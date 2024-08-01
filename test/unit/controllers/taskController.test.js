@@ -1,8 +1,8 @@
-const { createTask, getTasks, updateTask, deleteTask } = require('../../controllers/taskController');
-const taskService = require('../../services/taskService');
+const { createTask, getTasks, updateTask, deleteTask } = require('../../../controllers/taskController');
+const taskService = require('../../../services/taskService');
 const httpMocks = require('node-mocks-http');
 
-jest.mock('../../services/taskService');
+jest.mock('../../../services/taskService');
 
 jest.mock('sequelize', () => {
   const DataTypes = {

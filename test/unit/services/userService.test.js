@@ -1,12 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../../models/user');
+const User = require('../../../models/user');
 const { Op } = require('sequelize');
 
 // Mock dependencies
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
-jest.mock('../../models/user', () => ({
+jest.mock('../../../models/user', () => ({
   findOne: jest.fn(),
   create: jest.fn(),
 }));
@@ -35,7 +35,7 @@ jest.mock('sequelize', () => {
   };
 });
 
-const { register, login } = require('../../services/userService');
+const { register, login } = require('../../../services/userService');
 
 describe('User Service', () => {
   beforeAll(() => {

@@ -1,8 +1,8 @@
-const Task = require('../../models/task');
-const { createTask, getTasksByUser, updateTask, deleteTask } = require('../../services/taskService');
+const Task = require('../../../models/task');
+const { createTask, getTasksByUser, updateTask, deleteTask } = require('../../../services/taskService');
 
 // Mock dependencies
-jest.mock('../../models/task', () => ({
+jest.mock('../../../models/task', () => ({
     create: jest.fn(),
     findAll: jest.fn(),
     findOne: jest.fn(),
