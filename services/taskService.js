@@ -28,6 +28,9 @@ exports.updateTask = async (id, { title, description, dueDate, status, userId })
     return task;
   } catch (error) {
     console.error('Task update error:', error);
+    if (error.message === 'Task not found') {
+      throw error; // Re-throw the specific error
+    }
     throw new Error('Task update failed');
   }
 };
@@ -39,6 +42,9 @@ exports.deleteTask = async (id, userId) => {
     await task.destroy();
   } catch (error) {
     console.error('Task deletion error:', error);
+    if (error.message === 'Task not found') {
+      throw error; // Re-throw the specific error
+    }
     throw new Error('Task deletion failed');
   }
 };
