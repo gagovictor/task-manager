@@ -15,7 +15,6 @@ exports.createTask = async (req, res) => {
 
 exports.getTasks = async (req, res) => {
   try {
-    console.log("user", req.user);
     if (!req.user) {
       return res.status(401).json({ error: 'User not authenticated' });
     }

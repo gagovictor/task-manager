@@ -3,7 +3,7 @@ const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(process.env.POSTGRES_URL, {
   dialect: 'postgres',
-  logging: true,
+  logging: process.env.DB_QUERY_LOGGING.toLowerCase() === 'true',
 });
 
 sequelize.authenticate()
