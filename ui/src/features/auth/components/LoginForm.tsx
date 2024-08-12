@@ -1,27 +1,45 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { loginUser } from '../redux/authSlice';
-import { Button, TextField, Container, Typography, Paper, Box } from '@mui/material';
+import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert } from '@mui/material';
 import { LoginRequest } from '../services/AuthService';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
+  // State for form fields
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
+  // State for Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  // Error message to display
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Get auth status and error from the store
+  const authStatus = useSelector((state: RootState) => state.auth.status);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setErrorMessage(null); // Reset error message on form submit
+
     try {
-      const request: LoginRequest = {
-        username, password
-      }
+      const request: LoginRequest = { username, password };
       await dispatch(loginUser(request)).unwrap();
-      // Optionally redirect or show success message
+      navigate('/tasks'); // Redirect on successful login
     } catch (error) {
-      // Handle login error (e.g., show an error message)
       console.error('Login failed', error);
+      setErrorMessage('Login failed. Please check your username and password.');
+      setSnackbarOpen(true); // Open the Snackbar on error
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -64,12 +82,23 @@ const LoginForm: React.FC = () => {
               variant="contained"
               color="primary"
               sx={{ mt: 2 }}
+              disabled={authStatus === 'loading'} // Disable button while loading
             >
-              Login
+              {authStatus === 'loading' ? 'Logging in...' : 'Login'}
             </Button>
           </form>
         </Box>
       </Paper>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

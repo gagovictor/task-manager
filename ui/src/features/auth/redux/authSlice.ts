@@ -1,3 +1,5 @@
+// src/features/auth/redux/authSlice.ts
+
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { login, LoginRequest, LoginResponse } from '../services/AuthService';
 import { User } from '../models/user';
@@ -10,8 +12,8 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  isAuthenticated: false,
-  user: null,
+  isAuthenticated: !!localStorage.getItem('user'),
+  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
   status: 'idle',
   error: null,
 };
@@ -31,6 +33,7 @@ const authSlice = createSlice({
     logout(state) {
       state.isAuthenticated = false;
       state.user = null;
+      localStorage.removeItem('user'); // Clear local storage on logout
     },
   },
   extraReducers: (builder) => {
@@ -46,6 +49,7 @@ const authSlice = createSlice({
           username: action.payload.username,
           email: action.payload.email,
         };
+        localStorage.setItem('user', JSON.stringify(state.user));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'failed';
