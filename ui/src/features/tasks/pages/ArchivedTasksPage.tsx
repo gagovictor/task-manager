@@ -1,27 +1,51 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
 import Masonry from '@mui/lab/Masonry';
+import TaskCard from '../components/TaskCard';
 
-const heights = [150, 30, 90, 70, 110, 150, 130, 80, 50, 90, 100, 150, 30, 50, 80];
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(0.5),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}));
+// Mock list of tasks
+const tasks = [
+  {
+    id: '1',
+    title: 'Complete React Project',
+    description: 'Finish the task manager UI and integrate with backend.',
+    dueDate: new Date().toISOString(),
+    status: 'pending'
+  },
+  {
+    id: '2',
+    title: 'Update Documentation',
+    description: 'Revise the API documentation for the latest changes.',
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+    status: 'in-progress'
+  },
+  {
+    id: '3',
+    title: 'Fix Bugs',
+    description: 'Resolve the reported bugs from the last release.',
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+    status: 'pending'
+  },
+  {
+    id: '4',
+    title: 'Plan Sprint',
+    description: 'Prepare the sprint planning for the next development cycle.',
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString(),
+    status: 'completed'
+  }
+];
 
 export default function ArchivedTasksPage() {
   return (
-    <Box sx={{ width: 500, minHeight: 393 }}>
-      <Masonry columns={4} spacing={2}>
-        {heights.map((height, index) => (
-          <Item key={index} sx={{ height }}>
-            {index + 1}
-          </Item>
+    <Box sx={{ width: '100%', minHeight: '100vh', padding: 2 }}>
+      <Masonry columns={3} spacing={2}>
+        {tasks.map(task => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            onEdit={() => console.log(`Edit task ${task.id}`)}
+            onDelete={() => console.log(`Delete task ${task.id}`)}
+          />
         ))}
       </Masonry>
     </Box>
