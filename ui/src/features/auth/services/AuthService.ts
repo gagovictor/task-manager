@@ -2,20 +2,40 @@ import axios from 'axios';
 import API_BASE_URL from '../../shared/config/apiConfig';
 
 export interface LoginRequest {
-    username: string;
-    password: string;
-  }
+  username: string;
+  password: string;
+}
 
-  export interface LoginResponse {
-    token: string;
-    user: { 
-      id: string;
-      username: string;
-      email: string;
-    }
+export interface LoginResponse {
+  token: string;
+  user: { 
+    id: string;
+    username: string;
+    email: string;
   }
-    
+}
+
 export const login = async (request: LoginRequest): Promise<LoginResponse> => {
-  const response = await axios.post(`${API_BASE_URL}/login`, request);
-  return response.data;
+const response = await axios.post(`${API_BASE_URL}/login`, request);
+return response.data;
+};
+
+export interface SignupRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface SignupResponse {
+  token: string;
+  user: { 
+    id: string;
+    username: string;
+    email: string;
+  }
+}
+
+export const signup = async (request: SignupRequest): Promise<SignupResponse> => {
+const response = await axios.post(`${API_BASE_URL}/signup`, request);
+return response.data;
 };

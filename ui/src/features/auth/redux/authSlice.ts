@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { login, LoginRequest, LoginResponse } from '../services/AuthService';
+import { login, LoginRequest, LoginResponse, signup, SignupRequest, SignupResponse } from '../services/AuthService';
 import { User } from '../models/user';
 
 interface AuthState {
@@ -19,10 +19,19 @@ const initialState: AuthState = {
   error: null,
 };
 
-export const loginUser = createAsyncThunk<{ token: string; user: User }, LoginRequest>(
+export const loginUser = createAsyncThunk<LoginResponse, LoginRequest>(
   'auth/loginUser',
   async (loginRequest) => {
     const response = await login(loginRequest);
+    return response;
+  }
+);
+
+
+export const signupUser = createAsyncThunk<SignupResponse, SignupRequest>(
+  'auth/signupUser',
+  async (signupRequest) => {
+    const response = await signup(signupRequest);
     return response;
   }
 );
@@ -41,7 +50,7 @@ const authSlice = createSlice({
       .addCase(loginUser.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(loginUser.fulfilled, (state, action: PayloadAction<{ token: string; user: User }>) => {
+      .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
         state.status = 'idle';
         state.isAuthenticated = true;
         state.user = action.payload.user;
@@ -49,6 +58,20 @@ const authSlice = createSlice({
         localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || 'Login failed';
+      })
+      .addCase(signupUser.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(signupUser.fulfilled, (state, action: PayloadAction<SignupResponse>) => {
+        state.status = 'idle';
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        localStorage.setItem('token', action.payload.token || "");
+        localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));
+      })
+      .addCase(signupUser.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message || 'Login failed';
       });

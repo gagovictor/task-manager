@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../redux/store';
 import { loginUser } from '../redux/authSlice';
-import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert } from '@mui/material';
+import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert, Link } from '@mui/material';
 import { LoginRequest } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
 
@@ -82,10 +82,18 @@ const LoginForm: React.FC = () => {
               variant="contained"
               color="primary"
               sx={{ mt: 2 }}
-              disabled={authStatus === 'loading'} // Disable button while loading
+              disabled={authStatus === 'loading'}
             >
               {authStatus === 'loading' ? 'Logging in...' : 'Login'}
             </Button>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" color="textSecondary" align="center">
+                Don't have an account?{' '}
+                <Link href="/signup" variant="body2">
+                  Sign Up
+                </Link>
+              </Typography>
+            </Box>
           </form>
         </Box>
       </Paper>

@@ -1,5 +1,5 @@
 
-const { register, login } = require('../../../controllers/userController');
+const { signup, login } = require('../../../controllers/userController');
 const userService = require('../../../services/userService');
 const httpMocks = require('node-mocks-http');
 

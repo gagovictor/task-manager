@@ -35,7 +35,7 @@ jest.mock('sequelize', () => {
   };
 });
 
-const { register, login } = require('../../../services/userService');
+const { signup, login } = require('../../../services/userService');
 
 describe('User Service', () => {
   beforeAll(() => {
@@ -52,8 +52,8 @@ describe('User Service', () => {
     console.error.mockRestore();
   });
   
-  describe('register', () => {
-    it('should register a new user successfully', async () => {
+  describe('signup', () => {
+    it('should signup a new user successfully', async () => {
       // Mock user finding
       User.findOne.mockResolvedValue(null);
       // Mock password hashing
@@ -61,7 +61,7 @@ describe('User Service', () => {
       // Mock user creation
       User.create.mockResolvedValue({ id: 1, username: 'testuser', email: 'test@example.com' });
       
-      const result = await register({
+      const result = await signup({
         username: 'testuser',
         password: 'password',
         email: 'test@example.com'
@@ -88,7 +88,7 @@ describe('User Service', () => {
     it('should throw an error if username already exists', async () => {
       User.findOne.mockResolvedValue({ username: 'testuser', email: 'other@example.com' });
       
-      await expect(register({
+      await expect(signup({
         username: 'testuser',
         password: 'password',
         email: 'new@example.com'
@@ -98,7 +98,7 @@ describe('User Service', () => {
     it('should throw an error if email already exists', async () => {
       User.findOne.mockResolvedValue({ username: 'otheruser', email: 'test@example.com' });
       
-      await expect(register({
+      await expect(signup({
         username: 'newuser',
         password: 'password',
         email: 'test@example.com'
@@ -108,7 +108,7 @@ describe('User Service', () => {
     it('should throw a general error if something goes wrong', async () => {
       User.findOne.mockRejectedValue(new Error('Database error'));
       
-      await expect(register({
+      await expect(signup({
         username: 'testuser',
         password: 'password',
         email: 'test@example.com'

@@ -4,8 +4,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { Op } = require('sequelize');
 
-exports.register = async ({ username, password, email }) => {
+exports.signup = async ({ username, password, email }) => {
     try {
+        // Check if user already exists
         const existingUser = await User.findOne({
             where: {
                 [Op.or]: [{ username }, { email }]
@@ -21,17 +22,27 @@ exports.register = async ({ username, password, email }) => {
             }
         }
 
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create a new user
         const user = await User.create({
             username,
             email,
             password: hashedPassword
         });
 
+        // Generate a token
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // Return user and token
         return {
-            id: user.id,
-            username: user.username,
-            email: user.email
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }
         };
     } catch (error) {
         if (error.message === 'Username already exists' || error.message === 'Email already in use') {

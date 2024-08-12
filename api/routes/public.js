@@ -1,12 +1,12 @@
 const express = require('express');
-const { register, login } = require('../controllers/userController');
+const { signup, login } = require('../controllers/userController');
 const router = express.Router();
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     RegisterRequest:
+ *     SignupRequest:
  *       type: object
  *       required:
  *         - username
@@ -62,7 +62,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /register:
+ * /signup:
  *   post:
  *     summary: Register a new user
  *     tags: [Users]
@@ -71,10 +71,10 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/RegisterRequest'
+ *             $ref: '#/components/schemas/SignupRequest'
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: User signed up successfully
  *         content:
  *           application/json:
  *             schema:
@@ -84,7 +84,7 @@ const router = express.Router();
  *       409:
  *         description: Conflict (e.g., user already exists)
  */
-router.post('/register', register);
+router.post('/signup', signup);
 
 /**
  * @swagger
