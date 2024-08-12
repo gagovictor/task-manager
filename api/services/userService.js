@@ -42,11 +42,11 @@ exports.register = async ({ username, password, email }) => {
     }
 };
 
-exports.login = async ({ email, password }) => {
+exports.login = async ({ username, password }) => {
     try {
-        const user = await User.findOne({ where: { email } });
+        const user = await User.findOne({ where: { username } });
         if (!user) {
-            throw new Error('No user found with this email');
+            throw new Error('No user found with this username');
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -57,7 +57,7 @@ exports.login = async ({ email, password }) => {
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         return token;
     } catch (error) {
-        if (error.message === 'No user found with this email' || error.message === 'Incorrect password') {
+        if (error.message === 'No user found with this username' || error.message === 'Incorrect password') {
             throw error;
         }
         console.error('Login error:', error);

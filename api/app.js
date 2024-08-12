@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors'); // Import the cors package
 const { swaggerUi, swaggerSpec } = require('./swagger');
 const sequelize = require('./config/db');
 const morgan = require('morgan');
@@ -9,7 +10,15 @@ const protectedRouter = require('./routes/protected');
 
 const app = express();
 
+// CORS configuration
+const corsOptions = {
+  origin: 'http://localhost:3000', // Allow requests from this origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow specific methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+};
+
 // Middleware setup
+app.use(cors(corsOptions)); // Use the CORS middleware
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json());
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));

@@ -23,24 +23,24 @@ const router = express.Router();
  *           type: string
  *           description: The password of the user (plain text)
  *       example:
- *         username: johndoe
+ *         username: johndoe@example.com
  *         email: johndoe@example.com
  *         password: password123
  *
  *     LoginRequest:
  *       type: object
  *       required:
- *         - email
+ *         - username
  *         - password
  *       properties:
- *         email:
+ *         username:
  *           type: string
- *           description: The email address of the user
+ *           description: The username of the user
  *         password:
  *           type: string
  *           description: The password of the user (plain text)
  *       example:
- *         email: johndoe@example.com
+ *         username: johndoe@example.com
  *         password: password123
  *
  *     AuthResponse:
