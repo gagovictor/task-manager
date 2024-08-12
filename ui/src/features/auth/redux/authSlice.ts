@@ -4,6 +4,7 @@ import { User } from '../models/user';
 
 interface AuthState {
   isAuthenticated: boolean;
+  token: string;
   user: User | null;
   status: 'idle' | 'loading' | 'failed';
   error: string | null;
@@ -14,6 +15,7 @@ const parsedUser = user ? JSON.parse(user) : null;
 
 const initialState: AuthState = {
   isAuthenticated: !!localStorage.getItem('user'),
+  token: localStorage.getItem('token') || '',
   user: parsedUser,
   status: 'idle',
   error: null,

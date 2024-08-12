@@ -1,20 +1,41 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { RootState } from '../../../redux/store';
+import { fetchTasks as fetchTasksFromService } from '../services/TaskService';
 
 interface Task {
   id: number;
   title: string;
   description: string;
-  dueDate: string; // Use ISO 8601 date strings or Date objects
+  dueDate: string;
   status: 'pending' | 'completed';
 }
 
 interface TasksState {
   tasks: Task[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
 }
 
 const initialState: TasksState = {
   tasks: [],
+  status: 'idle',
+  error: null,
 };
+
+// Thunk to fetch tasks using taskService
+export const fetchTasks = createAsyncThunk(
+  'tasks/fetchTasks',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as RootState;
+      const token = state.auth.token;
+      const data = await fetchTasksFromService(token);
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 const tasksSlice = createSlice({
   name: 'tasks',
@@ -32,6 +53,21 @@ const tasksSlice = createSlice({
     deleteTask(state, action: PayloadAction<number>) {
       state.tasks = state.tasks.filter(task => task.id !== action.payload);
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTasks.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchTasks.fulfilled, (state, action: PayloadAction<Task[]>) => {
+        state.status = 'succeeded';
+        state.tasks = action.payload;
+      })
+      .addCase(fetchTasks.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      });
   },
 });
 
