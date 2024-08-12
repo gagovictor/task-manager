@@ -1,20 +1,12 @@
-import axios from 'axios';
 import API_BASE_URL from '../../shared/config/apiConfig';
-import { Task, TaskStatus } from '../models/task';
+import apiClient from '../../shared/services/ApiService';
+import { Task } from '../models/task';
 
-export const fetchTasks = async (token: string): Promise<any[]> => {
-    const response = await fetch(`${API_BASE_URL}/tasks`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
+export const fetchTasks = async (token: string) => {
+    const response = await apiClient.get(`${API_BASE_URL}/tasks`, {
+        headers: { Authorization: `Bearer ${token}` }
     });
-    
-    if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
-    }
-    
-    return response.json();
+    return response.data;
 };
 
 export interface CreateTaskRequest {
@@ -28,7 +20,7 @@ export interface CreateTaskResponse extends Task {
 }
 
 export const createTask = async (request: CreateTaskRequest, token: string) => {
-    const response = await axios.post(`${API_BASE_URL}/tasks`, request, {
+    const response = await apiClient.post(`${API_BASE_URL}/tasks`, request, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -46,7 +38,14 @@ export interface UpdateTaskResponse extends Task {
 }
 
 export const updateTask = async (request: UpdateTaskRequest, token: string) => {
-    const response = await axios.patch(`${API_BASE_URL}/tasks/${request.id}`, request, {
+    const response = await apiClient.patch(`${API_BASE_URL}/tasks/${request.id}`, request, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+};
+
+export const deleteTask = async (taskId: string, token: string) => {
+    const response = await apiClient.delete(`${API_BASE_URL}/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;

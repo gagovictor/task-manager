@@ -29,7 +29,6 @@ export const loginUser = createAsyncThunk<LoginResponse, LoginRequest>(
   }
 );
 
-
 export const signupUser = createAsyncThunk<SignupResponse, SignupRequest>(
   'auth/signupUser',
   async (signupRequest) => {
@@ -55,6 +54,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
         state.status = 'idle';
         state.isAuthenticated = true;
+        state.token = action.payload.token;
         state.user = action.payload.user;
         localStorage.setItem('token', action.payload.token || "");
         localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));
@@ -69,6 +69,7 @@ const authSlice = createSlice({
       .addCase(signupUser.fulfilled, (state, action: PayloadAction<SignupResponse>) => {
         state.status = 'idle';
         state.isAuthenticated = true;
+        state.token = action.payload.token;
         state.user = action.payload.user;
         localStorage.setItem('token', action.payload.token || "");
         localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));

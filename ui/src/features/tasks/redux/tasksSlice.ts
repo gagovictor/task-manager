@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { createTask, CreateTaskRequest, fetchTasks, updateTask, UpdateTaskRequest } from '../services/TaskService';
+import { createTask, CreateTaskRequest, deleteTask, fetchTasks, updateTask, UpdateTaskRequest } from '../services/TaskService';
 import { RootState } from '../../../redux/store';
 import { Task } from '../models/task';
-
 
 interface TasksState {
   tasks: Task[];
@@ -61,6 +60,21 @@ export const updateTaskAsync = createAsyncThunk(
   }
 );
 
+export const deleteTaskAsync = createAsyncThunk(
+  'tasks/deleteTaskAsync',
+  async (taskId: string, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      await deleteTask(taskId, token);
+      return taskId;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -103,6 +117,17 @@ const tasksSlice = createSlice({
       .addCase(updateTaskAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string || 'Failed to update task';
+      })
+      .addCase(deleteTaskAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(deleteTaskAsync.fulfilled, (state, action: PayloadAction<string>) => {
+        state.status = 'succeeded';
+        state.tasks = state.tasks.filter(task => task.id !== action.payload);
+      })
+      .addCase(deleteTaskAsync.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string || 'Failed to delete task';
       });
   },
 });

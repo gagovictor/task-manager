@@ -43,7 +43,6 @@ export default function TasksPage() {
               key={task.id}
               task={task}
               onEdit={() => handleEditTask(task)}
-              onDelete={() => console.log(`Delete task ${task.id}`)}
             />
           ))}
           <Box

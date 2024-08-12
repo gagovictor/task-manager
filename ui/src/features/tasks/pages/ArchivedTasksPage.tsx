@@ -44,7 +44,6 @@ export default function ArchivedTasksPage() {
             key={task.id}
             task={task}
             onEdit={() => console.log(`Edit task ${task.id}`)}
-            onDelete={() => console.log(`Delete task ${task.id}`)}
           />
         ))}
       </Masonry>
