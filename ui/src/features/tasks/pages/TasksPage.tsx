@@ -1,38 +1,48 @@
-// src/pages/TasksPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../redux/store';
-import { fetchTasksAsync } from '../redux/tasksSlice';
+import { fetchTasksAsync, createTaskAsync, updateTaskAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
+import EditTaskModal from '../components/EditTaskModal';
+import { Task } from '../models/task';
 
 export default function TasksPage() {
   const dispatch = useDispatch<AppDispatch>();
   const { tasks, status, error } = useSelector((state: RootState) => state.tasks);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
     dispatch(fetchTasksAsync());
   }, [dispatch]);
 
-  const handleModalOpen = () => setModalOpen(true);
-  const handleModalClose = () => setModalOpen(false);
+  const handleCreateTask = (newTask: { title: string; description: string; dueDate: string }) => {
+    dispatch(createTaskAsync({ ...newTask, status: 'pending' }));
+    setCreateModalOpen(false);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task);
+    setEditModalOpen(true);
+  };
 
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', padding: 2, position: 'relative' }}>
+    <Container sx={{ width: '100%', minHeight: '100vh', padding: 2, position: 'relative' }}>
       {status === 'loading' && <CircularProgress />}
       {status === 'failed' && <Alert severity="error">{error}</Alert>}
       {status === 'succeeded' && (
         <Masonry columns={3} spacing={2}>
-          {tasks.map((task) => (
+          {tasks.map((task: Task) => (
             <TaskCard
               key={task.id}
               task={task}
-              onEdit={() => console.log(`Edit task ${task.id}`)}
+              onEdit={() => handleEditTask(task)}
               onDelete={() => console.log(`Delete task ${task.id}`)}
             />
           ))}
@@ -48,7 +58,7 @@ export default function TasksPage() {
               backgroundColor: '#f0f0f0',
               cursor: 'pointer'
             }}
-            onClick={handleModalOpen}
+            onClick={() => setCreateModalOpen(true)}
           >
             <Typography variant="h6">Create New Task</Typography>
           </Box>
@@ -60,15 +70,23 @@ export default function TasksPage() {
         color="primary"
         aria-label="add"
         sx={{ position: 'fixed', bottom: 16, right: 16 }}
-        onClick={handleModalOpen}
+        onClick={() => setCreateModalOpen(true)}
       >
         <AddIcon />
       </Fab>
 
       <CreateTaskModal
-        open={modalOpen}
-        onClose={handleModalClose}
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
       />
-    </Box>
+
+      {selectedTask && (
+        <EditTaskModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          task={selectedTask}
+        />
+      )}
+    </Container>
   );
 }

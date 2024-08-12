@@ -34,7 +34,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           margin: 'auto',
           padding: 2,
           backgroundColor: 'white',
-          marginTop: '20%',
+          marginTop: '10%',
           borderRadius: 1,
           position: 'relative'
         }}

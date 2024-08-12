@@ -134,7 +134,7 @@ router.post('/', async (req, res) => {
 /**
  * @swagger
  * /tasks/{id}:
- *   put:
+ *   patch:
  *     summary: Update a task by ID
  *     tags: [Tasks]
  *     parameters:
@@ -162,7 +162,7 @@ router.post('/', async (req, res) => {
  *       404:
  *         description: Task not found
  */
-router.put('/:id', async (req, res) => {
+router.patch('/:id', async (req, res) => {
   try {
     const { title, description, dueDate, status } = req.body;
     const task = await Task.findOne({ where: { id: req.params.id, userId: req.user.id } });

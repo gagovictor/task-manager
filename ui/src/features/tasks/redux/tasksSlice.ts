@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { createTask, CreateTaskRequest, fetchTasks } from '../services/TaskService';
+import { createTask, CreateTaskRequest, fetchTasks, updateTask, UpdateTaskRequest } from '../services/TaskService';
 import { RootState } from '../../../redux/store';
 import { Task } from '../models/task';
 
@@ -16,7 +16,21 @@ const initialState: TasksState = {
   error: null,
 };
 
-// Async thunk for creating a task
+export const fetchTasksAsync = createAsyncThunk(
+  'tasks/fetchTasks',
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      const response = await fetchTasks(token);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const createTaskAsync = createAsyncThunk(
   'tasks/createTaskAsync',
   async (task: CreateTaskRequest, { getState, rejectWithValue }) => {
@@ -32,14 +46,14 @@ export const createTaskAsync = createAsyncThunk(
   }
 );
 
-export const fetchTasksAsync = createAsyncThunk(
-  'tasks/fetchTasks',
-  async (_, { getState, rejectWithValue }) => {
+export const updateTaskAsync = createAsyncThunk(
+  'tasks/updateTaskAsync',
+  async (task: UpdateTaskRequest, { getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const token = state.auth.token;
 
     try {
-      const response = await fetchTasks(token);
+      const response = await updateTask(task, token);
       return response;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -75,6 +89,20 @@ const tasksSlice = createSlice({
       .addCase(createTaskAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
+      })
+      .addCase(updateTaskAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(updateTaskAsync.fulfilled, (state, action: PayloadAction<Task>) => {
+        state.status = 'succeeded';
+        const index = state.tasks.findIndex(task => task.id === action.payload.id);
+        if (index >= 0) {
+          state.tasks[index] = action.payload;
+        }
+      })
+      .addCase(updateTaskAsync.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string || 'Failed to update task';
       });
   },
 });
