@@ -4,7 +4,7 @@ interface Task {
   id: number;
   title: string;
   description: string;
-  dueDate: string; // Consider using ISO 8601 date strings or Date objects
+  dueDate: string; // Use ISO 8601 date strings or Date objects
   status: 'pending' | 'completed';
 }
 
@@ -36,6 +36,6 @@ const tasksSlice = createSlice({
 });
 
 export const { addTask, updateTask, deleteTask } = tasksSlice.actions;
-export default tasksSlice.reducer;
-
 export type TasksStateType = TasksState;
+
+export default tasksSlice.reducer;
