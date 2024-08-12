@@ -55,7 +55,15 @@ exports.login = async ({ username, password }) => {
         }
 
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        return token;
+
+        return {
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }
+        };
     } catch (error) {
         if (error.message === 'No user found with this username' || error.message === 'Incorrect password') {
             throw error;

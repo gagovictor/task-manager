@@ -1,14 +1,25 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppBar, Box, Toolbar, Typography, Button } from '@mui/material';
 import Sidebar from './Sidebar';
+import { RootState } from '../../../redux/store';
+import { logout } from '../../../features/auth/redux/authSlice';
 
 export default function Header() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const username = useSelector((state: RootState) => state.auth.user?.username);
+
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+
+  const handleLogoutClick = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -18,9 +29,20 @@ export default function Header() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Task Manager
           </Typography>
-          <Button color="inherit" onClick={() => navigate('/login')}>
-            Login
-          </Button>
+          {isAuthenticated ? (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="body1" sx={{ mr: 2 }}>
+                {username}
+              </Typography>
+              <Button color="inherit" onClick={handleLogoutClick}>
+                Logout
+              </Button>
+            </Box>
+          ) : (
+            <Button color="inherit" onClick={handleLoginClick}>
+              Login
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
     </Box>

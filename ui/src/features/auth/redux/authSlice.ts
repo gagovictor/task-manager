@@ -1,5 +1,3 @@
-// src/features/auth/redux/authSlice.ts
-
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { login, LoginRequest, LoginResponse } from '../services/AuthService';
 import { User } from '../models/user';
@@ -11,14 +9,17 @@ interface AuthState {
   error: string | null;
 }
 
+const user = localStorage.getItem('user');
+const parsedUser = user ? JSON.parse(user) : null;
+
 const initialState: AuthState = {
   isAuthenticated: !!localStorage.getItem('user'),
-  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
+  user: parsedUser,
   status: 'idle',
   error: null,
 };
 
-export const loginUser = createAsyncThunk<LoginResponse, LoginRequest>(
+export const loginUser = createAsyncThunk<{ token: string; user: User }, LoginRequest>(
   'auth/loginUser',
   async (loginRequest) => {
     const response = await login(loginRequest);
@@ -33,7 +34,6 @@ const authSlice = createSlice({
     logout(state) {
       state.isAuthenticated = false;
       state.user = null;
-      localStorage.removeItem('user'); // Clear local storage on logout
     },
   },
   extraReducers: (builder) => {
@@ -41,15 +41,12 @@ const authSlice = createSlice({
       .addCase(loginUser.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
+      .addCase(loginUser.fulfilled, (state, action: PayloadAction<{ token: string; user: User }>) => {
         state.status = 'idle';
         state.isAuthenticated = true;
-        state.user = {
-          id: action.payload.id,
-          username: action.payload.username,
-          email: action.payload.email,
-        };
-        localStorage.setItem('user', JSON.stringify(state.user));
+        state.user = action.payload.user;
+        localStorage.setItem('token', action.payload.token || "");
+        localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'failed';
