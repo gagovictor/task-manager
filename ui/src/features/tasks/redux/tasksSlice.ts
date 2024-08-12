@@ -1,14 +1,8 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createTask, CreateTaskRequest, fetchTasks } from '../services/TaskService';
 import { RootState } from '../../../redux/store';
-import { fetchTasks as fetchTasksFromService } from '../services/TaskService';
+import { Task } from '../models/task';
 
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  dueDate: string;
-  status: 'pending' | 'completed';
-}
 
 interface TasksState {
   tasks: Task[];
@@ -22,17 +16,33 @@ const initialState: TasksState = {
   error: null,
 };
 
-// Thunk to fetch tasks using taskService
-export const fetchTasks = createAsyncThunk(
+// Async thunk for creating a task
+export const createTaskAsync = createAsyncThunk(
+  'tasks/createTaskAsync',
+  async (task: CreateTaskRequest, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      const response = await createTask(task, token);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const fetchTasksAsync = createAsyncThunk(
   'tasks/fetchTasks',
   async (_, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
     try {
-      const state = getState() as RootState;
-      const token = state.auth.token;
-      const data = await fetchTasksFromService(token);
-      return data;
+      const response = await fetchTasks(token);
+      return response;
     } catch (error: any) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response.data);
     }
   }
 );
@@ -41,37 +51,32 @@ const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
   reducers: {
-    addTask(state, action: PayloadAction<Task>) {
-      state.tasks.push(action.payload);
-    },
-    updateTask(state, action: PayloadAction<Task>) {
-      const index = state.tasks.findIndex(task => task.id === action.payload.id);
-      if (index !== -1) {
-        state.tasks[index] = action.payload;
-      }
-    },
-    deleteTask(state, action: PayloadAction<number>) {
-      state.tasks = state.tasks.filter(task => task.id !== action.payload);
-    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTasks.pending, (state) => {
+      .addCase(fetchTasksAsync.pending, (state) => {
         state.status = 'loading';
-        state.error = null;
       })
-      .addCase(fetchTasks.fulfilled, (state, action: PayloadAction<Task[]>) => {
+      .addCase(fetchTasksAsync.fulfilled, (state, action: PayloadAction<Task[]>) => {
         state.status = 'succeeded';
         state.tasks = action.payload;
       })
-      .addCase(fetchTasks.rejected, (state, action) => {
+      .addCase(fetchTasksAsync.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      .addCase(createTaskAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(createTaskAsync.fulfilled, (state, action: PayloadAction<Task>) => {
+        state.status = 'succeeded';
+        state.tasks.push(action.payload);
+      })
+      .addCase(createTaskAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       });
   },
 });
-
-export const { addTask, updateTask, deleteTask } = tasksSlice.actions;
-export type TasksStateType = TasksState;
 
 export default tasksSlice.reducer;
