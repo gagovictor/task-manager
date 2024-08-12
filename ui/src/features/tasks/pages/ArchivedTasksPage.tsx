@@ -14,7 +14,7 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export default function TasksPage() {
+export default function ArchivedTasksPage() {
   return (
     <Box sx={{ width: 500, minHeight: 393 }}>
       <Masonry columns={4} spacing={2}>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
@@ -17,7 +18,8 @@ import { IconButton } from '@mui/material';
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false); // State to manage login status
+  const [loggedIn, setLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDrawer = (newOpen: any) => () => {
     setOpen(newOpen);
@@ -25,17 +27,18 @@ export default function Sidebar() {
 
   const toggleLoginStatus = () => {
     setLoggedIn(!loggedIn);
+    navigate(loggedIn ? '/logout' : '/login');
   };
 
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
         {[
-          { text: 'Tasks', icon: <TaskIcon /> },
-          { text: 'Archived', icon: <ArchiveIcon /> },
+          { text: 'Tasks', icon: <TaskIcon />, route: '/tasks' },
+          { text: 'Archived', icon: <ArchiveIcon />, route: '/archived' },
         ].map((item) => (
           <ListItem key={item.text} disablePadding>
-            <ListItemButton>
+            <ListItemButton onClick={() => navigate(item.route)}>
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
