@@ -14,13 +14,26 @@ const Task = sequelize.define('Task', {
   },
   description: {
     type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
   },
   dueDate: {
     type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
   },
   status: {
     type: DataTypes.STRING,
-    defaultValue: 'pending',
+  },
+  archivedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
   },
 });
 

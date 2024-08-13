@@ -43,22 +43,6 @@ export default function ArchivedTasksPage() {
               onEdit={() => handleEditTask(task)}
             />
           ))}
-          <Box
-            sx={{
-              width: 300,
-              height: 200,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px dashed grey',
-              borderRadius: 1,
-              backgroundColor: '#f0f0f0',
-              cursor: 'pointer'
-            }}
-            onClick={() => setCreateModalOpen(true)}
-          >
-            <Typography variant="h6">Create New Task</Typography>
-          </Box>
         </Masonry>
       )}
       {status === 'idle' && <Typography>No tasks available</Typography>}

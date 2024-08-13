@@ -1,6 +1,6 @@
 const express = require('express');
-const Task = require('../models/task'); // Ensure this path is correct
 const router = express.Router();
+const taskController = require('../controllers/taskController');
 
 /**
  * @swagger
@@ -54,14 +54,7 @@ const router = express.Router();
  *               items:
  *                 $ref: '#/components/schemas/Task'
  */
-router.get('/', async (req, res) => {
-  try {
-    const tasks = await Task.findAll({ where: { userId: req.user.id } });
-    res.status(200).json(tasks);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.get('/', async(req, res) => taskController.getTasks(req, res));
 
 /**
  * @swagger
@@ -86,18 +79,7 @@ router.get('/', async (req, res) => {
  *       404:
  *         description: Task not found
  */
-router.get('/:id', async (req, res) => {
-  try {
-    const task = await Task.findOne({ where: { id: req.params.id, userId: req.user.id } });
-    if (task) {
-      res.status(200).json(task);
-    } else {
-      res.status(404).json({ error: 'Task not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.get('/:id', async(req, res) => taskController.getTaskById(req, res));
 
 /**
  * @swagger
@@ -121,15 +103,7 @@ router.get('/:id', async (req, res) => {
  *       400:
  *         description: Bad request
  */
-router.post('/', async (req, res) => {
-  try {
-    const { title, description, dueDate } = req.body;
-    const task = await Task.create({ title, description, dueDate, userId: req.user.id });
-    res.status(201).json(task);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+router.post('/', async(req, res) => taskController.createTask(req, res));
 
 /**
  * @swagger
@@ -162,17 +136,7 @@ router.post('/', async (req, res) => {
  *       404:
  *         description: Task not found
  */
-router.patch('/:id', async (req, res) => {
-  try {
-    const { title, description, dueDate, status } = req.body;
-    const task = await Task.findOne({ where: { id: req.params.id, userId: req.user.id } });
-    if (!task) return res.status(404).json({ error: 'Task not found' });
-    await task.update({ title, description, dueDate, status });
-    res.status(200).json(task);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+router.patch('/:id', async(req, res) => taskController.updateTask(req, res));
 
 /**
  * @swagger
@@ -193,15 +157,27 @@ router.patch('/:id', async (req, res) => {
  *       404:
  *         description: Task not found
  */
-router.delete('/:id', async (req, res) => {
-  try {
-    const task = await Task.findOne({ where: { id: req.params.id, userId: req.user.id } });
-    if (!task) return res.status(404).json({ error: 'Task not found' });
-    await task.destroy();
-    res.status(204).json();
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.delete('/:id', async(req, res) => taskController.deleteTask(req, res));
+
+/**
+ * @swagger
+ * /tasks/{id}/archive:
+ *   post:
+ *     summary: Archive a task by ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *     responses:
+ *       204:
+ *         description: Task archived successfully
+ *       404:
+ *         description: Task not found
+ */
+router.post('/:id/archive', async(req, res) => taskController.archiveTask(req, res));
 
 module.exports = router;

@@ -106,7 +106,7 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchTasksAsync.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload as string;
+        state.error = (action.payload as any).error as string || 'Failed to fetch tasks';
       })
       .addCase(createTaskAsync.pending, (state) => {
         state.status = 'loading';
@@ -117,7 +117,7 @@ const tasksSlice = createSlice({
       })
       .addCase(createTaskAsync.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload as string;
+        state.error = (action.payload as any).error as string || 'Failed to create task';
       })
       .addCase(updateTaskAsync.pending, (state) => {
         state.status = 'loading';
@@ -131,7 +131,7 @@ const tasksSlice = createSlice({
       })
       .addCase(updateTaskAsync.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload as string || 'Failed to update task';
+        state.error = (action.payload as any).error as string || 'Failed to update task';
       })
       .addCase(deleteTaskAsync.pending, (state) => {
         state.status = 'loading';
@@ -142,7 +142,7 @@ const tasksSlice = createSlice({
       })
       .addCase(deleteTaskAsync.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload as string || 'Failed to delete task';
+        state.error = (action.payload as any).error as string || 'Failed to delete task';
       });
   },
 });

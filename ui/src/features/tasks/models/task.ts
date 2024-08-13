@@ -5,11 +5,12 @@ export interface Task {
   title: string;
   description?: string;
   dueDate?: string;
-  status?: string/*TaskStatus*/;
-  userId?: string;
-  user?: User;
+  status: string/*TaskStatus*/;
+  userId: string;
   archivedAt?: string;
   deletedAt?: string;
 }
 
 export type TaskStatus = 'new' | 'active' | 'completed' | 'removed';
+
+export const taskStatuses = ['new', 'active', 'completed', 'removed'];

@@ -17,6 +17,7 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { Task } from '../models/task';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { PendingActionsOutlined } from '@mui/icons-material';
 
 interface TaskCardProps {
   task: Task;
@@ -49,9 +50,7 @@ export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
     }
   };
 
-  const handleOpenConfirm = () => setOpenConfirm(true);
   const handleCloseConfirm = () => setOpenConfirm(false);
-
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
   const handleArchive = async () => {
@@ -80,24 +79,26 @@ export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
   };
 
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const formattedDate = format(toZonedTime(task.dueDate!, timeZone), 'dd/MM/yyyy HH:mm');
+  let formattedDate = null;
+  if(task.dueDate) {
+    formattedDate = format(toZonedTime(task.dueDate, timeZone), 'dd/MM/yyyy HH:mm');
+  }
 
+  const formattedStatus = task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase();
   return (
     <Box sx={{ minWidth: 275, marginBottom: 2 }}>
       <Card variant="outlined" onClick={handleCardClick}>
         <CardContent>
-          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            Task
-          </Typography>
           <Typography variant="h5" component="div">
             {task.title}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5, color: 'text.secondary' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <PendingActionsOutlined sx={{ mr: 1 }} />
+              {task.dueDate ? `${formattedDate}` : 'No due date'}
+            </Box>
             <Typography>
-              {task.dueDate ? `Due: ${formattedDate}` : 'No due date'}
-            </Typography>
-            <Typography>
-              Status: {task.status}
+              {formattedStatus}
             </Typography>
           </Box>
           <Typography variant="body2">
@@ -134,7 +135,6 @@ export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar for Notifications */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}

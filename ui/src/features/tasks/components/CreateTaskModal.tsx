@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../redux/store';
 import { createTaskAsync } from '../redux/tasksSlice';
+import { taskStatuses } from '../models/task';
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -13,16 +14,33 @@ interface CreateTaskModalProps {
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [status, setStatus] = useState(taskStatuses[0]);
   const dispatch = useDispatch<AppDispatch>();
 
-  const handleCreate = () => {
-    if (title && description && dueDate) {
-      dispatch(createTaskAsync({ title, description, dueDate, status: 'pending' }));
-      setTitle('');
-      setDescription('');
-      setDueDate('');
-      onClose();
+  const handleCreate = async () => {
+    if (title) {
+      let dueDate = '';
+      if (date) {
+        dueDate = (time ? `${date}T${time}:00Z` : `${date}T00:00:00Z`);
+      } else if (time) {
+        const today = new Date().toISOString().split('T')[0];
+        dueDate = `${today}T${time}:00Z`;
+      } else {
+        dueDate = '';
+      }
+      try {
+        await dispatch(createTaskAsync({ title, description, dueDate, status })).unwrap();
+        // Reset form fields on success
+        setTitle('');
+        setDescription('');
+        setDate('');
+        setTime('');
+        setStatus(taskStatuses[0]);
+        onClose();
+      } catch (error) {
+      }
     }
   };
 
@@ -60,23 +78,52 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Date"
+            variant="outlined"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Time"
+            variant="outlined"
+            type="time"
+            InputLabelProps={{ shrink: true }}
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+          />
+        </Box>
         <TextField
           fullWidth
+          multiline
+          rows={10}
           margin="normal"
           label="Description"
           variant="outlined"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Due Date"
-          variant="outlined"
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-        />
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Status</InputLabel>
+          <Select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as string)}
+            label="Status"
+          >
+            {taskStatuses.map((statusOption) => (
+              <MenuItem key={statusOption} value={statusOption}>
+                {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <Button
           fullWidth
           variant="contained"

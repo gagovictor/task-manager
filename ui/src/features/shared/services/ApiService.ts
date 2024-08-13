@@ -10,11 +10,9 @@ apiClient.interceptors.response.use(
   response => response,
   error => {
     const { response } = error;
-    console.log(`response`, response);
-    console.log(`error`, error);
     if (response && response.status === 401) {
       // Redirect to login if a 401 response is detected
-      // window.location.href = "/login";
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }

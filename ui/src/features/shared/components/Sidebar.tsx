@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
@@ -15,21 +14,29 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { IconButton } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
+import { logout } from '../../../features/auth/redux/authSlice';
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   const toggleDrawer = (newOpen: any) => () => {
     setOpen(newOpen);
   };
 
-  const toggleLoginStatus = () => {
-    setLoggedIn(!loggedIn);
-    navigate(loggedIn ? '/logout' : '/login');
+  const handleLoginClick = () => {
+    navigate('/login');
   };
 
+  const handleLogoutClick = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+  
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
@@ -48,12 +55,21 @@ export default function Sidebar() {
       <Divider />
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={toggleLoginStatus}>
+        {isAuthenticated ?
+          <ListItemButton onClick={handleLogoutClick}>
             <ListItemIcon>
-              {loggedIn ? <LogoutIcon /> : <LoginIcon />}
+              <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary={loggedIn ? 'Logout' : 'Login'} />
+            <ListItemText primary="Logout" />
           </ListItemButton>
+          :
+          <ListItemButton onClick={handleLoginClick}>
+            <ListItemIcon>
+              <LoginIcon />
+            </ListItemIcon>
+            <ListItemText primary="Login" />
+          </ListItemButton>
+        }
         </ListItem>
       </List>
     </Box>

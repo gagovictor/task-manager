@@ -1,8 +1,14 @@
 const Task = require('../models/task');
 
-exports.createTask = async ({ title, description, dueDate, userId }) => {
+exports.createTask = async ({ title, description, dueDate, status, userId }) => {
   try {
-    const task = await Task.create({ title, description, dueDate, userId });
+    const task = await Task.create({
+      title,
+      description,
+      dueDate: dueDate || null,
+      status,
+      userId
+    });
     return task;
   } catch (error) {
     console.error('Task creation error:', error);
@@ -24,7 +30,13 @@ exports.updateTask = async (id, { title, description, dueDate, status, userId })
   try {
     const task = await Task.findOne({ where: { id, userId } });
     if (!task) throw new Error('Task not found');
-    await task.update({ title, description, dueDate, status });
+    await task.update({
+      title,
+      description,
+      dueDate: dueDate || null,
+      status,
+      userId
+    });
     return task;
   } catch (error) {
     console.error('Task update error:', error);
@@ -39,12 +51,30 @@ exports.deleteTask = async (id, userId) => {
   try {
     const task = await Task.findOne({ where: { id, userId } });
     if (!task) throw new Error('Task not found');
-    await task.destroy();
+    await task.update({
+      deletedAt: new Date(),
+    });
   } catch (error) {
     console.error('Task deletion error:', error);
     if (error.message === 'Task not found') {
       throw error; // Re-throw the specific error
     }
     throw new Error('Task deletion failed');
+  }
+};
+
+exports.archiveTask = async (id, userId) => {
+  try {
+    const task = await Task.findOne({ where: { id, userId } });
+    if (!task) throw new Error('Task not found');
+    await task.update({
+      archivedAt: new Date(),
+    });
+  } catch (error) {
+    console.error('Task archive error:', error);
+    if (error.message === 'Task not found') {
+      throw error; // Re-throw the specific error
+    }
+    throw new Error('Task archive failed');
   }
 };
