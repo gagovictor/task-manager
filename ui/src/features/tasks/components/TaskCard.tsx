@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArchiveIcon from '@mui/icons-material/Archive';
-import Tooltip from '@mui/material/Tooltip'; // Import Tooltip component
+import Tooltip from '@mui/material/Tooltip';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../redux/store';
 import { archiveTaskAsync, deleteTaskAsync } from '../redux/tasksSlice';
@@ -70,12 +70,21 @@ export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
     }
   };
 
+  const handleCardClick = () => {
+    onEdit(task);
+  };
+
+  const handleButtonClick = (event: React.MouseEvent, action: () => void) => {
+    event.stopPropagation(); // Prevent the click event from triggering the card's onClick
+    action(); // Call the specific action (archive or delete)
+  };
+
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const formattedDate = format(toZonedTime(task.dueDate!, timeZone), 'dd/MM/yyyy HH:mm');
 
   return (
     <Box sx={{ minWidth: 275, marginBottom: 2 }}>
-      <Card variant="outlined" onClick={() => onEdit(task)}>
+      <Card variant="outlined" onClick={handleCardClick}>
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             Task
@@ -97,17 +106,17 @@ export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
         </CardContent>
         <CardActions>
           <Tooltip title="Edit Task">
-            <Button size="small" onClick={() => onEdit(task)}>
+            <Button size="small" onClick={(event) => handleButtonClick(event, () => onEdit(task))}>
               <EditIcon />
             </Button>
           </Tooltip>
           <Tooltip title="Archive Task">
-            <Button size="small" onClick={handleArchive}>
+            <Button size="small" onClick={(event) => handleButtonClick(event, handleArchive)}>
               <ArchiveIcon />
             </Button>
           </Tooltip>
           <Tooltip title="Delete Task">
-            <Button size="small" color="error" onClick={handleOpenConfirm}>
+            <Button size="small" color="error" onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}>
               <DeleteIcon />
             </Button>
           </Tooltip>
