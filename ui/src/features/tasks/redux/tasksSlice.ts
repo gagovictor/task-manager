@@ -5,14 +5,30 @@ import { Task } from '../models/task';
 
 interface TasksState {
   tasks: Task[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error: string | null;
+  fetchStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  fetchError: string | null;
+  createStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  createError: string | null;
+  updateStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  updateError: string | null;
+  deleteStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  deleteError: string | null;
+  archiveStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  archiveError: string | null;
 }
 
 const initialState: TasksState = {
   tasks: [],
-  status: 'idle',
-  error: null,
+  fetchStatus: 'idle',
+  fetchError: null,
+  createStatus: 'idle',
+  createError: null,
+  updateStatus: 'idle',
+  updateError: null,
+  deleteStatus: 'idle',
+  deleteError: null,
+  archiveStatus: 'idle',
+  archiveError: null,
 };
 
 export const fetchTasksAsync = createAsyncThunk(
@@ -93,56 +109,85 @@ export const archiveTaskAsync = createAsyncThunk(
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
-  reducers: {
-  },
+  reducers: {},
   extraReducers: (builder) => {
+    // Fetch Tasks
     builder
       .addCase(fetchTasksAsync.pending, (state) => {
-        state.status = 'loading';
+        state.fetchStatus = 'loading';
       })
       .addCase(fetchTasksAsync.fulfilled, (state, action: PayloadAction<Task[]>) => {
-        state.status = 'succeeded';
+        state.fetchStatus = 'succeeded';
         state.tasks = action.payload;
       })
       .addCase(fetchTasksAsync.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = (action.payload as any).error as string || 'Failed to fetch tasks';
-      })
+        state.fetchStatus = 'failed';
+        state.fetchError = (action.payload as any).error as string || 'Failed to fetch tasks';
+      });
+
+    // Create Task
+    builder
       .addCase(createTaskAsync.pending, (state) => {
-        state.status = 'loading';
+        state.createStatus = 'loading';
       })
       .addCase(createTaskAsync.fulfilled, (state, action: PayloadAction<Task>) => {
-        state.status = 'succeeded';
+        state.createStatus = 'succeeded';
         state.tasks.push(action.payload);
       })
       .addCase(createTaskAsync.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = (action.payload as any).error as string || 'Failed to create task';
-      })
+        state.createStatus = 'failed';
+        state.createError = (action.payload as any).error as string || 'Failed to create task';
+      });
+
+    // Update Task
+    builder
       .addCase(updateTaskAsync.pending, (state) => {
-        state.status = 'loading';
+        state.updateStatus = 'loading';
       })
       .addCase(updateTaskAsync.fulfilled, (state, action: PayloadAction<Task>) => {
-        state.status = 'succeeded';
+        state.updateStatus = 'succeeded';
         const index = state.tasks.findIndex(task => task.id === action.payload.id);
         if (index >= 0) {
           state.tasks[index] = action.payload;
         }
       })
       .addCase(updateTaskAsync.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = (action.payload as any).error as string || 'Failed to update task';
-      })
+        state.updateStatus = 'failed';
+        state.updateError = (action.payload as any).error as string || 'Failed to update task';
+      });
+
+    // Delete Task
+    builder
       .addCase(deleteTaskAsync.pending, (state) => {
-        state.status = 'loading';
+        state.deleteStatus = 'loading';
       })
       .addCase(deleteTaskAsync.fulfilled, (state, action: PayloadAction<string>) => {
-        state.status = 'succeeded';
-        state.tasks = state.tasks.filter(task => task.id !== action.payload);
+        state.deleteStatus = 'succeeded';
+        const task = state.tasks.find(task => task.id === action.payload);
+        if (task) {
+          task.deletedAt = new Date().toISOString();
+        }
       })
       .addCase(deleteTaskAsync.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = (action.payload as any).error as string || 'Failed to delete task';
+        state.deleteStatus = 'failed';
+        state.deleteError = (action.payload as any).error as string || 'Failed to delete task';
+      });
+
+    // Archive Task
+    builder
+      .addCase(archiveTaskAsync.pending, (state) => {
+        state.archiveStatus = 'loading';
+      })
+      .addCase(archiveTaskAsync.fulfilled, (state, action: PayloadAction<string>) => {
+        state.archiveStatus = 'succeeded';
+        const task = state.tasks.find(task => task.id === action.payload);
+        if (task) {
+          task.archivedAt = new Date().toISOString();
+        }
+      })
+      .addCase(archiveTaskAsync.rejected, (state, action) => {
+        state.archiveStatus = 'failed';
+        state.archiveError = (action.payload as any).error as string || 'Failed to archive task';
       });
   },
 });

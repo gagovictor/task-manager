@@ -9,63 +9,45 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import Tooltip from '@mui/material/Tooltip';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { archiveTaskAsync, deleteTaskAsync } from '../redux/tasksSlice';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Snackbar } from '@mui/material';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { Task } from '../models/task';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PendingActionsOutlined } from '@mui/icons-material';
+import { useState } from 'react';
 
 interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
   onArchive?: (task: Task) => void;
+  showSnackbar: (message: string, severity: 'success' | 'error') => void;  // New prop
 }
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
-export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
+export default function TaskCard({ task, onEdit, onArchive, showSnackbar }: TaskCardProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [openConfirm, setOpenConfirm] = React.useState(false);
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState<'success' | 'error'>('success');
-
-  const handleDeleteTask = async () => {
-    try {
-      await dispatch(deleteTaskAsync(task.id)).unwrap();
-      setSnackbarMessage('Task deleted successfully');
-      setSnackbarSeverity('success');
-    } catch (error) {
-      setSnackbarMessage('Failed to delete the task');
-      setSnackbarSeverity('error');
-    } finally {
-      setSnackbarOpen(true);
-      setOpenConfirm(false);
-    }
-  };
+  const { deleteStatus, deleteError, archiveStatus, archiveError } = useSelector((state: RootState) => state.tasks);
 
   const handleCloseConfirm = () => setOpenConfirm(false);
-  const handleSnackbarClose = () => setSnackbarOpen(false);
 
+  const handleDelete = async () => {
+    try {
+      await dispatch(deleteTaskAsync(task.id)).unwrap();
+      showSnackbar('Task deleted successfully', 'success');
+    } catch (error) {
+      showSnackbar(deleteError || 'Failed to delete task', 'error');
+    }
+  };
+  
   const handleArchive = async () => {
     try {
       await dispatch(archiveTaskAsync(task.id)).unwrap();
-      if (onArchive) {
-        onArchive(task);
-      }
-      setSnackbarMessage('Task archived successfully');
-      setSnackbarSeverity('success');
+      showSnackbar('Task archived successfully', 'success');
     } catch (error) {
-      setSnackbarMessage('Failed to archive the task');
-      setSnackbarSeverity('error');
-    } finally {
-      setSnackbarOpen(true);
+      showSnackbar(archiveError || 'Failed to archive task', 'error');
     }
   };
 
@@ -80,11 +62,12 @@ export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
 
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   let formattedDate = null;
-  if(task.dueDate) {
+  if (task.dueDate) {
     formattedDate = format(toZonedTime(task.dueDate, timeZone), 'dd/MM/yyyy HH:mm');
   }
 
   const formattedStatus = task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase();
+
   return (
     <Box sx={{ minWidth: 275, marginBottom: 2 }}>
       <Card variant="outlined" onClick={handleCardClick}>
@@ -117,34 +100,23 @@ export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
             </Button>
           </Tooltip>
           <Tooltip title="Delete Task">
-            <Button size="small" color="error" onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}>
+            <Button size="small" onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}>
               <DeleteIcon />
             </Button>
           </Tooltip>
         </CardActions>
       </Card>
-
-      <Dialog open={openConfirm} onClose={handleCloseConfirm}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this task?</Typography>
-        </DialogContent>
+      <Dialog
+        open={openConfirm}
+        onClose={handleCloseConfirm}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>Are you sure you want to delete this task?</DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirm}>Cancel</Button>
-          <Button onClick={handleDeleteTask} color="error">Delete</Button>
+          <Button onClick={handleDelete} color="error">Delete</Button>
         </DialogActions>
       </Dialog>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }
