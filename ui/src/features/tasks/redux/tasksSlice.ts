@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { createTask, CreateTaskRequest, deleteTask, fetchTasks, updateTask, UpdateTaskRequest } from '../services/TaskService';
+import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, updateTask, UpdateTaskRequest } from '../services/TaskService';
 import { RootState } from '../../../redux/store';
 import { Task } from '../models/task';
 
@@ -68,6 +68,21 @@ export const deleteTaskAsync = createAsyncThunk(
 
     try {
       await deleteTask(taskId, token);
+      return taskId;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const archiveTaskAsync = createAsyncThunk(
+  'tasks/archiveTaskAsync',
+  async (taskId: string, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      await archiveTask(taskId, token);
       return taskId;
     } catch (error: any) {
       return rejectWithValue(error.response.data);

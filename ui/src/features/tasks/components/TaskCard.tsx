@@ -7,23 +7,28 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import Tooltip from '@mui/material/Tooltip'; // Import Tooltip component
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../../redux/store';
-import { deleteTaskAsync } from '../redux/tasksSlice';
+import { archiveTaskAsync, deleteTaskAsync } from '../redux/tasksSlice';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Snackbar } from '@mui/material';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { Task } from '../models/task';
+import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
+  onArchive?: (task: Task) => void;
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-export default function TaskCard({ task, onEdit }: TaskCardProps) {
+export default function TaskCard({ task, onEdit, onArchive }: TaskCardProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [openConfirm, setOpenConfirm] = React.useState(false);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
@@ -49,9 +54,28 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
 
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
+  const handleArchive = async () => {
+    try {
+      await dispatch(archiveTaskAsync(task.id)).unwrap();
+      if (onArchive) {
+        onArchive(task);
+      }
+      setSnackbarMessage('Task archived successfully');
+      setSnackbarSeverity('success');
+    } catch (error) {
+      setSnackbarMessage('Failed to archive the task');
+      setSnackbarSeverity('error');
+    } finally {
+      setSnackbarOpen(true);
+    }
+  };
+
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const formattedDate = format(toZonedTime(task.dueDate!, timeZone), 'dd/MM/yyyy HH:mm');
+
   return (
     <Box sx={{ minWidth: 275, marginBottom: 2 }}>
-      <Card variant="outlined">
+      <Card variant="outlined" onClick={() => onEdit(task)}>
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             Task
@@ -59,20 +83,34 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
           <Typography variant="h5" component="div">
             {task.title}
           </Typography>
-          <Typography sx={{ mb: 1.5 }} color="text.secondary">
-            {task.dueDate ? `Due: ${new Date(task.dueDate).toLocaleDateString()}` : 'No due date'}
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5, color: 'text.secondary' }}>
+            <Typography>
+              {task.dueDate ? `Due: ${formattedDate}` : 'No due date'}
+            </Typography>
+            <Typography>
+              Status: {task.status}
+            </Typography>
+          </Box>
           <Typography variant="body2">
             {task.description || 'No description available.'}
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small" onClick={() => onEdit(task)}>
-            <EditIcon /> Edit
-          </Button>
-          <Button size="small" color="error" onClick={handleOpenConfirm}>
-            <DeleteIcon /> Delete
-          </Button>
+          <Tooltip title="Edit Task">
+            <Button size="small" onClick={() => onEdit(task)}>
+              <EditIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Archive Task">
+            <Button size="small" onClick={handleArchive}>
+              <ArchiveIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Delete Task">
+            <Button size="small" color="error" onClick={handleOpenConfirm}>
+              <DeleteIcon />
+            </Button>
+          </Tooltip>
         </CardActions>
       </Card>
 
@@ -92,6 +130,7 @@ export default function TaskCard({ task, onEdit }: TaskCardProps) {
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
           {snackbarMessage}

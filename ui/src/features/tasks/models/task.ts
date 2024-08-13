@@ -8,6 +8,8 @@ export interface Task {
   status?: string/*TaskStatus*/;
   userId?: string;
   user?: User;
+  archivedAt?: string;
+  deletedAt?: string;
 }
 
-export type TaskStatus = 'pending' | 'completed';
+export type TaskStatus = 'new' | 'active' | 'completed' | 'removed';

@@ -22,23 +22,21 @@ export default function TasksPage() {
     dispatch(fetchTasksAsync());
   }, [dispatch]);
 
-  const handleCreateTask = (newTask: { title: string; description: string; dueDate: string }) => {
-    dispatch(createTaskAsync({ ...newTask, status: 'pending' }));
-    setCreateModalOpen(false);
-  };
-
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
     setEditModalOpen(true);
   };
 
+  // Filter out tasks that are archived or deleted
+  const activeTasks = tasks.filter((task: Task) => !task.archivedAt && !task.deletedAt);
+
   return (
-    <Container sx={{ width: '100%', minHeight: '100vh', padding: 2, position: 'relative' }}>
+    <Container sx={{ width: '100%', minHeight: '100vh', padding: 8, position: 'relative' }}>
       {status === 'loading' && <CircularProgress />}
       {status === 'failed' && <Alert severity="error">{error}</Alert>}
       {status === 'succeeded' && (
         <Masonry columns={3} spacing={2}>
-          {tasks.map((task: Task) => (
+          {activeTasks.map((task: Task) => (
             <TaskCard
               key={task.id}
               task={task}

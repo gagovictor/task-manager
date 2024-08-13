@@ -50,3 +50,10 @@ export const deleteTask = async (taskId: string, token: string) => {
     });
     return response.data;
 };
+
+export const archiveTask = async (taskId: string, token: string) => {
+    const response = await apiClient.post(`${API_BASE_URL}/tasks/${taskId}/archive`, null, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+};
