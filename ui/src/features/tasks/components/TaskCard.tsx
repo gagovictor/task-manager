@@ -100,8 +100,20 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
               variant="outlined"
             />
           </Box>
-          <Typography variant="body2">
-            {task.description || 'No description available.'}
+          <Typography
+            sx={{ 
+              mb: 1.5, 
+              whiteSpace: 'pre-line', 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis', 
+              maxHeight: '5em',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical'
+            }}
+            color="text.secondary"
+          >
+            {task.description ? task.description : 'No description provided'}
           </Typography>
         </CardContent>
         <CardActions>
