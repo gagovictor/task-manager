@@ -18,7 +18,12 @@ exports.createTask = async ({ title, description, dueDate, status, userId }) => 
 
 exports.getTasksByUser = async (userId) => {
   try {
-    const tasks = await Task.findAll({ where: { userId } });
+    const tasks = await Task.findAll({
+      where: {
+        userId,
+        deletedAt: null  // Exclude tasks where deletedAt is not null
+      }
+    });
     return tasks;
   } catch (error) {
     console.error('Fetching tasks error:', error);
@@ -28,7 +33,13 @@ exports.getTasksByUser = async (userId) => {
 
 exports.updateTask = async (id, { title, description, dueDate, status, userId }) => {
   try {
-    const task = await Task.findOne({ where: { id, userId } });
+    const task = await Task.findOne({
+      where: {
+        id,
+        userId,
+        deletedAt: null
+      }
+    });
     if (!task) throw new Error('Task not found');
     await task.update({
       title,
@@ -49,7 +60,13 @@ exports.updateTask = async (id, { title, description, dueDate, status, userId })
 
 exports.deleteTask = async (id, userId) => {
   try {
-    const task = await Task.findOne({ where: { id, userId } });
+    const task = await Task.findOne({
+      where: {
+        id,
+        userId,
+        deletedAt: null  // Ensure the task is not already deleted
+      }
+    });
     if (!task) throw new Error('Task not found');
     await task.update({
       deletedAt: new Date(),
@@ -65,7 +82,13 @@ exports.deleteTask = async (id, userId) => {
 
 exports.archiveTask = async (id, userId) => {
   try {
-    const task = await Task.findOne({ where: { id, userId } });
+    const task = await Task.findOne({
+      where: {
+        id,
+        userId,
+        deletedAt: null
+      }
+    });
     if (!task) throw new Error('Task not found');
     await task.update({
       archivedAt: new Date(),
@@ -81,7 +104,13 @@ exports.archiveTask = async (id, userId) => {
 
 exports.unarchiveTask = async (id, userId) => {
   try {
-    const task = await Task.findOne({ where: { id, userId } });
+    const task = await Task.findOne({
+      where: {
+        id,
+        userId,
+        deletedAt: null
+      }
+    });
     if (!task) throw new Error('Task not found');
     await task.update({
       archivedAt: null,

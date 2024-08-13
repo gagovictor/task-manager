@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
 import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button } from '@mui/material';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
@@ -20,8 +19,6 @@ export default function ArchivedTasksPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-
-  // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
@@ -43,7 +40,7 @@ export default function ArchivedTasksPage() {
     setSnackbarOpen(true);
   };
 
-  const activeTasks = tasks.filter((task: Task) => task.archivedAt && !task.deletedAt);
+  const activeTasks = tasks.filter((task: Task) => task.archivedAt);
 
   return (
     <Container sx={{ width: '100%', minHeight: '100vh', padding: 8, position: 'relative' }}>

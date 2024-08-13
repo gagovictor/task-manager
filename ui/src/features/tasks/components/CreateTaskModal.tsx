@@ -22,13 +22,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
   const handleCreate = async () => {
     if (title) {
       let dueDate = '';
-      if (date) {
-        dueDate = (time ? `${date}T${time}:00Z` : `${date}T00:00:00Z`);
-      } else if (time) {
-        const today = new Date().toISOString().split('T')[0];
-        dueDate = `${today}T${time}:00Z`;
-      } else {
-        dueDate = '';
+      if (date || time) {
+        // Use today's date if no date is provided
+        const finalDate = date || new Date().toISOString().split('T')[0];
+        // Set time or default to '00:00:00'
+        const finalTime = time || '00:00:00';
+        const localDateTime = new Date(`${finalDate}T${finalTime}`);
+        dueDate = localDateTime.toISOString();
       }
       try {
         await dispatch(createTaskAsync({ title, description, dueDate, status })).unwrap();

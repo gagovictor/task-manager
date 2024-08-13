@@ -49,7 +49,7 @@ export default function TasksPage() {
   };
   
 
-  const activeTasks = tasks.filter((task: Task) => !task.archivedAt && !task.deletedAt);
+  const activeTasks = tasks.filter((task: Task) => !task.archivedAt);
 
   return (
     <Container sx={{ width: '100%', minHeight: '100vh', padding: 8, position: 'relative' }}>
