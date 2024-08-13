@@ -180,4 +180,25 @@ router.delete('/:id', async(req, res) => taskController.deleteTask(req, res));
  */
 router.post('/:id/archive', async(req, res) => taskController.archiveTask(req, res));
 
+/**
+ * @swagger
+ * /tasks/{id}/unarchive:
+ *   post:
+ *     summary: Unarchive a task by ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *     responses:
+ *       204:
+ *         description: Task unarchived successfully
+ *       404:
+ *         description: Task not found
+ */
+router.post('/:id/unarchive', async(req, res) => taskController.unarchiveTask(req, res));
+
 module.exports = router;

@@ -78,3 +78,19 @@ exports.archiveTask = async (id, userId) => {
     throw new Error('Task archive failed');
   }
 };
+
+exports.unarchiveTask = async (id, userId) => {
+  try {
+    const task = await Task.findOne({ where: { id, userId } });
+    if (!task) throw new Error('Task not found');
+    await task.update({
+      archivedAt: null,
+    });
+  } catch (error) {
+    console.error('Task unarchive error:', error);
+    if (error.message === 'Task not found') {
+      throw error; // Re-throw the specific error
+    }
+    throw new Error('Task unarchive failed');
+  }
+};

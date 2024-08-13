@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, updateTask, UpdateTaskRequest } from '../services/TaskService';
+import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, unarchiveTask, updateTask, UpdateTaskRequest } from '../services/TaskService';
 import { RootState } from '../../../redux/store';
 import { Task } from '../models/task';
 
@@ -106,6 +106,21 @@ export const archiveTaskAsync = createAsyncThunk(
   }
 );
 
+export const unarchiveTaskAsync = createAsyncThunk(
+  'tasks/unarchiveTaskAsync',
+  async (taskId: string, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      await unarchiveTask(taskId, token);
+      return taskId;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -188,6 +203,20 @@ const tasksSlice = createSlice({
       .addCase(archiveTaskAsync.rejected, (state, action) => {
         state.archiveStatus = 'failed';
         state.archiveError = (action.payload as any).error as string || 'Failed to archive task';
+      })
+      .addCase(unarchiveTaskAsync.pending, (state) => {
+        state.archiveStatus = 'loading';
+      })
+      .addCase(unarchiveTaskAsync.fulfilled, (state, action: PayloadAction<string>) => {
+        state.archiveStatus = 'succeeded';
+        const task = state.tasks.find(task => task.id === action.payload);
+        if (task) {
+          task.archivedAt = undefined;
+        }
+      })
+      .addCase(unarchiveTaskAsync.rejected, (state, action) => {
+        state.archiveStatus = 'failed';
+        state.archiveError = (action.payload as any).error as string || 'Failed to unarchive task';
       });
   },
 });

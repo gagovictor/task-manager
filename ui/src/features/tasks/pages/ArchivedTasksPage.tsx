@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../redux/store';
-import { fetchTasksAsync, createTaskAsync, updateTaskAsync } from '../redux/tasksSlice';
+import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button } from '@mui/material';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import { Task } from '../models/task';
+import { useNavigate } from 'react-router-dom';
 
 export default function ArchivedTasksPage() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { tasks, fetchStatus, fetchError } = useSelector((state: RootState) => state.tasks);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -47,7 +49,7 @@ export default function ArchivedTasksPage() {
     <Container sx={{ width: '100%', minHeight: '100vh', padding: 8, position: 'relative' }}>
       {fetchStatus === 'loading' && <CircularProgress />}
       {fetchStatus === 'failed' && <Alert severity="error">{fetchError}</Alert>}
-      {fetchStatus === 'succeeded' && (
+      {fetchStatus === 'succeeded' && activeTasks.length > 0 && (
         <Masonry columns={3} spacing={2}>
           {activeTasks.map((task: Task) => (
             <TaskCard
@@ -57,25 +59,25 @@ export default function ArchivedTasksPage() {
               showSnackbar={showSnackbar}
             />
           ))}
-          <Box
-            sx={{
-              width: 300,
-              height: 200,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px dashed grey',
-              borderRadius: 1,
-              backgroundColor: '#f0f0f0',
-              cursor: 'pointer'
-            }}
-            onClick={() => setCreateModalOpen(true)}
-          >
-            <Typography variant="h6">Create New Task</Typography>
-          </Box>
         </Masonry>
       )}
-      {status === 'idle' && <Typography>No tasks available</Typography>}
+      {fetchStatus === 'succeeded' && activeTasks.length === 0 && (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 'calc(100vh - 64px)',
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="h4" gutterBottom>No archived tasks available</Typography>
+          <Button variant="contained" color="primary" onClick={() => navigate('/tasks')}>
+            Back to tasks
+          </Button>
+        </Box>
+      )}
 
       <Fab
         color="primary"

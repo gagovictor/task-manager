@@ -5,7 +5,7 @@ import { fetchTasksAsync, createTaskAsync, updateTaskAsync } from '../redux/task
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button } from '@mui/material';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
@@ -19,10 +19,10 @@ export default function TasksPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
 
   useEffect(() => {
     dispatch(fetchTasksAsync());
@@ -35,17 +35,26 @@ export default function TasksPage() {
 
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
-  const showSnackbar = (message: string, severity: 'success' | 'error') => {
+  const showSnackbar = (message: string, severity: 'success' | 'error', undoAction?: () => void) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
+    setSnackbarUndoAction(() => undoAction);
   };
+  
+  const handleSnackbarAction = () => {
+    if (snackbarUndoAction) {
+      snackbarUndoAction();
+    }
+  };
+  
 
   const activeTasks = tasks.filter((task: Task) => !task.archivedAt && !task.deletedAt);
 
   return (
     <Container sx={{ width: '100%', minHeight: '100vh', padding: 8, position: 'relative' }}>
       {fetchStatus === 'loading' && <CircularProgress />}
+      {fetchStatus === 'idle' && <Typography>No tasks available</Typography>}
       {fetchStatus === 'failed' && <Alert severity="error">{fetchError}</Alert>}
       {fetchStatus === 'succeeded' && (
         <Masonry columns={3} spacing={2}>
@@ -60,7 +69,7 @@ export default function TasksPage() {
           <Box
             sx={{
               width: 300,
-              height: 200,
+              height: 182,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -75,7 +84,6 @@ export default function TasksPage() {
           </Box>
         </Masonry>
       )}
-      {status === 'idle' && <Typography>No tasks available</Typography>}
 
       <Fab
         color="primary"
@@ -98,17 +106,27 @@ export default function TasksPage() {
           task={selectedTask}
         />
       )}
-
+      
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          action={
+            snackbarUndoAction ? (
+              <Button color="inherit" onClick={handleSnackbarAction}>
+                Undo
+              </Button>
+            ) : null
+          }>
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
     </Container>
   );
 }

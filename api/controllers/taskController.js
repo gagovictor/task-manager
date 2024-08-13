@@ -69,3 +69,18 @@ exports.archiveTask = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+exports.unarchiveTask = async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    await taskService.unarchiveTask(id, req.user.id);
+    res.status(204).json();
+  } catch (error) {
+    console.error('Task unarchive error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
