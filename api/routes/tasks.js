@@ -201,4 +201,43 @@ router.post('/:id/archive', async(req, res) => taskController.archiveTask(req, r
  */
 router.post('/:id/unarchive', async(req, res) => taskController.unarchiveTask(req, res));
 
+/**
+ * @swagger
+ * /tasks/{id}/status:
+ *   post:
+ *     summary: Update the status of a task by ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *       - in: body
+ *         name: status
+ *         schema:
+ *           type: object
+ *           properties:
+ *             status:
+ *               type: string
+ *               description: The new status of the task
+ *         required: true
+ *         description: The new status to be set for the task
+ *     responses:
+ *       200:
+ *         description: Task status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Task'
+ *       404:
+ *         description: Task not found
+ *       401:
+ *         description: User not authenticated
+ *       500:
+ *         description: Server error
+ */
+router.post('/:id/status', async (req, res) => taskController.updateTaskStatus(req, res));
+
 module.exports = router;

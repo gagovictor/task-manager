@@ -70,7 +70,6 @@ exports.archiveTask = async (req, res) => {
   }
 };
 
-
 exports.unarchiveTask = async (req, res) => {
   const { id } = req.params;
   try {
@@ -81,6 +80,28 @@ exports.unarchiveTask = async (req, res) => {
     res.status(204).json();
   } catch (error) {
     console.error('Task unarchive error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updateTaskStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const updatedTask = await taskService.updateTaskStatus(id, status, req.user.id);
+
+    if (!updatedTask) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    res.status(200).json(updatedTask);
+  } catch (error) {
+    console.error('Task status update error:', error);
     res.status(500).json({ error: error.message });
   }
 };

@@ -5,8 +5,8 @@ export interface Task {
   dueDate?: string;
   status: string/*TaskStatus*/;
   userId: string;
-  archivedAt?: string;
-  deletedAt?: string;
+  archivedAt: string|null;
+  deletedAt: string|null;
 }
 
 export type TaskStatus = 'new' | 'active' | 'completed' | 'removed';

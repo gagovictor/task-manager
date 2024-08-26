@@ -8,6 +8,7 @@ import LogoutPage from './features/auth/pages/LogoutPage';
 import TasksPage from './features/tasks/pages/TasksPage';
 import ArchivedTasksPage from './features/tasks/pages/ArchivedTasksPage';
 import AuthGuard from './features/shared/components/AuthGuard';
+import TaskBoardPage from './features/tasks/pages/TaskBoardPage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route element={<AuthGuard />}>
               <Route path="/tasks" element={<TasksPage />} />
               <Route path="/archived" element={<ArchivedTasksPage />} />
+              <Route path="/board" element={<TaskBoardPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/login" />} />

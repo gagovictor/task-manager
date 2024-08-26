@@ -43,7 +43,7 @@ export default function ArchivedTasksPage() {
   const activeTasks = tasks.filter((task: Task) => task.archivedAt);
 
   return (
-    <Container sx={{ width: '100%', minHeight: '100vh', padding: 8, position: 'relative' }}>
+    <Container sx={{ width: '100%', minHeight: '100vh', padding: 16, position: 'relative' }}>
       {fetchStatus === 'loading' && <CircularProgress />}
       {fetchStatus === 'failed' && <Alert severity="error">{fetchError}</Alert>}
       {fetchStatus === 'succeeded' && activeTasks.length > 0 && (

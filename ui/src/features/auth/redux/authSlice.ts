@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { login, LoginRequest, LoginResponse, signup, SignupRequest, SignupResponse } from '../services/AuthService';
 import { User } from '../models/user';
 
-interface AuthState {
+export interface AuthState {
   isAuthenticated: boolean;
   token: string;
   user: User | null;
@@ -13,7 +13,7 @@ interface AuthState {
 const user = localStorage.getItem('user');
 const parsedUser = user ? JSON.parse(user) : null;
 
-const initialState: AuthState = {
+export const initialState: AuthState = {
   isAuthenticated: !!localStorage.getItem('user'),
   token: localStorage.getItem('token') || '',
   user: parsedUser,

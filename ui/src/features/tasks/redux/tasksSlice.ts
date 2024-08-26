@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, unarchiveTask, updateTask, UpdateTaskRequest } from '../services/TaskService';
+import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, unarchiveTask, updateTask, UpdateTaskRequest, updateTaskStatus } from '../services/TaskService';
 import { RootState } from '../../../redux/store';
 import { Task } from '../models/task';
 
-interface TasksState {
+export interface TasksState {
   tasks: Task[];
   fetchStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   fetchError: string | null;
@@ -17,7 +17,7 @@ interface TasksState {
   archiveError: string | null;
 }
 
-const initialState: TasksState = {
+export const initialState: TasksState = {
   tasks: [],
   fetchStatus: 'idle',
   fetchError: null,
@@ -121,6 +121,21 @@ export const unarchiveTaskAsync = createAsyncThunk(
   }
 );
 
+export const updateTaskStatusAsync = createAsyncThunk(
+  'tasks/updateTaskStatusAsync',
+  async ({ id, status }: { id: string, status: string }, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      const response = await updateTaskStatus({ id, status } as UpdateTaskRequest, token);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -211,12 +226,28 @@ const tasksSlice = createSlice({
         state.archiveStatus = 'succeeded';
         const task = state.tasks.find(task => task.id === action.payload);
         if (task) {
-          task.archivedAt = undefined;
+          task.archivedAt = null;
         }
       })
       .addCase(unarchiveTaskAsync.rejected, (state, action) => {
         state.archiveStatus = 'failed';
         state.archiveError = (action.payload as any).error as string || 'Failed to unarchive task';
+      })
+
+      // Update task status
+      .addCase(updateTaskStatusAsync.pending, (state) => {
+        state.updateStatus = 'loading';
+      })
+      .addCase(updateTaskStatusAsync.fulfilled, (state, action: PayloadAction<Task>) => {
+        state.updateStatus = 'succeeded';
+        const index = state.tasks.findIndex(task => task.id === action.payload.id);
+        if (index >= 0) {
+          state.tasks[index] = action.payload;
+        }
+      })
+      .addCase(updateTaskStatusAsync.rejected, (state, action) => {
+        state.updateStatus = 'failed';
+        state.updateError = (action.payload as any).error as string || 'Failed to update task status';
       });
   },
 });

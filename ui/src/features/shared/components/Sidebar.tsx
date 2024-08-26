@@ -7,6 +7,7 @@ import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import ListItemText from '@mui/material/ListItemText';
 import MenuIcon from '@mui/icons-material/Menu';
 import TaskIcon from '@mui/icons-material/Task';
@@ -41,6 +42,7 @@ export default function Sidebar() {
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
         {[
+          { text: 'Board', icon: <DashboardIcon />, route: '/board' },
           { text: 'Tasks', icon: <TaskIcon />, route: '/tasks' },
           { text: 'Archived', icon: <ArchiveIcon />, route: '/archived' },
         ].map((item) => (

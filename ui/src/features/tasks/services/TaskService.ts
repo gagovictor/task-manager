@@ -64,3 +64,15 @@ export const unarchiveTask = async (taskId: string, token: string) => {
     });
     return response.data;
 };
+
+export interface UpdateTaskStatusRequest {
+    id: string;
+    status: string; /*TaskStatus*/
+}
+
+export const updateTaskStatus = async (request: UpdateTaskStatusRequest, token: string) => {
+    const response = await apiClient.post(`${API_BASE_URL}/tasks/${request.id}/status`, { status: request.status }, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+};

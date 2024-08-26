@@ -123,3 +123,21 @@ exports.unarchiveTask = async (id, userId) => {
     throw new Error('Task unarchive failed');
   }
 };
+
+exports.updateTaskStatus = async (taskId, status, userId) => {
+  try {
+    const task = await Task.findOne({ where: { id: taskId, userId } });
+
+    if (!task) {
+      return null;
+    }
+
+    task.status = status;
+    await task.save();
+
+    return task;
+  } catch (error) {
+    console.error('Update task status error:', error);
+    throw new Error('Could not update task status');
+  }
+};

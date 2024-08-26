@@ -10,31 +10,26 @@ const LoginForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  // State for form fields
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  // State for Snackbar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-
-  // Error message to display
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Get auth status and error from the store
   const authStatus = useSelector((state: RootState) => state.auth.status);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setErrorMessage(null); // Reset error message on form submit
+    setErrorMessage(null);
 
     try {
       const request: LoginRequest = { username, password };
       await dispatch(loginUser(request)).unwrap();
-      navigate('/tasks'); // Redirect on successful login
+      navigate('/tasks');
     } catch (error) {
       console.error('Login failed', error);
       setErrorMessage('Login failed. Please check your username and password.');
-      setSnackbarOpen(true); // Open the Snackbar on error
+      setSnackbarOpen(true);
     }
   };
 
@@ -62,6 +57,7 @@ const LoginForm: React.FC = () => {
               autoFocus
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              inputProps={{ "data-testid": "input-username" }}
             />
             <TextField
               variant="outlined"
@@ -75,6 +71,7 @@ const LoginForm: React.FC = () => {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              inputProps={{ "data-testid": "input-password" }}
             />
             <Button
               type="submit"
@@ -83,6 +80,7 @@ const LoginForm: React.FC = () => {
               color="primary"
               sx={{ mt: 2 }}
               disabled={authStatus === 'loading'}
+              data-testid="submit"
             >
               {authStatus === 'loading' ? 'Logging in...' : 'Login'}
             </Button>

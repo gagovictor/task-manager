@@ -19,6 +19,8 @@ import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PendingActionsOutlined } from '@mui/icons-material';
 import { useState } from 'react';
+import './TaskCard.css';
+import theme from '../../shared/config/theme';
 
 interface TaskCardProps {
   task: Task;
@@ -75,16 +77,24 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
   };
 
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  let formattedDate = null;
+  let formattedDueDate = 'No due date';
   if (task.dueDate) {
-    formattedDate = format(toZonedTime(task.dueDate, timeZone), 'dd/MM/yyyy HH:mm');
+    formattedDueDate = format(toZonedTime(task.dueDate, timeZone), 'dd/MM/yyyy HH:mm');
   }
 
   const formattedStatus = task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase();
 
   return (
-    <Box sx={{ minWidth: 275, marginBottom: 2 }}>
-      <Card variant="outlined" onClick={handleCardClick}>
+    <Box sx={{ width: '100%', marginBottom: 2 }}>
+      <Card
+        className="no-select"
+        variant="outlined"
+        onClick={handleCardClick}
+        sx={{
+          backgroundColor: theme.palette.background.paper,
+          cursor: 'pointer'
+        }}
+      >
         <CardContent>
           <Typography variant="h5" component="div">
             {task.title}
@@ -92,13 +102,9 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', my: 1, gap: 1, color: 'text.secondary' }}>
             <Chip
               icon={<PendingActionsOutlined />}
-              label={task.dueDate ? `${formattedDate}` : 'No due date'}
-              variant="outlined"
+              label={formattedDueDate}
             />
-            <Chip
-              label={formattedStatus}
-              variant="outlined"
-            />
+            <Chip label={formattedStatus} />
           </Box>
           <Typography
             sx={{ 
