@@ -139,7 +139,12 @@ export const updateTaskStatusAsync = createAsyncThunk(
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
-  reducers: {},
+  reducers: {
+    reorderTasksLocally(state, action: PayloadAction<{ updatedTasks: Task[] }>) {
+      const { updatedTasks } = action.payload;
+      state.tasks = updatedTasks;
+    },
+  },
   extraReducers: (builder) => {
     // Fetch Tasks
     builder
@@ -251,5 +256,7 @@ const tasksSlice = createSlice({
       });
   },
 });
+
+export const { reorderTasksLocally } = tasksSlice.actions;
 
 export default tasksSlice.reducer;

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../redux/store';
-import { fetchTasksAsync, updateTaskStatusAsync } from '../redux/tasksSlice';
+import { fetchTasksAsync, reorderTasksLocally, updateTaskStatusAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Fab from '@mui/material/Fab';
@@ -11,8 +11,8 @@ import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
-import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCenter, useDroppable, useSensor, useSensors, PointerSensor, DragOverEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
+import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCenter, useDroppable, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
+import { SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
@@ -23,6 +23,7 @@ import { Paper } from '@mui/material';
 const TaskBoardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { tasks, fetchStatus, fetchError } = useSelector((state: RootState) => state.tasks);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -41,7 +42,9 @@ const TaskBoardPage = () => {
     })
   );
 
-  let filteredTasks = tasks.filter((task: Task) => !task.archivedAt);
+    useEffect(() => {
+      setFilteredTasks(tasks.filter((task: Task) => !task.archivedAt));
+    }, [tasks]);
 
   useEffect(() => {
     dispatch(fetchTasksAsync());
@@ -71,42 +74,49 @@ const TaskBoardPage = () => {
     const task = filteredTasks.find(task => task.id == event.active.id);
     setDraggingTask(task || null);
   }
-  
   const handleDragEnd = async (event: DragEndEvent) => {
     setDraggingTask(null);
     const { active, over } = event;
   
     if (over && active.id !== over.id) {
-      const activeColumn = filteredTasks.find(task => task.id == active.id)?.status;
-      let overColumn = '';
-      if(over.id.toString().includes('container')) {
-        overColumn = over.id.toString().replace('container-', '');
+      const taskId = active.id.toString();
+      const activeTaskIndex = filteredTasks.findIndex(task => task.id === active.id);
+      const overTaskIndex = filteredTasks.findIndex(task => task.id === over.id);
+      const currentStatus = filteredTasks[activeTaskIndex]?.status;
+      let newStatus;
+
+      // Check if the dragged item is a task card and not a container
+      if (!over.id.toString().includes('container')) {
+        newStatus = filteredTasks[overTaskIndex]?.status;
+        if(currentStatus == newStatus) {
+          // Reorder tasks array locally
+          const updatedTasks = [...filteredTasks];
+          const [movedTask] = updatedTasks.splice(activeTaskIndex, 1);
+          updatedTasks.splice(overTaskIndex, 0, movedTask);
+          console.log(updatedTasks);
+          dispatch(reorderTasksLocally({ updatedTasks }));
+    
+          showSnackbar('Tasks reordered successfully', 'success');
+          return;
+        }
       } else {
-        overColumn = filteredTasks.find(task => task.id == over.id)?.status || '';
+        // Handle moving task to a different column/container
+        newStatus = over.id.toString().replace('container-', '');
       }
-      console.log('activeColumn', activeColumn);
-      console.log('overColumn', overColumn);
-      if(!activeColumn || !overColumn) {
+
+      if(currentStatus == newStatus) {
         return;
       }
 
-      const newStatus = overColumn;
-      const taskId = active.id.toString();
-  
       try {
         await dispatch(updateTaskStatusAsync({ id: taskId, status: newStatus })).unwrap();
-        // filteredTasks = arrayMove(filteredTasks, oldIndex, newIndex);
         showSnackbar('Task moved successfully', 'success');
       } catch (error: any) {
         showSnackbar(`Failed to move task`, 'error');
       }
     }
   };
-
-  const handleDragOver = async (event: DragOverEvent) => {
-    // console.log("dragover", event, event.over?.id);
-  };
-
+  
   const SortableTaskCard = ({ task }: { task: Task }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
       id: task.id,
@@ -121,7 +131,7 @@ const TaskBoardPage = () => {
       <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
         <div
           style={{
-            opacity: draggingTask?.id === task.id ? 0 : 1,
+            opacity: draggingTask?.id === task.id ? 0.1 : 1,
           }}
         >
           <TaskCard
@@ -234,7 +244,7 @@ const TaskBoardPage = () => {
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          onDragOver={handleDragOver}>
+        >
           <Box
             sx={{
               width: '100%',
