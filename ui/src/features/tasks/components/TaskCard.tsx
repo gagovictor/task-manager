@@ -79,9 +79,14 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
   };
 
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const currentDate = new Date();
   let formattedDueDate = 'No due date';
+  let isPastDue = false;
+
   if (task.dueDate) {
-    formattedDueDate = format(toZonedTime(task.dueDate, timeZone), 'dd/MM/yyyy HH:mm');
+    const dueDate = toZonedTime(task.dueDate, timeZone);
+    formattedDueDate = format(dueDate, 'dd/MM/yyyy HH:mm');
+    isPastDue = dueDate < currentDate;
   }
 
   const formattedStatus = task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase();
@@ -102,11 +107,22 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
             {task.title}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', my: 1, gap: 1, color: 'text.secondary' }}>
+            {isPastDue ? (
+                <Chip
+                  label={formattedDueDate}
+                  color="error"
+                  sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}
+                />
+              ) : (
+                <Chip
+                  icon={<PendingActionsOutlined />}
+                  label={formattedDueDate}
+                />
+              )
+            }
             <Chip
-              icon={<PendingActionsOutlined />}
-              label={formattedDueDate}
-            />
-            <Chip label={formattedStatus} />
+              color={task.status == 'active' ? 'primary' : 'default'}
+              label={formattedStatus} />
           </Box>
           <Typography
             sx={{ 
