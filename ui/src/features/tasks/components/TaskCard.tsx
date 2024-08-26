@@ -24,7 +24,7 @@ import theme from '../../shared/config/theme';
 
 interface TaskCardProps {
   task: Task;
-  onEdit: (task: Task) => void;
+  onEdit?: (task: Task) => void;
   showSnackbar: (message: string, severity: 'success' | 'error', undoAction?: () => void) => void; // Update to accept undoAction
 }
 
@@ -68,7 +68,9 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
   };
 
   const handleCardClick = () => {
-    onEdit(task);
+    if(onEdit) {
+      onEdit(task);
+    }
   };
 
   const handleButtonClick = (event: React.MouseEvent, action: () => void) => {
@@ -124,7 +126,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
         </CardContent>
         <CardActions>
           <Tooltip title="Edit Task">
-            <Button size="small" onClick={(event) => handleButtonClick(event, () => onEdit(task))}>
+            <Button size="small" onClick={(event) => handleButtonClick(event, () => { if(onEdit) onEdit(task); })}>
               <EditIcon />
             </Button>
           </Tooltip>

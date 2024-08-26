@@ -11,7 +11,7 @@ import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
-import { DndContext, DragEndEvent, closestCenter, useDroppable } from '@dnd-kit/core';
+import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCenter, useDroppable } from '@dnd-kit/core';
 import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import CreateTaskModal from '../components/CreateTaskModal';
@@ -30,6 +30,7 @@ const TaskBoardPage = () => {
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
+  const [draggingTask, setDraggingTask] = useState<Task | null>(null);
 
   let filteredTasks = tasks.filter((task: Task) => !task.archivedAt);
 
@@ -56,9 +57,16 @@ const TaskBoardPage = () => {
       snackbarUndoAction();
     }
   };
+
+  const handleDragStart = async (event: DragStartEvent) => {
+    const task = filteredTasks.find(task => task.id == event.active.id);
+    setDraggingTask(task || null);
+  }
   
   const handleDragEnd = async (event: DragEndEvent) => {
+    setDraggingTask(null);
     const { active, over } = event;
+    console.log(event)
   
     if (over && active.id !== over.id) {
       const oldIndex = filteredTasks.findIndex(task => task.id === active.id);
@@ -67,6 +75,7 @@ const TaskBoardPage = () => {
       const activeColumn = filteredTasks.find(task => task.id == active.id)?.status;
       const overColumn = filteredTasks.find(task => task.id == over.id)?.status;
       
+      console.log(active, over);
       console.log(`activeColumn ${activeColumn} overColumn ${overColumn} `)
       if(!activeColumn || !overColumn) {
         return;
@@ -102,12 +111,18 @@ const TaskBoardPage = () => {
 
     return (
       <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        <TaskCard
+        <div
+          style={{
+            opacity: draggingTask?.id === task.id ? 0 : 1,
+          }}
+        >
+          <TaskCard
             key={task.id}
             task={task}
             onEdit={() => handleEditTask(task)}
             showSnackbar={showSnackbar}
-        />
+          />
+        </div>
       </div>
     );
   };
@@ -121,8 +136,12 @@ const TaskBoardPage = () => {
     const title = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
     const tasksByStatus = filteredTasks.filter(task => task.status === status);
     const { setNodeRef } = taskColumnRefs[status];
-
+  
     return (
+      <SortableContext
+        items={tasksByStatus.map(task => task.id)}
+        strategy={rectSortingStrategy}
+      >
       <Box
         key={status}
         sx={{
@@ -134,37 +153,68 @@ const TaskBoardPage = () => {
           height: '100%',
         }}
       >
-        <Paper sx={{ padding: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Paper
+          sx={{
+            padding: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+          }}
+        >
           <Typography variant="h6" sx={{ textAlign: 'center', marginBottom: '16px' }}>
             {title}
           </Typography>
-          <SortableContext
-            items={tasksByStatus.map(task => task.id)}
-            strategy={rectSortingStrategy}
-            >
             <Box
               ref={setNodeRef}
-              sx={{ flex: 1, overflowY: 'auto' }}>
+              sx={{
+                flex: 1,
+                overflowY: 'auto',
+              }}
+            >
               {tasksByStatus.map(task => (
                 <SortableTaskCard key={task.id} task={task} />
               ))}
             </Box>
-          </SortableContext>
         </Paper>
       </Box>
+      </SortableContext>
     );
   };
   
   return (
-    <Container sx={{ width: '100%', minHeight: '100vh', padding: 16, position: 'relative', display: 'flex', flexDirection: 'column' }}>
+    <Container
+      sx={{
+        width: '100%',
+        minHeight: '100vh',
+        padding: 16,
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       {fetchStatus === 'loading' && <CircularProgress />}
       {fetchStatus === 'idle' && <Typography>No tasks available</Typography>}
       {fetchStatus === 'failed' && <Alert severity="error">{fetchError}</Alert>}
       {fetchStatus === 'succeeded' && (
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <Box sx={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+        <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <Box
+            sx={{
+              display: 'flex',
+              height: 'calc(100vh - 64px)', // Adjust for any fixed position elements like Fab
+              overflow: 'hidden',
+            }}
+          >
             {taskStatuses.map(status => renderTaskColumns(status))}
           </Box>
+          <DragOverlay>
+            {draggingTask && (
+              <TaskCard
+                key={draggingTask.id}
+                task={draggingTask}
+                showSnackbar={showSnackbar}
+              />
+            )}
+          </DragOverlay>
         </DndContext>
       )}
 
