@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArchiveIcon from '@mui/icons-material/Archive';
-import UnarchiveIcon from '@mui/icons-material/Unarchive'; // Import Unarchive icon
+import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import Tooltip from '@mui/material/Tooltip';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../redux/store';
@@ -25,13 +25,13 @@ import theme from '../../shared/config/theme';
 interface TaskCardProps {
   task: Task;
   onEdit?: (task: Task) => void;
-  showSnackbar: (message: string, severity: 'success' | 'error', undoAction?: () => void) => void; // Update to accept undoAction
+  showSnackbar: (message: string, severity: 'success' | 'error', undoAction?: () => void) => void;
 }
 
 export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [openConfirm, setOpenConfirm] = React.useState(false);
-  const [archiving, setArchiving] = useState(false); // State to track archiving
+  const [archiving, setArchiving] = useState(false);
 
   const { deleteStatus, deleteError, archiveStatus, archiveError } = useSelector((state: RootState) => state.tasks);
 
@@ -93,7 +93,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
         variant="outlined"
         onClick={handleCardClick}
         sx={{
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: '#fefefe',
           cursor: 'pointer'
         }}
       >

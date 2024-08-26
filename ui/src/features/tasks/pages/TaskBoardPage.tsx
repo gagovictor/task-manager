@@ -11,13 +11,13 @@ import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
-import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCenter, useDroppable } from '@dnd-kit/core';
-import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCenter, useDroppable, useSensor, useSensors, PointerSensor, DragOverEvent } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import TaskCard from '../components/TaskCard';
-import { Task, taskStatuses } from '../models/task';
+import { Task } from '../models/task';
 import { Paper } from '@mui/material';
 
 const TaskBoardPage = () => {
@@ -31,6 +31,15 @@ const TaskBoardPage = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [draggingTask, setDraggingTask] = useState<Task | null>(null);
+  const statusColumns = ['new', 'active', 'completed'];
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3
+      }
+    })
+  );
 
   let filteredTasks = tasks.filter((task: Task) => !task.archivedAt);
 
@@ -66,17 +75,17 @@ const TaskBoardPage = () => {
   const handleDragEnd = async (event: DragEndEvent) => {
     setDraggingTask(null);
     const { active, over } = event;
-    console.log(event)
   
     if (over && active.id !== over.id) {
-      const oldIndex = filteredTasks.findIndex(task => task.id === active.id);
-      const newIndex = filteredTasks.findIndex(task => task.id === over.id);
-  
       const activeColumn = filteredTasks.find(task => task.id == active.id)?.status;
-      const overColumn = filteredTasks.find(task => task.id == over.id)?.status;
-      
-      console.log(active, over);
-      console.log(`activeColumn ${activeColumn} overColumn ${overColumn} `)
+      let overColumn = '';
+      if(over.id.toString().includes('container')) {
+        overColumn = over.id.toString().replace('container-', '');
+      } else {
+        overColumn = filteredTasks.find(task => task.id == over.id)?.status || '';
+      }
+      console.log('activeColumn', activeColumn);
+      console.log('overColumn', overColumn);
       if(!activeColumn || !overColumn) {
         return;
       }
@@ -85,18 +94,17 @@ const TaskBoardPage = () => {
       const taskId = active.id.toString();
   
       try {
-        // Dispatch the action and await the result with `unwrap`
         await dispatch(updateTaskStatusAsync({ id: taskId, status: newStatus })).unwrap();
-        
-        // If successful, optimistically update the UI
-        filteredTasks = arrayMove(filteredTasks, oldIndex, newIndex);
-  
+        // filteredTasks = arrayMove(filteredTasks, oldIndex, newIndex);
         showSnackbar('Task moved successfully', 'success');
       } catch (error: any) {
-        // If the update fails, show an error message
         showSnackbar(`Failed to move task`, 'error');
       }
     }
+  };
+
+  const handleDragOver = async (event: DragOverEvent) => {
+    // console.log("dragover", event, event.over?.id);
   };
 
   const SortableTaskCard = ({ task }: { task: Task }) => {
@@ -127,56 +135,81 @@ const TaskBoardPage = () => {
     );
   };
 
-  const taskColumnRefs = taskStatuses.reduce((acc, status) => {
-    acc[status] = useDroppable({ id: status });
-    return acc;
-  }, {} as Record<string, ReturnType<typeof useDroppable>>);
+  const SortableContainer = ({ status }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+      id: `container-${status}`,
+    });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      background: 'red',
+    };
+
+    return (
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      </div>
+    );
+  };
+
+  let taskColumnRefs = {};
+  statusColumns.forEach(status => {
+    taskColumnRefs[status] = {
+      droppable: useDroppable({ id: status }),
+      sortable: useDroppable({ id: `sortable-${status}` })
+    };
+  });
 
   const renderTaskColumns = (status: string) => {
     const title = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
     const tasksByStatus = filteredTasks.filter(task => task.status === status);
-    const { setNodeRef } = taskColumnRefs[status];
-  
+    const { isOver, setNodeRef } = taskColumnRefs[status].droppable;
+
     return (
       <SortableContext
         items={tasksByStatus.map(task => task.id)}
         strategy={rectSortingStrategy}
       >
-      <Box
-        key={status}
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          margin: '0 8px',
-          height: '100%',
-        }}
-      >
-        <Paper
+        <Box
+          key={status}
           sx={{
-            padding: 1,
+            flex: 1,
+            minWidth: 0,
             display: 'flex',
             flexDirection: 'column',
+            margin: '0 8px',
             height: '100%',
           }}
         >
-          <Typography variant="h6" sx={{ textAlign: 'center', marginBottom: '16px' }}>
-            {title}
-          </Typography>
+          <Paper
+            ref={setNodeRef}
+            sx={{
+              padding: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              borderRadius: '6px',
+              border: isOver ? '1px solid blue' : '1px solid #777',
+            }}
+          >
+            <Typography variant="h6" sx={{ textAlign: 'center', marginBottom: '16px' }}>
+              {title}
+            </Typography>
             <Box
-              ref={setNodeRef}
               sx={{
                 flex: 1,
                 overflowY: 'auto',
+                position: 'relative',
+                display: 'block'
               }}
             >
+              <SortableContainer status={status}></SortableContainer>
               {tasksByStatus.map(task => (
-                <SortableTaskCard key={task.id} task={task} />
+                <SortableTaskCard task={task} />
               ))}
             </Box>
-        </Paper>
-      </Box>
+          </Paper>
+        </Box>
       </SortableContext>
     );
   };
@@ -196,20 +229,25 @@ const TaskBoardPage = () => {
       {fetchStatus === 'idle' && <Typography>No tasks available</Typography>}
       {fetchStatus === 'failed' && <Alert severity="error">{fetchError}</Alert>}
       {fetchStatus === 'succeeded' && (
-        <DndContext collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragOver={handleDragOver}>
           <Box
             sx={{
+              width: '100%',
               display: 'flex',
-              height: 'calc(100vh - 64px)', // Adjust for any fixed position elements like Fab
+              height: 'calc(100vh - 64px)',
               overflow: 'hidden',
             }}
           >
-            {taskStatuses.map(status => renderTaskColumns(status))}
+            {statusColumns.map(status => renderTaskColumns(status))}
           </Box>
           <DragOverlay>
             {draggingTask && (
               <TaskCard
-                key={draggingTask.id}
                 task={draggingTask}
                 showSnackbar={showSnackbar}
               />
