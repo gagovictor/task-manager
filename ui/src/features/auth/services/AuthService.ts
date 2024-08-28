@@ -36,6 +36,6 @@ export interface SignupResponse {
 }
 
 export const signup = async (request: SignupRequest): Promise<SignupResponse> => {
-const response = await axios.post(`${API_BASE_URL}/signup`, request);
-return response.data;
+  const response = await axios.post(`${API_BASE_URL}/signup`, request);
+  return response.data;
 };

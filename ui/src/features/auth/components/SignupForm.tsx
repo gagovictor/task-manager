@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../redux/store';
-import { signupUser } from '../redux/authSlice';
+import { AppDispatch } from '../../../redux/store';
+import { AuthState, signupUser } from '../redux/authSlice';
 import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert } from '@mui/material';
 import { SignupRequest } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
@@ -10,34 +10,29 @@ const SignupForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  // State for form fields
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // State for Snackbar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-
-  // Error message to display
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const authStatus = useSelector((state: RootState) => state.auth.status);
+  const authStatus = useSelector((state: AuthState) => state.status);
   
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setErrorMessage(null); // Reset error message on form submit
+    setErrorMessage(null);
 
-    // Copy email to username
+    // User does not input username directly. Instead, copy email to username
     const username = email;
 
     try {
       const request: SignupRequest = { username, email, password };
       await dispatch(signupUser(request)).unwrap();
-      navigate('/tasks'); // Redirect on successful registration
+      navigate('/tasks');
     } catch (error) {
       console.error('Signup failed', error);
       setErrorMessage('Signup failed. Please check your details.');
-      setSnackbarOpen(true); // Open the Snackbar on error
+      setSnackbarOpen(true);
     }
   };
 
@@ -46,7 +41,7 @@ const SignupForm: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container maxWidth="xs">
       <Paper elevation={3} sx={{ padding: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography variant="h5" gutterBottom>

@@ -17,7 +17,7 @@ export default function SignupPage() {
                 paddingBottom: 8,
             }}
         >
-            <SignupForm />
+            <SignupForm/>
         </Container>
     );
 }

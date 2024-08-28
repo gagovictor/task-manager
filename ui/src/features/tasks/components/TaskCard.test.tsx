@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { act } from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TaskCard from './TaskCard';
@@ -54,34 +54,38 @@ describe('TaskCard', () => {
     expect(mockOnEdit).toHaveBeenCalledWith(mockTask);
   });
 
+  it('calls onEdit when edit button is clicked', () => {
+    renderComponent();
+
+    userEvent.click(screen.getByTestId('edit-task-btn'));
+
+    expect(mockOnEdit).toHaveBeenCalledWith(mockTask);
+  });
+
   it('calls handleArchive when archive button is clicked', async () => {
     const mockArchivedTask = { ...mockTask, archivedAt: null };
     renderComponent(mockArchivedTask);
-
-    const archiveButton = screen.getByTitle(/Archive Task/i);
-    userEvent.click(archiveButton);
-
-    expect(mockShowSnackbar).not.toHaveBeenCalled();
-    // Handle further assertions once the task has been archived
+  
+    await act(async () => {
+      userEvent.click(screen.getByTestId('archive-task-btn'));
+      expect(mockShowSnackbar).not.toHaveBeenCalled();
+    });
+  
   });
 
   it('calls handleUnarchive when unarchive button is clicked', async () => {
     const mockUnarchivedTask = { ...mockTask, archivedAt: new Date().toISOString() };
     renderComponent(mockUnarchivedTask);
 
-    const unarchiveButton = screen.getByTitle(/Unarchive Task/i);
-    userEvent.click(unarchiveButton);
+    userEvent.click(screen.getByTestId('unarchive-task-btn'));
 
     expect(mockShowSnackbar).not.toHaveBeenCalled();
-    // Handle further assertions once the task has been unarchived
   });
 
   it('calls setOpenConfirm when delete button is clicked', async () => {
     renderComponent();
 
-    const deleteButton = screen.getByTitle(/Delete Task/i);
-    userEvent.click(deleteButton);
-
+    userEvent.click(screen.getByTestId('delete-task-btn'));
 
     expect(screen.getByText(/Confirm Delete/i)).toBeInTheDocument();
   });
@@ -89,10 +93,8 @@ describe('TaskCard', () => {
   it('calls handleDelete when delete is confirmed', async () => {
     renderComponent();
 
-    userEvent.click(screen.getByLabelText(/Delete Task/i));
-    userEvent.click(screen.getByText(/Delete/i));
+    userEvent.click(screen.getByTestId('delete-task-btn'));
 
     expect(mockShowSnackbar).not.toHaveBeenCalled();
-    // Handle further assertions once the task has been deleted
   });
 });

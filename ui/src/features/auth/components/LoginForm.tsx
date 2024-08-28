@@ -38,7 +38,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container maxWidth="xs">
       <Paper elevation={3} sx={{ padding: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography variant="h5" gutterBottom>

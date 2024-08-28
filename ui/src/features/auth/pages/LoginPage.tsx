@@ -17,7 +17,7 @@ export default function LoginPage() {
                 paddingBottom: 8,
             }}
         >
-            <LoginForm />
+            <LoginForm/>
         </Container>
     );
 }

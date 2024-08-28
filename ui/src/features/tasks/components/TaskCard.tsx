@@ -142,25 +142,37 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
         </CardContent>
         <CardActions>
           <Tooltip title="Edit Task">
-            <Button size="small" onClick={(event) => handleButtonClick(event, () => { if(onEdit) onEdit(task); })}>
+            <Button
+              size="small"
+              onClick={(event) => handleButtonClick(event, () => { if(onEdit) onEdit(task); })}
+              data-testid="edit-task-btn">
               <EditIcon />
             </Button>
           </Tooltip>
           {task.archivedAt ? (
             <Tooltip title="Unarchive Task">
-              <Button size="small" onClick={(event) => handleButtonClick(event, handleUnarchive)}>
+              <Button
+                size="small"
+                onClick={(event) => handleButtonClick(event, handleUnarchive)}
+                data-testid="unarchive-task-btn">
                 <UnarchiveIcon />
               </Button>
             </Tooltip>
           ) : (
             <Tooltip title="Archive Task">
-              <Button size="small" onClick={(event) => handleButtonClick(event, handleArchive)} disabled={archiving}>
+              <Button
+                size="small"
+                onClick={(event) => handleButtonClick(event, handleArchive)} disabled={archiving}
+                data-testid="archive-task-btn">
                 <ArchiveIcon />
               </Button>
             </Tooltip>
           )}
           <Tooltip title="Delete Task">
-            <Button size="small" onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}>
+            <Button
+              size="small"
+              onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}
+              data-testid="delete-task-btn">
               <DeleteIcon />
             </Button>
           </Tooltip>
