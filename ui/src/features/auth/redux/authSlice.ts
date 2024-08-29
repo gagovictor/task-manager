@@ -21,22 +21,6 @@ export const initialState: AuthState = {
   error: null,
 };
 
-export const loginUser = createAsyncThunk<LoginResponse, LoginRequest>(
-  'auth/loginUser',
-  async (loginRequest) => {
-    const response = await login(loginRequest);
-    return response;
-  }
-);
-
-export const signupUser = createAsyncThunk<SignupResponse, SignupRequest>(
-  'auth/signupUser',
-  async (signupRequest) => {
-    const response = await signup(signupRequest);
-    return response;
-  }
-);
-
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -81,5 +65,23 @@ const authSlice = createSlice({
   },
 });
 
+export const loginUser = createAsyncThunk<LoginResponse, LoginRequest>(
+  'auth/loginUser',
+  async (loginRequest) => {
+    const response = await login(loginRequest);
+    return response;
+  }
+);
+
+export const signupUser = createAsyncThunk<SignupResponse, SignupRequest>(
+  'auth/signupUser',
+  async (signupRequest) => {
+    const response = await signup(signupRequest);
+    return response;
+  }
+);
+
 export const { logout } = authSlice.actions;
-export default authSlice.reducer;
+export const authReducer = authSlice.reducer;
+export default authSlice;
+

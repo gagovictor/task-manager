@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../../redux/store';
+import { AppDispatch } from '../../../store';
 import { createTaskAsync } from '../redux/tasksSlice';
 import { taskStatuses } from '../models/task';
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../../redux/store';
+import { AppDispatch } from '../../../store';
 import { updateTaskAsync } from '../redux/tasksSlice';
 import { Task, taskStatuses } from '../models/task';
 import { format, toZonedTime } from 'date-fns-tz';

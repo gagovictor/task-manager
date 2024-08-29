@@ -1,10 +1,10 @@
 import React from 'react';
-import { getAllByText, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import SignupPage from './SignupPage';
-import store from '../../../redux/store';
+import store from '../../../store';
 
 describe('SignupPage', () => {
     const renderWithProviders = (component: React.ReactElement) => {

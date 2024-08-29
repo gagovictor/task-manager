@@ -1,22 +1,28 @@
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './features/auth/redux/authSlice';
-import tasksReducer from './features/tasks/redux/tasksSlice';
-import { initialState as tasksState } from './features/tasks/redux/tasksSlice';
-import { initialState as authState } from './features/auth/redux/authSlice';
+import { combineSlices, configureStore } from '@reduxjs/toolkit';
+import tasksSlice, { TasksState, initialState as tasksState } from './features/tasks/redux/tasksSlice';
+import authSlice, { AuthState, initialState as authState } from './features/auth/redux/authSlice';
 
-const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    tasks: tasksReducer,
-  },
-});
+export const rootReducer = combineSlices(authSlice, tasksSlice);
 
 export const initialState = {
   auth: authState,
   tasks: tasksState
 };
 
-export type RootState = ReturnType<typeof store.getState>;
+export function setupStore(preloadedState?: Partial<RootState>) {
+  return configureStore({
+    reducer: rootReducer,
+    preloadedState
+  })
+}
+
+export type RootState = {
+  auth: AuthState;
+  tasks: TasksState;
+};
+
 export type AppDispatch = typeof store.dispatch;
+
+const store = setupStore(initialState);
 
 export default store;

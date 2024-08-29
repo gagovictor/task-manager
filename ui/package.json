@@ -38,7 +38,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --watchAll --coverage",
+    "test": "react-scripts test --watchAll --coverage --transformIgnorePatterns \"node_modules/(?!msw)/\"",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -69,7 +69,8 @@
       }
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!(axios)/)"
+      "/node_modules/(?!(axios)/)",
+      "node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)"
     ]
   },
   "devDependencies": {
@@ -78,6 +79,7 @@
     "@types/redux-thunk": "^2.1.0",
     "babel-jest": "^29.7.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "msw": "^2.4.0",
     "prettier": "^3.3.3",
     "redux-mock-store": "^1.5.4"
   }

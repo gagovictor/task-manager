@@ -1,36 +1,30 @@
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
-import configureStore from 'redux-mock-store';
-import { loginUser } from '../redux/authSlice';
 import LoginForm from './LoginForm';
 import userEvent from "@testing-library/user-event";
-import { initialState, RootState } from '../../../store';
-import { render, waitFor, screen } from '@testing-library/react';
+import { initialState, setupStore } from '../../../store';
+import { render, screen } from '@testing-library/react';
 
-const mockStore = configureStore<RootState>([]);
+// const mockDispatch = jest.fn();
 
-const mockDispatch = jest.fn();
+// jest.mock('react-redux', () => ({
+//     ...jest.requireActual('react-redux'),
+//     useDispatch: () => mockDispatch,
+// }));
 
-
-jest.mock('react-redux', () => ({
-    ...jest.requireActual('react-redux'),
-    useDispatch: () => mockDispatch,
-}));
-
-jest.mock('../redux/authSlice', () => ({
-    ...jest.requireActual('../redux/authSlice'),
-    loginUser: jest.fn().mockImplementation(() => async () => {
-        return { data: 'mocked data', unwrap: () => Promise.resolve({ data: {} }) }; // Ensure unwrap exists and returns a promise
-    }),
-}));
+// jest.mock('../redux/authSlice', () => ({
+//     ...jest.requireActual('../redux/authSlice'),
+//     loginUser: jest.fn().mockImplementation(() => async () => {
+//         return { data: 'mocked data', unwrap: () => Promise.resolve({ data: {} }) }; // Ensure unwrap exists and returns a promise
+//     }),
+// }));
 
 describe('LoginForm component', () => {
-    const renderWithProviders = (store: any) =>
-        render(
+    const renderWithProviders = (store: any) => render(
         <Provider store={store}>
-        <Router>
-        <LoginForm />
-        </Router>
+            <Router>
+                <LoginForm />
+            </Router>
         </Provider>
     );
     
@@ -43,13 +37,7 @@ describe('LoginForm component', () => {
     };
     
     it('should render the login form', async () => {
-        const store = mockStore({
-            ...initialState,
-            auth: {
-                ...initialState.auth,
-                status: 'idle'
-            },
-        });
+        const store = setupStore(initialState);
         
         renderWithProviders(store);
         
@@ -59,7 +47,7 @@ describe('LoginForm component', () => {
     });
     
     // it('should dispatch loginUser action when form is submitted', async () => {
-    //     const store = mockStore({
+    //     const store = setupStore({
     //         ...initialState,
     //         auth: {
     //             ...initialState.auth,
@@ -77,7 +65,7 @@ describe('LoginForm component', () => {
     // });
     
     // it('should show loading state when login is in progress', async() => {
-    //     const store = mockStore({
+    //     const store = setupStore({
     //         ...initialState,
     //         auth: {
     //             ...initialState.auth,
@@ -91,7 +79,7 @@ describe('LoginForm component', () => {
     // });
     
     // it('should display error message on login failure', async () => {
-    //     const store = mockStore({
+    //     const store = setupStore({
     //         ...initialState,
     //         auth: {
     //             ...initialState.auth,
@@ -117,7 +105,7 @@ describe('LoginForm component', () => {
     // });
     
     // it('should close the Snackbar when the close button is clicked', async () => {
-    //     const store = mockStore({
+    //     const store = setupStore({
     //         ...initialState,
     //         auth: {
     //             ...initialState.auth,

@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import LoginPage from './LoginPage';
-import store from '../../../redux/store';
+import store from '../../../store';
 
 describe('LoginPage', () => {
     const renderWithProviders = (component: React.ReactElement) => {

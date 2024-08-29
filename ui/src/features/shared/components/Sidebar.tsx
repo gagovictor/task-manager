@@ -16,7 +16,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../redux/store';
+import { RootState } from '../../../store';
 import { logout } from '../../../features/auth/redux/authSlice';
 
 export default function Sidebar() {

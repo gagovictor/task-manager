@@ -1,13 +1,6 @@
-import authReducer, { loginUser, signupUser, logout, initialState, AuthState } from './authSlice';
+import { authReducer, loginUser, signupUser, logout, initialState, AuthState } from './authSlice';
 import { AnyAction } from 'redux';
 import { LoginResponse, SignupResponse } from '../services/AuthService';
-import { configureStore } from '@reduxjs/toolkit';
-import { thunk } from 'redux-thunk';
-
-const store = configureStore({
-    reducer: authReducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
-});
 
 describe('authSlice', () => {
   beforeEach(() => {

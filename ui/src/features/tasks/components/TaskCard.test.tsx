@@ -1,12 +1,12 @@
-import React, { act } from 'react';
+import { act } from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TaskCard from './TaskCard';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import tasksReducer from '../redux/tasksSlice';
 import userEvent from '@testing-library/user-event';
 import { Task } from '../models/task';
+import { tasksReducer } from '../redux/tasksSlice';
 
 const mockTask: Task = {
   id: '1',

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../redux/store';
+import { AppDispatch, RootState } from '../../../store';
 import { fetchTasksAsync, reorderTasksLocally, updateTaskStatusAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -33,7 +33,7 @@ const TaskBoardPage = () => {
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [draggingTask, setDraggingTask] = useState<Task | null>(null);
   const statusColumns = ['new', 'active', 'completed'];
-
+  
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -42,9 +42,9 @@ const TaskBoardPage = () => {
     })
   );
 
-    useEffect(() => {
-      setFilteredTasks(tasks.filter((task: Task) => !task.archivedAt));
-    }, [tasks]);
+  useEffect(() => {
+    setFilteredTasks(tasks.filter((task: Task) => !task.archivedAt));
+  }, [tasks]);
 
   useEffect(() => {
     dispatch(fetchTasksAsync());

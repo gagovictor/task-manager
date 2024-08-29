@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppBar, Box, Toolbar, Typography, Button } from '@mui/material';
 import Sidebar from './Sidebar';
-import { RootState } from '../../../redux/store';
+import { RootState } from '../../../store';
 import { logout } from '../../../features/auth/redux/authSlice';
 
 export default function Header() {

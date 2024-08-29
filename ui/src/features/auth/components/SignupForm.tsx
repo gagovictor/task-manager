@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '../../../redux/store';
-import { AuthState, signupUser } from '../redux/authSlice';
+import { AppDispatch, RootState } from '../../../store';
+import { signupUser } from '../redux/authSlice';
 import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert } from '@mui/material';
 import { SignupRequest } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
@@ -15,15 +15,14 @@ const SignupForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const authStatus = useSelector((state: AuthState) => state.status);
+  const authStatus = useSelector((state: RootState) => { return state.auth.status });
   
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setErrorMessage(null);
 
     // User does not input username directly. Instead, copy email to username
-    const username = email;
+    setUsername(email);
 
     try {
       const request: SignupRequest = { username, email, password };

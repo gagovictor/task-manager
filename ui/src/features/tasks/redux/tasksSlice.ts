@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, unarchiveTask, updateTask, UpdateTaskRequest, updateTaskStatus } from '../services/TaskService';
-import { RootState } from '../../../redux/store';
+import { RootState } from '../../../store';
 import { Task } from '../models/task';
 
 export interface TasksState {
@@ -30,111 +30,6 @@ export const initialState: TasksState = {
   archiveStatus: 'idle',
   archiveError: null,
 };
-
-export const fetchTasksAsync = createAsyncThunk(
-  'tasks/fetchTasks',
-  async (_, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const token = state.auth.token;
-
-    try {
-      const response = await fetchTasks(token);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const createTaskAsync = createAsyncThunk(
-  'tasks/createTaskAsync',
-  async (task: CreateTaskRequest, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const token = state.auth.token;
-
-    try {
-      const response = await createTask(task, token);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const updateTaskAsync = createAsyncThunk(
-  'tasks/updateTaskAsync',
-  async (task: UpdateTaskRequest, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const token = state.auth.token;
-
-    try {
-      const response = await updateTask(task, token);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const deleteTaskAsync = createAsyncThunk(
-  'tasks/deleteTaskAsync',
-  async (taskId: string, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const token = state.auth.token;
-
-    try {
-      await deleteTask(taskId, token);
-      return taskId;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const archiveTaskAsync = createAsyncThunk(
-  'tasks/archiveTaskAsync',
-  async (taskId: string, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const token = state.auth.token;
-
-    try {
-      await archiveTask(taskId, token);
-      return taskId;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const unarchiveTaskAsync = createAsyncThunk(
-  'tasks/unarchiveTaskAsync',
-  async (taskId: string, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const token = state.auth.token;
-
-    try {
-      await unarchiveTask(taskId, token);
-      return taskId;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const updateTaskStatusAsync = createAsyncThunk(
-  'tasks/updateTaskStatusAsync',
-  async ({ id, status }: { id: string, status: string }, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const token = state.auth.token;
-
-    try {
-      const response = await updateTaskStatus({ id, status } as UpdateTaskRequest, token);
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
 
 const tasksSlice = createSlice({
   name: 'tasks',
@@ -257,6 +152,111 @@ const tasksSlice = createSlice({
   },
 });
 
-export const { reorderTasksLocally } = tasksSlice.actions;
+export const fetchTasksAsync = createAsyncThunk(
+  'tasks/fetchTasks',
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
 
-export default tasksSlice.reducer;
+    try {
+      const response = await fetchTasks(token);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const createTaskAsync = createAsyncThunk(
+  'tasks/createTaskAsync',
+  async (task: CreateTaskRequest, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      const response = await createTask(task, token);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateTaskAsync = createAsyncThunk(
+  'tasks/updateTaskAsync',
+  async (task: UpdateTaskRequest, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      const response = await updateTask(task, token);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const deleteTaskAsync = createAsyncThunk(
+  'tasks/deleteTaskAsync',
+  async (taskId: string, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      await deleteTask(taskId, token);
+      return taskId;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const archiveTaskAsync = createAsyncThunk(
+  'tasks/archiveTaskAsync',
+  async (taskId: string, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      await archiveTask(taskId, token);
+      return taskId;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const unarchiveTaskAsync = createAsyncThunk(
+  'tasks/unarchiveTaskAsync',
+  async (taskId: string, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      await unarchiveTask(taskId, token);
+      return taskId;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateTaskStatusAsync = createAsyncThunk(
+  'tasks/updateTaskStatusAsync',
+  async ({ id, status }: { id: string, status: string }, { getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const token = state.auth.token;
+
+    try {
+      const response = await updateTaskStatus({ id, status } as UpdateTaskRequest, token);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const { reorderTasksLocally } = tasksSlice.actions;
+export const tasksReducer = tasksSlice.reducer;
+export default tasksSlice;

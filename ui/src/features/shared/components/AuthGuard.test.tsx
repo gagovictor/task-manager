@@ -1,14 +1,9 @@
-import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import configureStore from 'redux-mock-store';
 import AuthGuard from './AuthGuard';
-import { RootState } from '../../../redux/store';
-import { initialState } from '../../../store';
-
-const mockStore = configureStore<RootState>([]);
+import { initialState, setupStore } from '../../../store';
 
 describe('AuthGuard component', () => {
   const renderWithProviders = (store: any, initialRoute: string = '/') =>
@@ -27,7 +22,7 @@ describe('AuthGuard component', () => {
     );
 
   it('should render protected content when authenticated', () => {
-    const store = mockStore({
+    const store = setupStore({
       ...initialState,
       auth: {
         ...initialState.auth,
@@ -41,7 +36,7 @@ describe('AuthGuard component', () => {
   });
 
   it('should redirect to login when not authenticated', () => {
-    const store = mockStore({
+    const store = setupStore({
       ...initialState,
       auth: {
         ...initialState.auth,
@@ -55,7 +50,7 @@ describe('AuthGuard component', () => {
   });
 
   it('should redirect to the specified path when not authenticated', () => {
-    const store = mockStore({
+    const store = setupStore({
       ...initialState,
       auth: {
         ...initialState.auth,
