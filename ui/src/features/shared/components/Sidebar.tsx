@@ -42,14 +42,14 @@ export default function Sidebar() {
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
         {[
-          { text: 'Board', icon: <DashboardIcon />, route: '/board' },
           { text: 'Tasks', icon: <TaskIcon />, route: '/tasks' },
           { text: 'Archived', icon: <ArchiveIcon />, route: '/archived' },
+          { text: 'Board', icon: <DashboardIcon />, route: '/board', experimental: true },
         ].map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton onClick={() => navigate(item.route)}>
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemText primary={item.text} secondary={item.experimental ? 'Beta' : ''} />
             </ListItemButton>
           </ListItem>
         ))}
