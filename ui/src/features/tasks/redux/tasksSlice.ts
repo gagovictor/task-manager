@@ -45,6 +45,7 @@ const tasksSlice = createSlice({
     builder
       .addCase(fetchTasksAsync.pending, (state) => {
         state.fetchStatus = 'loading';
+        state.fetchError = null;
       })
       .addCase(fetchTasksAsync.fulfilled, (state, action: PayloadAction<Task[]>) => {
         state.fetchStatus = 'succeeded';

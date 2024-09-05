@@ -27,7 +27,6 @@ const LoginForm: React.FC = () => {
       await dispatch(loginUser(request)).unwrap();
       navigate('/tasks');
     } catch (error) {
-      console.error('Login failed', error);
       setErrorMessage('Login failed. Please check your username and password.');
       setSnackbarOpen(true);
     }
@@ -100,8 +99,13 @@ const LoginForm: React.FC = () => {
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        data-testid="snackbar"
       >
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: '100%' }}
+          data-testid="alert">
           {errorMessage}
         </Alert>
       </Snackbar>

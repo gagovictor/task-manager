@@ -2,7 +2,7 @@ export interface Task {
   id: string; // UUID
   title: string;
   description: string;
-  dueDate?: string;
+  dueDate: string|null;
   status: string/*TaskStatus*/;
   userId: string;
   archivedAt: string|null;

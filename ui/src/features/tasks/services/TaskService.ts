@@ -12,7 +12,7 @@ export const fetchTasks = async (token: string) => {
 export interface CreateTaskRequest {
     title: string;
     description: string;
-    dueDate: string;
+    dueDate: string|null;
     status:  string/*TaskStatus*/;
 }
 
@@ -30,7 +30,7 @@ export interface UpdateTaskRequest {
     id: string;
     title: string;
     description: string;
-    dueDate: string;
+    dueDate: string|null;
     status:  string/*TaskStatus*/;
 }
 

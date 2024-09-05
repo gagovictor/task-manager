@@ -31,8 +31,6 @@ interface TaskCardProps {
 export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [openConfirm, setOpenConfirm] = React.useState(false);
-  const [archiving, setArchiving] = useState(false);
-
   const { deleteStatus, deleteError, archiveStatus, archiveError } = useSelector((state: RootState) => state.tasks);
 
   const handleCloseConfirm = () => setOpenConfirm(false);
@@ -47,14 +45,11 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
   };
 
   const handleArchive = async () => {
-    setArchiving(true);
     try {
       await dispatch(archiveTaskAsync(task.id)).unwrap();
       showSnackbar('Task archived successfully', 'success', () => handleUnarchive());
     } catch (error) {
       showSnackbar(archiveError || 'Failed to archive task', 'error');
-    } finally {
-      setArchiving(false);
     }
   };
 
@@ -142,39 +137,50 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
         </CardContent>
         <CardActions>
           <Tooltip title="Edit Task">
-            <Button
-              size="small"
-              onClick={(event) => handleButtonClick(event, () => { if(onEdit) onEdit(task); })}
-              data-testid="edit-task-btn">
-              <EditIcon />
-            </Button>
+            <span>
+              <Button
+                size="small"
+                onClick={(event) => handleButtonClick(event, () => { if(onEdit) onEdit(task); })}
+                data-testid="edit-task-btn">
+                <EditIcon />
+              </Button>
+            </span>
           </Tooltip>
           {task.archivedAt ? (
             <Tooltip title="Unarchive Task">
-              <Button
-                size="small"
-                onClick={(event) => handleButtonClick(event, handleUnarchive)}
-                data-testid="unarchive-task-btn">
-                <UnarchiveIcon />
-              </Button>
+              <span>
+                <Button
+                  size="small"
+                  onClick={(event) => handleButtonClick(event, handleUnarchive)}
+                  disabled={archiveStatus === 'loading'}
+                  data-testid="unarchive-task-btn">
+                  <UnarchiveIcon />
+                </Button>
+              </span>
             </Tooltip>
           ) : (
             <Tooltip title="Archive Task">
-              <Button
-                size="small"
-                onClick={(event) => handleButtonClick(event, handleArchive)} disabled={archiving}
-                data-testid="archive-task-btn">
-                <ArchiveIcon />
-              </Button>
+              <span>
+                <Button
+                  size="small"
+                  onClick={(event) => handleButtonClick(event, handleArchive)}
+                  disabled={archiveStatus === 'loading'}
+                  data-testid="archive-task-btn">
+                  <ArchiveIcon />
+                </Button>
+              </span>
             </Tooltip>
           )}
           <Tooltip title="Delete Task">
-            <Button
-              size="small"
-              onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}
-              data-testid="delete-task-btn">
-              <DeleteIcon />
-            </Button>
+            <span>
+              <Button
+                size="small"
+                onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}
+                disabled={deleteStatus === 'loading'}
+                data-testid="delete-task-btn">
+                <DeleteIcon />
+              </Button>
+            </span>
           </Tooltip>
         </CardActions>
       </Card>

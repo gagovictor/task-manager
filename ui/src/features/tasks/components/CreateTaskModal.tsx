@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../store';
 import { createTaskAsync } from '../redux/tasksSlice';
 import { taskStatuses } from '../models/task';
 
@@ -18,21 +18,19 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
   const [time, setTime] = useState('');
   const [status, setStatus] = useState(taskStatuses[0]);
   const dispatch = useDispatch<AppDispatch>();
+  const { createStatus } = useSelector((state: RootState) => state.tasks);
 
   const handleCreate = async () => {
     if (title) {
       let dueDate = '';
       if (date || time) {
-        // Use today's date if no date is provided
         const finalDate = date || new Date().toISOString().split('T')[0];
-        // Set time or default to '00:00:00'
         const finalTime = time || '00:00:00';
         const localDateTime = new Date(`${finalDate}T${finalTime}`);
         dueDate = localDateTime.toISOString();
       }
       try {
         await dispatch(createTaskAsync({ title, description, dueDate, status })).unwrap();
-        // Reset form fields on success
         setTitle('');
         setDescription('');
         setDate('');
@@ -64,6 +62,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             top: 8,
             right: 8
           }}
+          aria-label="Close"
         >
           <CloseIcon />
         </IconButton>
@@ -77,6 +76,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           variant="outlined"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          required
         />
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
           <TextField
@@ -130,6 +130,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           color="primary"
           sx={{ mt: 2 }}
           onClick={handleCreate}
+          disabled={createStatus != 'idle'}
         >
           Create
         </Button>

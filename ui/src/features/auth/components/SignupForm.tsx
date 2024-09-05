@@ -10,7 +10,6 @@ const SignupForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -21,15 +20,12 @@ const SignupForm: React.FC = () => {
     event.preventDefault();
     setErrorMessage(null);
 
-    // User does not input username directly. Instead, copy email to username
-    setUsername(email);
-
     try {
-      const request: SignupRequest = { username, email, password };
+      // User does not input username directly. Instead, copy email to username
+      const request: SignupRequest = { username: email, email, password };
       await dispatch(signupUser(request)).unwrap();
       navigate('/tasks');
     } catch (error) {
-      console.error('Signup failed', error);
       setErrorMessage('Signup failed. Please check your details.');
       setSnackbarOpen(true);
     }
@@ -59,6 +55,7 @@ const SignupForm: React.FC = () => {
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              inputProps={{ "data-testid": "input-username" }}
             />
             <TextField
               variant="outlined"
@@ -72,6 +69,7 @@ const SignupForm: React.FC = () => {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              inputProps={{ "data-testid": "input-password" }}
             />
             <Button
               type="submit"
@@ -80,6 +78,7 @@ const SignupForm: React.FC = () => {
               color="primary"
               sx={{ mt: 2 }}
               disabled={authStatus === 'loading'}
+              data-testid="submit"
             >
               Sign Up
             </Button>
@@ -91,8 +90,13 @@ const SignupForm: React.FC = () => {
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        data-testid="snackbar"
       >
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: '100%' }}
+          data-testid="alert">
           {errorMessage}
         </Alert>
       </Snackbar>

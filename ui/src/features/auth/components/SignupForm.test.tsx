@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import SignupForm from './SignupForm';
@@ -6,12 +6,16 @@ import { setupStore } from '../../../store';
 import { initialState } from '../../../store';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import { SignupRequest, SignupResponse } from '../services/AuthService';
+import { User } from '../models/user';
+import API_BASE_URL from '../../shared/config/apiConfig';
+import userEvent from '@testing-library/user-event';
 
-// const mockNavigate = jest.fn();
-// jest.mock('react-router-dom', () => ({
-//     ...jest.requireActual('react-router-dom'),
-//     useNavigate: () => mockNavigate,
-// }));
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
+    useNavigate: () => mockNavigate,
+}));
 
 describe('SignupForm', () => {
     const renderWithProviders = (store: any) => render(
@@ -21,12 +25,27 @@ describe('SignupForm', () => {
             </MemoryRouter>
         </Provider>
     );
-
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
     
-    test('renders the signup form with email and password fields', () => {
+    const mockUser: User = {
+        id: 'userId',
+        email: 'test@example.com',
+        username: 'test@example.com'
+    };
+    
+    const submitForm = async (request: SignupRequest) => {
+        await act(async () => {
+            fireEvent.change(screen.getByLabelText(/Email Address/i), {
+                target: { value: request.username },
+            });
+            fireEvent.change(screen.getByLabelText(/Password/i), {
+                target: { value: request.password },
+            });
+            fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
+
+        });
+    };
+    
+    it('should render the signup form with email and password fields', () => {
         const store = setupStore();
         renderWithProviders(store);
         
@@ -35,22 +54,7 @@ describe('SignupForm', () => {
         expect(screen.getByRole('button', { name: /Sign Up/i })).toBeInTheDocument();
     });
     
-    test('allows the user to fill out the form', () => {
-        const store = setupStore();
-        renderWithProviders(store);
-
-        fireEvent.change(screen.getByLabelText(/Email Address/i), {
-            target: { value: 'test@example.com' },
-        });
-        fireEvent.change(screen.getByLabelText(/Password/i), {
-            target: { value: 'password123' },
-        });
-        
-        expect(screen.getByLabelText(/Email Address/i)).toHaveValue('test@example.com');
-        expect(screen.getByLabelText(/Password/i)).toHaveValue('password123');
-    });
-    
-    test('disables the signup button when auth status is loading', () => {
+    it('should disable the signup button when auth status is loading', () => {
         const store = setupStore({
             ...initialState,
             auth: {
@@ -64,27 +68,85 @@ describe('SignupForm', () => {
         expect(signUpButton).toBeDisabled();
     });
     
-    test('displays an error message when signup fails', async () => {
-        // const server = setupServer(
-        //     http.post('/api/signup', () => {
-        //         return new Response(null, {
-        //           status: 400,
-        //         })
-        //     })
-        // );
-        // server.listen();
-        const server = setupServer(
-            http.get('https://example.com/user', () => {
-              // ...and respond to them using this JSON response.
-              return HttpResponse.json({
-                id: 'c7b3d8e0-5e0b-4b0f-8b3a-3b9f4b3d3b3d',
-                firstName: 'John',
-                lastName: 'Maverick',
-              })
+    it('allows the user to fill out the form', async () => {
+        const store = setupStore();
+
+        renderWithProviders(store);
+        await submitForm({
+            username: mockUser.username,
+            email: mockUser.email,
+            password: 'password123'
+        });
+
+        await waitFor(() => {
+            expect(screen.getByLabelText(/Email Address/i)).toHaveValue(mockUser.username);
+            expect(screen.getByLabelText(/Password/i)).toHaveValue('password123');
+        });
+    });
+    
+    it('should redirect the user to /tasks on successful signup', async () => {
+        const response: SignupResponse = {
+            token: 'jwt',
+            user: mockUser
+        };
+        const handlers = [
+            http.post(`${API_BASE_URL}/signup`, () => {
+                return HttpResponse.json(response)
+            }),
+            http.options(`${API_BASE_URL}/signup`, () => {
+                return new Response(null, {
+                    status: 200,
+                    headers: {
+                        Allow: 'GET,HEAD,POST',
+                    },
+                })
             })
-        );
+        ];
+        const server = setupServer(...handlers);
         server.listen();
         
+        const store = setupStore({
+            ...initialState,
+            auth: {
+                ...initialState.auth,
+                status: 'idle',
+                error: null,
+                user: mockUser
+            }
+        });
+        renderWithProviders(store);
+        
+        await submitForm({
+            username: mockUser.username,
+            email: mockUser.email,
+            password: 'password123'
+        });
+        
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/tasks');
+        });
+        server.dispose();
+    });
+    
+    it('should display an error message on signup failure', async () => {
+        const handlers = [
+            http.post(`${API_BASE_URL}/signup`, () => {
+                return HttpResponse.json(
+                    { message: 'Signup failed.' },
+                    { status: 400 }
+                )
+            }),
+            http.options(`${API_BASE_URL}/signup`, () => {
+                return new Response(null, {
+                    status: 200,
+                    headers: {
+                        Allow: 'GET,HEAD,POST',
+                    },
+                })
+            })
+        ];
+        const server = setupServer(...handlers);
+        server.listen();
         const store = setupStore({
             ...initialState,
             auth: {
@@ -93,39 +155,27 @@ describe('SignupForm', () => {
                 error: 'Signup failed'
             }
         });
+
         renderWithProviders(store);
-
-        fireEvent.change(screen.getByLabelText(/Email Address/i), {
-            target: { value: 'test@example.com' },
+        await submitForm({
+            username: mockUser.username,
+            email: mockUser.email,
+            password: 'password123'
         });
-        fireEvent.change(screen.getByLabelText(/Password/i), {
-            target: { value: 'password123' },
-        });
-        fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
-
+        
         await waitFor(() => {
+            expect(screen.getByTestId('snackbar')).toBeInTheDocument();
+            expect(screen.getByTestId('alert')).toBeInTheDocument();
             expect(screen.getByText(/Signup failed. Please check your details./i)).toBeInTheDocument();
         });
-        expect(screen.getByRole('alert')).toBeInTheDocument();
+        
+        await act(() => userEvent.click(screen.getByLabelText('Close')));
+        
+        await waitFor(() => {
+            expect(screen.queryByTestId('snackbar')).toBeNull();
+            expect(screen.queryByTestId('alert')).toBeNull();
+            expect(screen.queryByText(/Signup failed. Please check your details./i)).toBeNull();
+        });
+        server.dispose();
     });
-    
-    // test('redirects the user to /tasks on successful signup', async () => {
-    //     (signupUser as unknown as jest.Mock).mockImplementation((dispatch) => {
-    //         dispatch({ type: 'auth/signup/fulfilled', payload: {} });
-    //     });
-    //     const store = setupStore();
-    
-    //     renderWithProviders(store);
-    //     fireEvent.change(screen.getByLabelText(/Email Address/i), {
-    //         target: { value: 'test@example.com' },
-    //     });
-    //     fireEvent.change(screen.getByLabelText(/Password/i), {
-    //         target: { value: 'password123' },
-    //     });
-    //     fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
-
-    //     await waitFor(() => {
-    //         expect(mockNavigate).toHaveBeenCalledWith('/tasks');
-    //     });
-    // });
 });

@@ -37,6 +37,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
   }, [task]);
 
   const handleUpdate = async () => {
+    console.log('handleUpdate');
     if (title) {
       let dueDate = '';
       if (date || time) {
@@ -49,6 +50,11 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
       }
       try {
         await dispatch(updateTaskAsync({ id: task.id, title, description, dueDate, status: status as string })).unwrap();
+        setTitle('');
+        setDescription('');
+        setDate('');
+        setTime('');
+        setStatus(taskStatuses[0]);
         onClose();
       } catch (error) {
       }
@@ -75,6 +81,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
             top: 8,
             right: 8
           }}
+          aria-label="Close"
         >
           <CloseIcon />
         </IconButton>
