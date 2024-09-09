@@ -1,10 +1,9 @@
 import { http } from 'msw';
 import { setupServer } from 'msw/node';
-import API_BASE_URL from '../config/apiConfig';
 import apiClient from './ApiService';
 
 const handlers = [
-    http.get(`${API_BASE_URL}/test-success`, () => {
+    http.get(`${process.env.REACT_APP_API_BASE_URL}/test-success`, () => {
         return new Response(
             JSON.stringify({ message: 'Success' }), 
             {
@@ -13,7 +12,7 @@ const handlers = [
             }
         );
     }),
-    http.get(`${API_BASE_URL}/test-unauthorized`, () => {
+    http.get(`${process.env.REACT_APP_API_BASE_URL}/test-unauthorized`, () => {
         return new Response(
             JSON.stringify({ message: 'Unauthorized' }), 
             {

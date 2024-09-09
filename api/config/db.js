@@ -1,7 +1,9 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize(process.env.POSTGRES_URL, {
+const POSTGRES_URL = `postgres://${process.env.AZURE_POSTGRESQL_USER}:${process.env.AZURE_POSTGRESQL_PASSWORD}@${process.env.AZURE_POSTGRESQL_HOST}:${process.env.AZURE_POSTGRESQL_PORT}/${process.env.AZURE_POSTGRESQL_DATABASE}?sslmode=${process.env.AZURE_POSTGRESQL_SSL === 'true' ? 'require' : 'disable'}`;
+
+const sequelize = new Sequelize(POSTGRES_URL, {
   dialect: 'postgres',
   logging: process.env.DB_QUERY_LOGGING.toLowerCase() === 'true',
 });

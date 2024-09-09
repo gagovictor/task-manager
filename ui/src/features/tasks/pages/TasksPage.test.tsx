@@ -1,9 +1,8 @@
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/lib/node';
-import API_BASE_URL from '../../shared/config/apiConfig';
 import TasksPage from './TasksPage';
 import { initialState, setupStore } from '../../../store';
 import userEvent from '@testing-library/user-event';
@@ -75,7 +74,7 @@ describe('TasksPage component', () => {
     ];
     
     const handlers = [
-        http.get(`${API_BASE_URL}/tasks`, () => {
+        http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
             return HttpResponse.json(mockTasks)
         }),
     ];
@@ -113,7 +112,7 @@ describe('TasksPage component', () => {
     
     it('renders typography and alert on failure', async () => {
         server.use(
-            http.get(`${API_BASE_URL}/tasks`, () => {
+            http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
                 return new Response(null, {
                     status: 400,
                     headers: {

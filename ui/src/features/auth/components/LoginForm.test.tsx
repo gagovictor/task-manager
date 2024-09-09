@@ -8,7 +8,6 @@ import { LoginRequest, LoginResponse, SignupRequest } from '../services/AuthServ
 import { User } from '../models/user';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/lib/node';
-import API_BASE_URL from '../../shared/config/apiConfig';
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -71,10 +70,10 @@ describe('LoginForm component', () => {
             user: mockUser
         };
         const handlers = [
-            http.post(`${API_BASE_URL}/login`, () => {
+            http.post(`${process.env.REACT_APP_API_BASE_URL}/login`, () => {
                 return HttpResponse.json(response)
             }),
-            http.options(`${API_BASE_URL}/login`, () => {
+            http.options(`${process.env.REACT_APP_API_BASE_URL}/login`, () => {
                 return new Response(null, {
                     status: 200,
                     headers: {
@@ -110,13 +109,13 @@ describe('LoginForm component', () => {
     
     it('should display error message on login failure', async () => {
         const handlers = [
-            http.post(`${API_BASE_URL}/login`, () => {
+            http.post(`${process.env.REACT_APP_API_BASE_URL}/login`, () => {
                 return HttpResponse.json(
                     { message: 'Login failed.' },
                     { status: 400 }
                 )
             }),
-            http.options(`${API_BASE_URL}/login`, () => {
+            http.options(`${process.env.REACT_APP_API_BASE_URL}/login`, () => {
                 return new Response(null, {
                     status: 200,
                     headers: {

@@ -3,7 +3,6 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/lib/node';
-import API_BASE_URL from '../../shared/config/apiConfig';
 import { initialState, setupStore } from '../../../store';
 import ArchivedTasksPage from './ArchivedTasksPage';
 
@@ -54,7 +53,7 @@ describe('ArchivedTasksPage component', () => {
     ];
     
     const handlers = [
-        http.get(`${API_BASE_URL}/tasks`, () => {
+        http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
             return HttpResponse.json(mockTasks);
         }),
     ];
@@ -103,7 +102,7 @@ describe('ArchivedTasksPage component', () => {
 
     it('renders typography and alert on failure', async () => {
         server.use(
-            http.get(`${API_BASE_URL}/tasks`, () => {
+            http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
                 return new Response(null, {
                     status: 400,
                     headers: {
@@ -124,7 +123,7 @@ describe('ArchivedTasksPage component', () => {
     
     it('shows "No archived tasks available" if no tasks are archived', async () => {
         server.use(
-            http.get(`${API_BASE_URL}/tasks`, () => {
+            http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
                 return HttpResponse.json([
                     {
                         id: '1',

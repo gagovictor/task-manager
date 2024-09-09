@@ -5,7 +5,6 @@ import { initialState, setupStore } from '../../../store';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
-import API_BASE_URL from '../../shared/config/apiConfig';
 import { CreateTaskRequest } from '../services/TaskService';
 import { Task } from '../models/task';
 import EditTaskModal from './EditTaskModal';
@@ -20,7 +19,7 @@ const mockOnClose = jest.fn();
 
 describe('EditTaskModal component', () => {
     const handlers = [
-        http.all(`${API_BASE_URL}/*`, () => {
+        http.all(`${process.env.REACT_APP_API_BASE_URL}/*`, () => {
             return new Response(null, {
                 status: 200,
                 headers: {

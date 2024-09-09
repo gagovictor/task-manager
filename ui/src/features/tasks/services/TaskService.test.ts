@@ -1,6 +1,5 @@
 import apiClient from '../../shared/services/ApiService';
 import { fetchTasks, createTask, updateTask, deleteTask, archiveTask, unarchiveTask, updateTaskStatus } from './TaskService'; // Adjust path as needed
-import API_BASE_URL from '../../shared/config/apiConfig';
 import { Task } from '../models/task';
 
 jest.mock('../../shared/services/ApiService');
@@ -29,7 +28,7 @@ describe('TaskService', () => {
             const result = await fetchTasks(token);
 
             expect(result).toEqual(response);
-            expect(mockedApiClient.get).toHaveBeenCalledWith(`${API_BASE_URL}/tasks`, {
+            expect(mockedApiClient.get).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.get).toHaveBeenCalledTimes(1);
@@ -53,7 +52,7 @@ describe('TaskService', () => {
             const result = await createTask(request, token);
 
             expect(result).toEqual(response);
-            expect(mockedApiClient.post).toHaveBeenCalledWith(`${API_BASE_URL}/tasks`, request, {
+            expect(mockedApiClient.post).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks`, request, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.post).toHaveBeenCalledTimes(1);
@@ -78,7 +77,7 @@ describe('TaskService', () => {
             const result = await updateTask(request, token);
 
             expect(result).toEqual(response);
-            expect(mockedApiClient.patch).toHaveBeenCalledWith(`${API_BASE_URL}/tasks/${request.id}`, request, {
+            expect(mockedApiClient.patch).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks/${request.id}`, request, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.patch).toHaveBeenCalledTimes(1);
@@ -102,7 +101,7 @@ describe('TaskService', () => {
             const result = await deleteTask(taskId, token);
 
             expect(result).toEqual({});
-            expect(mockedApiClient.delete).toHaveBeenCalledWith(`${API_BASE_URL}/tasks/${taskId}`, {
+            expect(mockedApiClient.delete).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks/${taskId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.delete).toHaveBeenCalledTimes(1);
@@ -126,7 +125,7 @@ describe('TaskService', () => {
             const result = await archiveTask(taskId, token);
 
             expect(result).toEqual({});
-            expect(mockedApiClient.post).toHaveBeenCalledWith(`${API_BASE_URL}/tasks/${taskId}/archive`, null, {
+            expect(mockedApiClient.post).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks/${taskId}/archive`, null, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.post).toHaveBeenCalledTimes(1);
@@ -150,7 +149,7 @@ describe('TaskService', () => {
             const result = await unarchiveTask(taskId, token);
 
             expect(result).toEqual({});
-            expect(mockedApiClient.post).toHaveBeenCalledWith(`${API_BASE_URL}/tasks/${taskId}/unarchive`, null, {
+            expect(mockedApiClient.post).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks/${taskId}/unarchive`, null, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.post).toHaveBeenCalledTimes(1);
@@ -174,7 +173,7 @@ describe('TaskService', () => {
             const result = await updateTaskStatus(request, token);
 
             expect(result).toEqual({});
-            expect(mockedApiClient.post).toHaveBeenCalledWith(`${API_BASE_URL}/tasks/${request.id}/status`, { status: request.status }, {
+            expect(mockedApiClient.post).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks/${request.id}/status`, { status: request.status }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.post).toHaveBeenCalledTimes(1);

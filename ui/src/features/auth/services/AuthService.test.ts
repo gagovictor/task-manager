@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { login, signup, LoginRequest, LoginResponse, SignupRequest, SignupResponse } from './AuthService';
-import API_BASE_URL from '../../shared/config/apiConfig';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -26,7 +25,7 @@ describe('AuthService', () => {
             const result = await login(request);
 
             expect(result).toEqual(response);
-            expect(mockedAxios.post).toHaveBeenCalledWith(`${API_BASE_URL}/login`, request);
+            expect(mockedAxios.post).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/login`, request);
             expect(mockedAxios.post).toHaveBeenCalledTimes(1);
         });
 
@@ -54,7 +53,7 @@ describe('AuthService', () => {
             const result = await signup(request);
 
             expect(result).toEqual(response);
-            expect(mockedAxios.post).toHaveBeenCalledWith(`${API_BASE_URL}/signup`, request);
+            expect(mockedAxios.post).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/signup`, request);
             expect(mockedAxios.post).toHaveBeenCalledTimes(1);
         });
 

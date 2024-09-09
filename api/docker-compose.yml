@@ -9,7 +9,7 @@ services:
   #     - '5000:5000'
   #   environment:
   #     - DB_HOST=db
-  #     - DB_NAME=${DB_NAME}
+  #     - AZURE_POSTGRESQL_DATABASE=${AZURE_POSTGRESQL_DATABASE}
   #     - DB_USER=${DB_USER}
   #     - DB_PASSWORD=${DB_PASSWORD}
   #     - JWT_SECRET=${JWT_SECRET}
@@ -22,7 +22,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_DB=${AZURE_POSTGRESQL_DATABASE}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
