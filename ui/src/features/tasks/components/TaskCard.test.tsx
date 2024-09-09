@@ -9,7 +9,6 @@ import { initialState, setupStore } from '../../../store';
 import { format } from 'date-fns-tz';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
-import API_BASE_URL from '../../shared/config/apiConfig';
 
 const mockTask: Task = {
   id: '1',
@@ -40,7 +39,7 @@ const renderComponent = (task = mockTask, store = mockStore) => {
 describe('TaskCard', () => {
   
   const handlers = [
-    http.all(`${API_BASE_URL}/*`, () => {
+    http.all(`${process.env.REACT_APP_API_BASE_URL}/*`, () => {
       return new Response(null, {
         status: 200,
         headers: {
@@ -54,7 +53,11 @@ describe('TaskCard', () => {
   beforeAll(() => {
     server.listen();
   });
-  
+
+  afterEach(() => {
+    server.resetHandlers();
+  });
+
   afterAll(() => {
     server.dispose();
   });

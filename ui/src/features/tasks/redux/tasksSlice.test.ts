@@ -60,11 +60,11 @@ describe('tasksSlice', () => {
         expect(state.tasks).toEqual(mockTasks);
     });
     
-    it('should handle fetchTasksAsync.rejected', () => {
-        const action = { type: fetchTasksAsync.rejected.type, payload: { error: 'Fetch failed' } };
+    it('should handle fetchTasksAsync.rejected and set fixed error message', () => {
+        const action = { type: fetchTasksAsync.rejected.type, error: { message: 'Fetch failed' } };
         const state = tasksReducer(initialState, action);
         expect(state.fetchStatus).toBe('failed');
-        expect(state.fetchError).toBe('Fetch failed');
+        expect(state.fetchError).toBe('Failed to load tasks.');
     });
     
     it('should handle createTaskAsync.pending', () => {
@@ -81,7 +81,7 @@ describe('tasksSlice', () => {
     });
     
     it('should handle createTaskAsync.rejected', () => {
-        const action = { type: createTaskAsync.rejected.type, payload: { error: 'Create failed' } };
+        const action = { type: createTaskAsync.rejected.type, error: { message: 'Create failed' } };
         const state = tasksReducer(initialState, action);
         expect(state.createStatus).toBe('failed');
         expect(state.createError).toBe('Create failed');
@@ -103,7 +103,7 @@ describe('tasksSlice', () => {
     });
     
     it('should handle updateTaskAsync.rejected', () => {
-        const action = { type: updateTaskAsync.rejected.type, payload: { error: 'Update failed' } };
+        const action = { type: updateTaskAsync.rejected.type, error: { message: 'Update failed' } };
         const state = tasksReducer(initialState, action);
         expect(state.updateStatus).toBe('failed');
         expect(state.updateError).toBe('Update failed');
@@ -124,7 +124,7 @@ describe('tasksSlice', () => {
     });
     
     it('should handle deleteTaskAsync.rejected', () => {
-        const action = { type: deleteTaskAsync.rejected.type, payload: { error: 'Delete failed' } };
+        const action = { type: deleteTaskAsync.rejected.type, error: { message: 'Delete failed' } };
         const state = tasksReducer(initialState, action);
         expect(state.deleteStatus).toBe('failed');
         expect(state.deleteError).toBe('Delete failed');
@@ -145,7 +145,7 @@ describe('tasksSlice', () => {
     });
     
     it('should handle archiveTaskAsync.rejected', () => {
-        const action = { type: archiveTaskAsync.rejected.type, payload: { error: 'Archive failed' } };
+        const action = { type: archiveTaskAsync.rejected.type, error: { message: 'Archive failed' } };
         const state = tasksReducer(initialState, action);
         expect(state.archiveStatus).toBe('failed');
         expect(state.archiveError).toBe('Archive failed');
@@ -166,7 +166,7 @@ describe('tasksSlice', () => {
     });
     
     it('should handle unarchiveTaskAsync.rejected', () => {
-        const action = { type: unarchiveTaskAsync.rejected.type, payload: { error: 'Unarchive failed' } };
+        const action = { type: unarchiveTaskAsync.rejected.type, error: { message: 'Unarchive failed' } };
         const state = tasksReducer(initialState, action);
         expect(state.archiveStatus).toBe('failed');
         expect(state.archiveError).toBe('Unarchive failed');
@@ -188,7 +188,7 @@ describe('tasksSlice', () => {
     });
     
     it('should handle updateTaskStatusAsync.rejected', () => {
-        const action = { type: updateTaskStatusAsync.rejected.type, payload: { error: 'Status update failed' } };
+        const action = { type: updateTaskStatusAsync.rejected.type, error: { message: 'Status update failed' } };
         const state = tasksReducer(initialState, action);
         expect(state.updateStatus).toBe('failed');
         expect(state.updateError).toBe('Status update failed');
@@ -223,10 +223,10 @@ describe('tasksSlice', () => {
     });
     
     it('should handle fetchTasksAsync.rejected with an unexpected error structure', () => {
-        const action = { type: fetchTasksAsync.rejected.type, payload: { error: null } };
+        const action = { type: fetchTasksAsync.rejected.type, error: { message: null } };
         const state = tasksReducer(initialState, action);
         expect(state.fetchStatus).toBe('failed');
-        expect(state.fetchError).toBe('Failed to fetch tasks');
+        expect(state.fetchError).toBe('Failed to load tasks.');
     });
     
     it('should handle createTaskAsync.fulfilled with existing tasks', () => {

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import API_BASE_URL from '../../shared/config/apiConfig';
 
 export interface LoginRequest {
   username: string;
@@ -16,7 +15,8 @@ export interface LoginResponse {
 }
 
 export const login = async (request: LoginRequest): Promise<LoginResponse> => {
-const response = await axios.post(`${API_BASE_URL}/login`, request);
+  console.log(process.env)
+const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/login`, request);
 return response.data;
 };
 
@@ -36,6 +36,6 @@ export interface SignupResponse {
 }
 
 export const signup = async (request: SignupRequest): Promise<SignupResponse> => {
-  const response = await axios.post(`${API_BASE_URL}/signup`, request);
+  const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/signup`, request);
   return response.data;
 };

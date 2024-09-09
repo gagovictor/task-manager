@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { fetchTasksAsync } from '../redux/tasksSlice';
@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
 import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card } from '@mui/material';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
@@ -52,12 +51,12 @@ const TasksPage = () => {
   };
 
   const filteredTasks = tasks.filter((task: Task) => {
-    const matchesStatus = filterStatus ? task.status === filterStatus : true;
+    const matchesStatus = filterStatus ? task.status === filterStatus : task.status !== 'removed'; // Removed tasks are hidden by default
     const matchesText = filterText ? 
       task.title.toLowerCase().includes(filterText.toLowerCase()) || 
       task.description.toLowerCase().includes(filterText.toLowerCase()) 
       : true;
-    return !task.archivedAt && matchesStatus && matchesText;
+    return !task.archivedAt && !task.deletedAt && matchesStatus && matchesText;
   });
 
   const handleClearFilters = () => {
@@ -108,8 +107,14 @@ const TasksPage = () => {
       </Box>
 
       {fetchStatus === 'loading' && <CircularProgress />}
-      {fetchStatus === 'idle' && <Typography>No tasks available</Typography>}
-      {fetchStatus === 'failed' && <Alert severity="error">{fetchError}</Alert>}
+      {fetchStatus === 'failed' &&
+        <Alert
+          severity="error"
+          data-testid="fetch-error-alert"
+        >
+          {fetchError}
+        </Alert>
+      }
       {fetchStatus === 'succeeded' && (
         <Masonry columns={3} spacing={2}>
           {filteredTasks.length > 0 ? (

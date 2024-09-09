@@ -53,7 +53,7 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchTasksAsync.rejected, (state, action) => {
         state.fetchStatus = 'failed';
-        state.fetchError = (action.payload as any).error as string || 'Failed to fetch tasks';
+        state.fetchError = 'Failed to load tasks.';
       });
 
     // Create Task
@@ -67,7 +67,7 @@ const tasksSlice = createSlice({
       })
       .addCase(createTaskAsync.rejected, (state, action) => {
         state.createStatus = 'failed';
-        state.createError = (action.payload as any).error as string || 'Failed to create task';
+        state.createError = action.error.message || 'Failed to create task.';
       });
 
     // Update Task
@@ -84,7 +84,7 @@ const tasksSlice = createSlice({
       })
       .addCase(updateTaskAsync.rejected, (state, action) => {
         state.updateStatus = 'failed';
-        state.updateError = (action.payload as any).error as string || 'Failed to update task';
+        state.updateError = action.error.message || 'Failed to update task.';
       });
 
     // Delete Task
@@ -101,7 +101,7 @@ const tasksSlice = createSlice({
       })
       .addCase(deleteTaskAsync.rejected, (state, action) => {
         state.deleteStatus = 'failed';
-        state.deleteError = (action.payload as any).error as string || 'Failed to delete task';
+        state.deleteError = action.error.message ||  'Failed to delete task.';
       });
 
     // Archive Task
@@ -118,7 +118,7 @@ const tasksSlice = createSlice({
       })
       .addCase(archiveTaskAsync.rejected, (state, action) => {
         state.archiveStatus = 'failed';
-        state.archiveError = (action.payload as any).error as string || 'Failed to archive task';
+        state.archiveError = action.error.message || 'Failed to archive task.';
       })
       .addCase(unarchiveTaskAsync.pending, (state) => {
         state.archiveStatus = 'loading';
@@ -132,7 +132,7 @@ const tasksSlice = createSlice({
       })
       .addCase(unarchiveTaskAsync.rejected, (state, action) => {
         state.archiveStatus = 'failed';
-        state.archiveError = (action.payload as any).error as string || 'Failed to unarchive task';
+        state.archiveError = action.error.message || 'Failed to unarchive task.';
       })
 
       // Update task status
@@ -148,7 +148,7 @@ const tasksSlice = createSlice({
       })
       .addCase(updateTaskStatusAsync.rejected, (state, action) => {
         state.updateStatus = 'failed';
-        state.updateError = (action.payload as any).error as string || 'Failed to update task status';
+        state.updateError = action.error.message || 'Failed to update task status.';
       });
   },
 });
@@ -163,7 +163,7 @@ export const fetchTasksAsync = createAsyncThunk(
       const response = await fetchTasks(token);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response.data || null);
     }
   }
 );
@@ -178,7 +178,7 @@ export const createTaskAsync = createAsyncThunk(
       const response = await createTask(task, token);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -193,7 +193,7 @@ export const updateTaskAsync = createAsyncThunk(
       const response = await updateTask(task, token);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -208,7 +208,7 @@ export const deleteTaskAsync = createAsyncThunk(
       await deleteTask(taskId, token);
       return taskId;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -223,7 +223,7 @@ export const archiveTaskAsync = createAsyncThunk(
       await archiveTask(taskId, token);
       return taskId;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -238,7 +238,7 @@ export const unarchiveTaskAsync = createAsyncThunk(
       await unarchiveTask(taskId, token);
       return taskId;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -253,7 +253,7 @@ export const updateTaskStatusAsync = createAsyncThunk(
       const response = await updateTaskStatus({ id, status } as UpdateTaskRequest, token);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data);
     }
   }
 );

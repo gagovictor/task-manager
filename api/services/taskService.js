@@ -40,7 +40,11 @@ exports.updateTask = async (id, { title, description, dueDate, status, userId })
         deletedAt: null
       }
     });
-    if (!task) throw new Error('Task not found');
+
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
     await task.update({
       title,
       description,
@@ -48,6 +52,7 @@ exports.updateTask = async (id, { title, description, dueDate, status, userId })
       status,
       userId
     });
+    
     return task;
   } catch (error) {
     console.error('Task update error:', error);
@@ -64,10 +69,12 @@ exports.deleteTask = async (id, userId) => {
       where: {
         id,
         userId,
-        deletedAt: null  // Ensure the task is not already deleted
+        deletedAt: null
       }
     });
-    if (!task) throw new Error('Task not found');
+    if (!task) {
+      throw new Error('Task not found');
+    }
     await task.update({
       deletedAt: new Date(),
     });

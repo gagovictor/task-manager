@@ -93,7 +93,6 @@ const TaskBoardPage = () => {
           const updatedTasks = [...filteredTasks];
           const [movedTask] = updatedTasks.splice(activeTaskIndex, 1);
           updatedTasks.splice(overTaskIndex, 0, movedTask);
-          console.log(updatedTasks);
           dispatch(reorderTasksLocally({ updatedTasks }));
     
           showSnackbar('Tasks reordered successfully', 'success');
@@ -177,11 +176,11 @@ const TaskBoardPage = () => {
 
     return (
       <SortableContext
+        key={status}
         items={tasksByStatus.map(task => task.id)}
         strategy={rectSortingStrategy}
       >
         <Box
-          key={status}
           sx={{
             flex: 1,
             minWidth: 0,
@@ -202,7 +201,10 @@ const TaskBoardPage = () => {
               border: isOver ? '1px solid blue' : '1px solid #777',
             }}
           >
-            <Typography variant="h6" sx={{ textAlign: 'center', marginBottom: '16px' }}>
+            <Typography
+              variant="h6"
+              sx={{ textAlign: 'center', marginBottom: '16px' }}
+              data-testid={`heading-${status}`}>
               {title}
             </Typography>
             <Box
@@ -215,7 +217,7 @@ const TaskBoardPage = () => {
             >
               <SortableContainer status={status}></SortableContainer>
               {tasksByStatus.map(task => (
-                <SortableTaskCard task={task} />
+                <SortableTaskCard key={task.id} task={task} />
               ))}
             </Box>
           </Paper>
@@ -236,8 +238,14 @@ const TaskBoardPage = () => {
       }}
     >
       {fetchStatus === 'loading' && <CircularProgress />}
-      {fetchStatus === 'idle' && <Typography>No tasks available</Typography>}
-      {fetchStatus === 'failed' && <Alert severity="error">{fetchError}</Alert>}
+      {fetchStatus === 'failed' &&
+        <Alert
+          severity="error"
+          data-testid="fetch-error-alert"
+        >
+          {fetchError}
+        </Alert>
+      }
       {fetchStatus === 'succeeded' && (
         <DndContext
           sensors={sensors}
@@ -246,6 +254,7 @@ const TaskBoardPage = () => {
           onDragEnd={handleDragEnd}
         >
           <Box
+            key={'dnd-container'}
             sx={{
               width: '100%',
               display: 'flex',

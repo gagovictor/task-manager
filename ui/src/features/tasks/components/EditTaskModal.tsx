@@ -37,13 +37,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
   }, [task]);
 
   const handleUpdate = async () => {
-    console.log('handleUpdate');
     if (title) {
       let dueDate = '';
       if (date || time) {
-        // Use today's date if no date is provided
         const finalDate = date || new Date().toISOString().split('T')[0];
-        // Set time or default to '00:00:00'
         const finalTime = time || '00:00:00';
         const localDateTime = new Date(`${finalDate}T${finalTime}`);
         dueDate = localDateTime.toISOString();

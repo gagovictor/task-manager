@@ -53,7 +53,7 @@ describe('Task Service', () => {
             const result = await getTasksByUser(userId);
             
             expect(result).toEqual(tasks);
-            expect(Task.findAll).toHaveBeenCalledWith({ where: { userId } });
+            expect(Task.findAll).toHaveBeenCalledWith({ where: { userId, deletedAt: null } });
         });
         
         it('should throw an error if fetching tasks fails', async () => {
@@ -73,13 +73,21 @@ describe('Task Service', () => {
             Task.findOne.mockResolvedValue(task);
             
             const result = await updateTask(taskId, { ...updatedData, userId });
-            
+    
             expect(result.title).toEqual(updatedData.title);
             expect(result.description).toEqual(updatedData.description);
-            expect(result.dueData).toEqual(updatedData.dueData);
+            expect(result.dueDate).toEqual(updatedData.dueDate);
             expect(result.status).toEqual(updatedData.status);
-            expect(Task.findOne).toHaveBeenCalledWith({ where: { id: taskId, userId } });
-            expect(task.update).toHaveBeenCalledWith(updatedData);
+            
+            expect(Task.findOne).toHaveBeenCalledWith({ where: { id: taskId, userId, deletedAt: null } });
+    
+            expect(task.update).toHaveBeenCalledWith(expect.objectContaining({
+                userId,
+                title: updatedData.title,
+                description: updatedData.description,
+                dueDate: updatedData.dueDate,
+                status: updatedData.status
+            }));
         });
         
         it('should throw an error if the task is not found', async () => {
@@ -100,16 +108,16 @@ describe('Task Service', () => {
     });
     
     describe('deleteTask', () => {
-        it('should delete a task successfully', async () => {
+        it('should mark a task as deleted successfully', async () => {
             const taskId = 1;
             const userId = 1;
-            const task = { id: taskId, userId, destroy: jest.fn().mockResolvedValue() };
+            const task = { id: taskId, userId, update: jest.fn().mockResolvedValue() };
             Task.findOne.mockResolvedValue(task);
             
             await deleteTask(taskId, userId);
             
-            expect(Task.findOne).toHaveBeenCalledWith({ where: { id: taskId, userId } });
-            expect(task.destroy).toHaveBeenCalled();
+            expect(Task.findOne).toHaveBeenCalledWith({ where: { id: taskId, userId, deletedAt: null } });
+            expect(task.update).toHaveBeenCalledWith({ deletedAt: expect.any(Date) });
         });
         
         it('should throw an error if the task is not found', async () => {

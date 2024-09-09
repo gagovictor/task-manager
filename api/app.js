@@ -11,8 +11,18 @@ const protectedRouter = require('./routes/protected');
 const app = express();
 
 // CORS configuration
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+? process.env.CORS_ALLOWED_ORIGINS.split(',')
+: [];
+
 const corsOptions = {
-  origin: 'http://localhost:3000', // Allow requests from this origin
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allow specific methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
 };

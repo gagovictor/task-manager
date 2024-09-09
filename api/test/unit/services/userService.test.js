@@ -54,35 +54,39 @@ describe('User Service', () => {
   
   describe('signup', () => {
     it('should signup a new user successfully', async () => {
-      // Mock user finding
-      User.findOne.mockResolvedValue(null);
-      // Mock password hashing
-      bcrypt.hash.mockResolvedValue('hashedPassword');
-      // Mock user creation
-      User.create.mockResolvedValue({ id: 1, username: 'testuser', email: 'test@example.com' });
-      
-      const result = await signup({
-        username: 'testuser',
-        password: 'password',
-        email: 'test@example.com'
-      });
-      
-      expect(result).toEqual({
-        id: 1,
-        username: 'testuser',
-        email: 'test@example.com'
-      });
-      expect(User.findOne).toHaveBeenCalledWith({
-        where: {
-          [Op.or]: [{ username: 'testuser' }, { email: 'test@example.com' }]
-        }
-      });
-      expect(bcrypt.hash).toHaveBeenCalledWith('password', 10);
-      expect(User.create).toHaveBeenCalledWith({
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'hashedPassword'
-      });
+        User.findOne.mockResolvedValue(null);
+        bcrypt.hash.mockResolvedValue('hashedPassword');
+        User.create.mockResolvedValue({ id: 1, username: 'testuser', email: 'test@example.com' });
+        
+        const mockToken = 'mocked.jwt.token';
+        jwt.sign = jest.fn().mockReturnValue(mockToken);
+
+        const result = await signup({
+            username: 'testuser',
+            password: 'password',
+            email: 'test@example.com'
+        });
+
+        expect(result).toEqual({
+            token: mockToken,
+            user: {
+                id: 1,
+                username: 'testuser',
+                email: 'test@example.com'
+            }
+        });
+        
+        expect(User.findOne).toHaveBeenCalledWith({
+            where: {
+                [Op.or]: [{ username: 'testuser' }, { email: 'test@example.com' }]
+            }
+        });
+        expect(bcrypt.hash).toHaveBeenCalledWith('password', 10);
+        expect(User.create).toHaveBeenCalledWith({
+            username: 'testuser',
+            email: 'test@example.com',
+            password: 'hashedPassword'
+        });
     });
     
     it('should throw an error if username already exists', async () => {
@@ -119,19 +123,22 @@ describe('User Service', () => {
   describe('login', () => {
     it('should log in a user and return a token', async () => {
       // Mock user finding
-      User.findOne.mockResolvedValue({ id: 1, email: 'test@example.com', password: 'hashedPassword' });
+      User.findOne.mockResolvedValue({ id: 1, email: 'test@example.com', username: 'test@example.com', password: 'hashedPassword' });
       // Mock password comparison
       bcrypt.compare.mockResolvedValue(true);
       // Mock token signing
       jwt.sign.mockReturnValue('token');
       
       const result = await login({
-        email: 'test@example.com',
+        username: 'test@example.com',
         password: 'password'
       });
       
-      expect(result).toBe('token');
-      expect(User.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
+      expect(result.token).toBe('token');
+      expect(result.user.email).toBe('test@example.com');
+      expect(result.user.username).toBe('test@example.com');
+      expect(result.user.password).toBeFalsy();
+      expect(User.findOne).toHaveBeenCalledWith({ where: { username: 'test@example.com' } });
       expect(bcrypt.compare).toHaveBeenCalledWith('password', 'hashedPassword');
       expect(jwt.sign).toHaveBeenCalledWith({ userId: 1 }, process.env.JWT_SECRET, { expiresIn: '1h' });
     });
@@ -142,7 +149,7 @@ describe('User Service', () => {
       await expect(login({
         email: 'nonexistent@example.com',
         password: 'password'
-      })).rejects.toThrow('No user found with this email');
+      })).rejects.toThrow('No user found with this username');
     });
     
     it('should throw an error if the password is incorrect', async () => {

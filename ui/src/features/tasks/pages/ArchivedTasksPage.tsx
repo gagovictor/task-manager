@@ -40,12 +40,19 @@ export default function ArchivedTasksPage() {
     setSnackbarOpen(true);
   };
 
-  const activeTasks = tasks.filter((task: Task) => task.archivedAt);
+  const activeTasks = tasks.filter((task: Task) => task.archivedAt && !task.deletedAt);
 
   return (
     <Container sx={{ width: '100%', minHeight: '100vh', padding: 16, position: 'relative' }}>
       {fetchStatus === 'loading' && <CircularProgress />}
-      {fetchStatus === 'failed' && <Alert severity="error">{fetchError}</Alert>}
+      {fetchStatus === 'failed' &&
+        <Alert
+          severity="error"
+          data-testid="fetch-error-alert"
+        >
+          {fetchError}
+        </Alert>
+      }
       {fetchStatus === 'succeeded' && activeTasks.length > 0 && (
         <Masonry columns={3} spacing={2}>
           {activeTasks.map((task: Task) => (

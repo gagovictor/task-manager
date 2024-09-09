@@ -63,7 +63,7 @@ describe('TaskController', () => {
       
       // Assert
       expect(res.statusCode).toBe(201);
-      expect(JSON.parse(res._getData())).toEqual({ message: 'Task created successfully', task });
+      expect(JSON.parse(res._getData())).toEqual(task);
     });
     
     it('should handle task creation error', async () => {
@@ -106,7 +106,7 @@ describe('TaskController', () => {
       
       // Assert
       expect(res.statusCode).toBe(200);
-      expect(JSON.parse(res._getData())).toEqual({ tasks });
+      expect(JSON.parse(res._getData())).toEqual(tasks);
     });
     
     it('should handle error while fetching tasks', async () => {
@@ -147,7 +147,7 @@ describe('TaskController', () => {
       
       // Assert
       expect(res.statusCode).toBe(200);
-      expect(JSON.parse(res._getData())).toEqual({ message: 'Task updated successfully', task });
+      expect(JSON.parse(res._getData())).toEqual(task);
     });
     
     it('should handle task update error', async () => {
@@ -182,17 +182,17 @@ describe('TaskController', () => {
   
   describe('deleteTask', () => {
     it('should delete a task successfully', async () => {
-      // Arrange
-      taskService.deleteTask.mockResolvedValue();
-      req.params = { id: 1 };
-      req.user = { id: 1 };
-      
-      // Act
-      await deleteTask(req, res);
-      
-      // Assert
-      expect(res.statusCode).toBe(204);
-      expect(res._getData()).toBe(''); // No content
+        // Arrange
+        taskService.deleteTask.mockResolvedValue(); // Simulate successful deletion
+        req.params = { id: 1 };
+        req.user = { id: 1 };
+        
+        // Act
+        await deleteTask(req, res);
+        
+        // Assert
+        expect(res.statusCode).toBe(204);
+        expect(res._getData()).toBe(''); // No content
     });
     
     it('should handle task deletion error', async () => {

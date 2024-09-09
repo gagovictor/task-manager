@@ -1,9 +1,8 @@
-import API_BASE_URL from '../../shared/config/apiConfig';
 import apiClient from '../../shared/services/ApiService';
 import { Task } from '../models/task';
 
 export const fetchTasks = async (token: string) => {
-    const response = await apiClient.get(`${API_BASE_URL}/tasks`, {
+    const response = await apiClient.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -20,7 +19,7 @@ export interface CreateTaskResponse extends Task {
 }
 
 export const createTask = async (request: CreateTaskRequest, token: string) => {
-    const response = await apiClient.post(`${API_BASE_URL}/tasks`, request, {
+    const response = await apiClient.post(`${process.env.REACT_APP_API_BASE_URL}/tasks`, request, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -38,28 +37,28 @@ export interface UpdateTaskResponse extends Task {
 }
 
 export const updateTask = async (request: UpdateTaskRequest, token: string) => {
-    const response = await apiClient.patch(`${API_BASE_URL}/tasks/${request.id}`, request, {
+    const response = await apiClient.patch(`${process.env.REACT_APP_API_BASE_URL}/tasks/${request.id}`, request, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
 export const deleteTask = async (taskId: string, token: string) => {
-    const response = await apiClient.delete(`${API_BASE_URL}/tasks/${taskId}`, {
+    const response = await apiClient.delete(`${process.env.REACT_APP_API_BASE_URL}/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
 export const archiveTask = async (taskId: string, token: string) => {
-    const response = await apiClient.post(`${API_BASE_URL}/tasks/${taskId}/archive`, null, {
+    const response = await apiClient.post(`${process.env.REACT_APP_API_BASE_URL}/tasks/${taskId}/archive`, null, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
 };
 
 export const unarchiveTask = async (taskId: string, token: string) => {
-    const response = await apiClient.post(`${API_BASE_URL}/tasks/${taskId}/unarchive`, null, {
+    const response = await apiClient.post(`${process.env.REACT_APP_API_BASE_URL}/tasks/${taskId}/unarchive`, null, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -71,7 +70,7 @@ export interface UpdateTaskStatusRequest {
 }
 
 export const updateTaskStatus = async (request: UpdateTaskStatusRequest, token: string) => {
-    const response = await apiClient.post(`${API_BASE_URL}/tasks/${request.id}/status`, { status: request.status }, {
+    const response = await apiClient.post(`${process.env.REACT_APP_API_BASE_URL}/tasks/${request.id}/status`, { status: request.status }, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;

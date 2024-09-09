@@ -72,7 +72,7 @@ describe('UserController', () => {
       
       // Assert
       expect(res.statusCode).toBe(200);
-      expect(JSON.parse(res._getData())).toEqual({ token }); // Parse response data
+      expect(JSON.parse(res._getData())).toEqual(token);
     });
     
     it('should handle login error', async () => {

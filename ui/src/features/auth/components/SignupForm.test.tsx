@@ -8,7 +8,6 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { SignupRequest, SignupResponse } from '../services/AuthService';
 import { User } from '../models/user';
-import API_BASE_URL from '../../shared/config/apiConfig';
 import userEvent from '@testing-library/user-event';
 
 const mockNavigate = jest.fn();
@@ -90,10 +89,10 @@ describe('SignupForm', () => {
             user: mockUser
         };
         const handlers = [
-            http.post(`${API_BASE_URL}/signup`, () => {
+            http.post(`${process.env.REACT_APP_API_BASE_URL}/signup`, () => {
                 return HttpResponse.json(response)
             }),
-            http.options(`${API_BASE_URL}/signup`, () => {
+            http.options(`${process.env.REACT_APP_API_BASE_URL}/signup`, () => {
                 return new Response(null, {
                     status: 200,
                     headers: {
@@ -130,13 +129,13 @@ describe('SignupForm', () => {
     
     it('should display an error message on signup failure', async () => {
         const handlers = [
-            http.post(`${API_BASE_URL}/signup`, () => {
+            http.post(`${process.env.REACT_APP_API_BASE_URL}/signup`, () => {
                 return HttpResponse.json(
                     { message: 'Signup failed.' },
                     { status: 400 }
                 )
             }),
-            http.options(`${API_BASE_URL}/signup`, () => {
+            http.options(`${process.env.REACT_APP_API_BASE_URL}/signup`, () => {
                 return new Response(null, {
                     status: 200,
                     headers: {
