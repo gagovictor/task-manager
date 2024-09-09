@@ -54,7 +54,11 @@ describe('TaskCard', () => {
   beforeAll(() => {
     server.listen();
   });
-  
+
+  afterEach(() => {
+    server.resetHandlers();
+  });
+
   afterAll(() => {
     server.dispose();
   });

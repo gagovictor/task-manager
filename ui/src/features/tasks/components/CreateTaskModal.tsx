@@ -130,7 +130,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           color="primary"
           sx={{ mt: 2 }}
           onClick={handleCreate}
-          disabled={createStatus != 'idle'}
+          disabled={createStatus == 'loading'}
         >
           Create
         </Button>

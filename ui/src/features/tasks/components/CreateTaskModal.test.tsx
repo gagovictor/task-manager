@@ -4,17 +4,10 @@ import userEvent from "@testing-library/user-event";
 import { initialState, setupStore } from '../../../store';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { CreateTaskRequest } from '../services/TaskService';
-import { Task } from '../models/task';
 import CreateTaskModal from './CreateTaskModal';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
 import API_BASE_URL from '../../shared/config/apiConfig';
-
-const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-    ...jest.requireActual('react-router-dom'),
-    useNavigate: () => mockNavigate,
-}));
 
 const mockOnClose = jest.fn();
 
@@ -35,7 +28,11 @@ describe('CreateTaskModal component', () => {
     beforeAll(() => {
         server.listen();
     });
-    
+
+    afterEach(() => {
+        server.resetHandlers();
+    });
+
     afterAll(() => {
         server.dispose();
     });

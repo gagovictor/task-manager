@@ -2,7 +2,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { initialState, setupStore } from '../../../store';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
 import API_BASE_URL from '../../shared/config/apiConfig';
@@ -33,6 +33,10 @@ describe('EditTaskModal component', () => {
 
     beforeAll(() => {
         server.listen();
+    });
+
+    afterEach(() => {
+        server.resetHandlers();
     });
 
     afterAll(() => {
