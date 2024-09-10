@@ -86,7 +86,7 @@ const LoginForm: React.FC = () => {
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2" color="textSecondary" align="center">
                 Don't have an account?{' '}
-                <Link href="/signup" variant="body2">
+                <Link variant="body2" onClick={() => navigate('/signup')}>
                   Sign Up
                 </Link>
               </Typography>

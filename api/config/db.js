@@ -1,11 +1,34 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-const POSTGRES_URL = `postgres://${process.env.AZURE_POSTGRESQL_USER}:${process.env.AZURE_POSTGRESQL_PASSWORD}@${process.env.AZURE_POSTGRESQL_HOST}:${process.env.AZURE_POSTGRESQL_PORT}/${process.env.AZURE_POSTGRESQL_DATABASE}?sslmode=${process.env.AZURE_POSTGRESQL_SSL === 'true' ? 'require' : 'disable'}`;
+const dialect = process.env.DB_DIALECT || 'postgres';
+let host, port, database, user, password;
 
-console.log(POSTGRES_URL)
-const sequelize = new Sequelize(POSTGRES_URL, {
-  dialect: 'postgres',
+switch (dialect) {
+  case 'postgres':
+    host = process.env.AZURE_POSTGRESQL_HOST;
+    port = process.env.AZURE_POSTGRESQL_PORT;
+    database = process.env.AZURE_POSTGRESQL_DATABASE;
+    user = process.env.AZURE_POSTGRESQL_USER;
+    password = process.env.AZURE_POSTGRESQL_PASSWORD;
+    break;
+
+  case 'mssql':
+    host = process.env.MYSQL_HOST;
+    port = process.env.MYSQL_PORT;
+    database = process.env.MYSQL_DATABASE;
+    user = process.env.MYSQL_USER;
+    password = process.env.MYSQL_PASSWORD;
+    break;
+
+  default:
+    throw new Error('Unsupported database dialect');
+}
+
+const sequelize = new Sequelize(database, user, password, {
+  dialect,
+  host,
+  port,
   logging: process.env.DB_QUERY_LOGGING.toLowerCase() === 'true',
 });
 

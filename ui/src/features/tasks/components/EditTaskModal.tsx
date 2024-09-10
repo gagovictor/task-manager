@@ -118,7 +118,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
         <TextField
           fullWidth
           multiline
-          rows={10}
+          rows={6}
           margin="normal"
           label="Description"
           variant="outlined"

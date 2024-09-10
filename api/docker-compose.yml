@@ -6,7 +6,7 @@ services:
   #   build:
   #     context: .
   #   ports:
-  #     - '5000:5000'
+  #     - '8080:8080'
   #   environment:
   #     - DB_HOST=db
   #     - AZURE_POSTGRESQL_DATABASE=${AZURE_POSTGRESQL_DATABASE}

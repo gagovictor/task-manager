@@ -103,7 +103,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
         <TextField
           fullWidth
           multiline
-          rows={10}
+          rows={6}
           margin="normal"
           label="Description"
           variant="outlined"

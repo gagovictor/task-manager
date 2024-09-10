@@ -131,7 +131,7 @@ const TasksPage = () => {
               variant="outlined"
               sx={{
                 width: 300,
-                height: 182,
+                height: 198,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -145,7 +145,7 @@ const TasksPage = () => {
             variant="outlined"
             sx={{
               width: 300,
-              height: 182,
+              height: 198,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
