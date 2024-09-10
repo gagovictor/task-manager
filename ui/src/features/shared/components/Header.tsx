@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppBar, Box, Toolbar, Typography, Button, useMediaQuery, useTheme } from '@mui/material';
@@ -31,21 +30,27 @@ export default function Header() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Task Manager
           </Typography>
-          {isAuthenticated ? (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {!isMobile && (
+          {!isMobile && (
+            isAuthenticated ? (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ mr: 2 }}>
                   {username}
                 </Typography>
-              )}
-              <Button color="inherit" onClick={handleLogoutClick}>
-                Logout
+                <Button
+                  color="inherit"
+                  sx={{ fontWeight: '400' }}
+                  onClick={handleLogoutClick}>
+                  Logout
+                </Button>
+              </Box>
+            ) : (
+              <Button
+                color="inherit"
+                  sx={{ fontWeight: '400' }}
+                onClick={handleLoginClick}>
+                Login
               </Button>
-            </Box>
-          ) : (
-            <Button color="inherit" onClick={handleLoginClick}>
-              Login
-            </Button>
+            )
           )}
         </Toolbar>
       </AppBar>

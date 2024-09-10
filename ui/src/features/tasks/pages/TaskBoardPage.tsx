@@ -18,8 +18,7 @@ import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import TaskCard from '../components/TaskCard';
 import { Task } from '../models/task';
-import { Paper, useMediaQuery } from '@mui/material';
-import theme from '../../shared/config/theme';
+import { Paper, useMediaQuery, useTheme } from '@mui/material';
 
 const TaskBoardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,6 +33,7 @@ const TaskBoardPage = () => {
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [draggingTask, setDraggingTask] = useState<Task | null>(null);
   const statusColumns = ['new', 'active', 'completed'];
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const sensors = useSensors(
@@ -186,7 +186,7 @@ const TaskBoardPage = () => {
             display: 'flex',
             flexDirection: 'column',
             margin: '0 8px',
-            minWidth: '360px',
+            minWidth: isMobile ? '60vw' : '360px',
             flex: '0 0 auto',
           }}
         >
@@ -198,12 +198,16 @@ const TaskBoardPage = () => {
               flexDirection: 'column',
               height: '80vh',
               borderRadius: '6px',
-              border: isOver ? '1px solid blue' : '1px solid #777',
+              border: `1px solid ${theme.palette.secondary.contrastText}`,
             }}
           >
             <Typography
               variant="h6"
-              sx={{ marginLeft: '8px', fontWeight: '600', marginBottom: '16px' }}
+              sx={{
+                marginLeft: '8px',
+                marginBottom: '16px',
+                color: theme.palette.secondary.contrastText
+              }}
               data-testid={`heading-${status}`}>
               {title}
             </Typography>

@@ -5,12 +5,11 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card, useMediaQuery } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card, useMediaQuery, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import { Task, taskStatuses } from '../models/task';
-import theme from '../../shared/config/theme';
 
 const TasksPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -24,6 +23,7 @@ const TasksPage = () => {
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterText, setFilterText] = useState<string>('');
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   useEffect(() => {
@@ -174,9 +174,7 @@ const TasksPage = () => {
             }}
             onClick={() => setCreateModalOpen(true)}
           >
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: '500' }}>
+            <Typography variant="h6">
               Create New Task
             </Typography>
           </Card>

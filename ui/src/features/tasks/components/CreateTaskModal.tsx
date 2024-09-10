@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
@@ -46,13 +46,15 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
     <Modal open={open} onClose={onClose}>
       <Box
         sx={{
-          width: 400,
+          width: '85%',
+          maxWidth: 500,
           margin: 'auto',
           padding: 2,
           backgroundColor: 'white',
-          marginTop: '10%',
           borderRadius: 1,
-          position: 'relative'
+          position: 'relative',
+          marginTop: '10%',
+          overflow: 'hidden'
         }}
       >
         <IconButton

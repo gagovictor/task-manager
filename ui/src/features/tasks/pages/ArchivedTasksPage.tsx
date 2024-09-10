@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, useMediaQuery } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, useMediaQuery, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import { Task } from '../models/task';
 import { useNavigate } from 'react-router-dom';
-import theme from '../../shared/config/theme';
 
 export default function ArchivedTasksPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -23,6 +22,7 @@ export default function ArchivedTasksPage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {

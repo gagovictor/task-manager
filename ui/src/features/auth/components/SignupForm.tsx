@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { signupUser } from '../redux/authSlice';
-import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert } from '@mui/material';
+import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert, Link } from '@mui/material';
 import { SignupRequest } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
 import PasswordField from './PasswordField';
@@ -112,6 +112,14 @@ const SignupForm: React.FC = () => {
             >
               Sign Up
             </Button>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" color="textSecondary" align="center">
+                Already have an account?{' '}
+                <Link variant="body2" onClick={() => navigate('/login')}>
+                  Login
+                </Link>
+              </Typography>
+            </Box>
           </form>
         </Box>
       </Paper>

@@ -14,13 +14,17 @@ const theme = createTheme({
   palette: {
     primary: {
       main: '#39588A',
+      contrastText: '#EDF5FF '
+      // contrastText: '#4e5155',
     },
     secondary: {
       main: '#FFD0BB',
+      contrastText: '#55504e'
     },
     background: {
-      default: '#ffffff',
-      paper: '#fbf6f4',
+      default: '#FFFFFF',
+      paper: '#FBF6F4',
+      
     },
     text: {
       primary: '#212121',
@@ -29,6 +33,12 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
+    button: {
+      fontWeight: 700,
+    },
+    h6: {
+      fontWeight: 500,
+    },
   },
   shape: {
     borderRadius: 6,
