@@ -112,8 +112,8 @@ const TasksPage = () => {
             />
           </Box>
           <Button
-            variant="outlined"
-            color="primary"
+            variant="contained"
+            color="secondary"
             onClick={handleClearFilters}
           >
             Clear Filters
@@ -174,7 +174,11 @@ const TasksPage = () => {
             }}
             onClick={() => setCreateModalOpen(true)}
           >
-            <Typography variant="h6">Create New Task</Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: '500' }}>
+              Create New Task
+            </Typography>
           </Card>
         </Masonry>
       )}

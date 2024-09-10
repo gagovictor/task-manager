@@ -90,7 +90,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
         variant="outlined"
         onClick={handleCardClick}
         sx={{
-          backgroundColor: '#fefefe',
+          backgroundColor: theme.palette.background.paper,
           cursor: 'pointer',
           userSelect: 'no-select'
         }}
@@ -99,7 +99,15 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
           <Typography variant="h6" component="div">
             {task.title}
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', my: 1, gap: 1, color: 'text.secondary' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              my: 1,
+              gap: 1,
+              color: 'text.secondary'
+            }}
+          >
             {isPastDue ? (
                 <Chip
                   label={formattedDueDate}
