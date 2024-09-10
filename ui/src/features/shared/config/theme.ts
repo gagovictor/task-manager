@@ -1,6 +1,16 @@
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
+  spacing: 8,
+  components: {
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          padding: '32px 16px',
+        },
+      },
+    },
+  },
   palette: {
     primary: {
       main: '#2196f3',

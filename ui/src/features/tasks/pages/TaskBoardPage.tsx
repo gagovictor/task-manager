@@ -18,7 +18,8 @@ import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import TaskCard from '../components/TaskCard';
 import { Task } from '../models/task';
-import { Paper } from '@mui/material';
+import { Paper, useMediaQuery } from '@mui/material';
+import theme from '../../shared/config/theme';
 
 const TaskBoardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -33,6 +34,7 @@ const TaskBoardPage = () => {
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [draggingTask, setDraggingTask] = useState<Task | null>(null);
   const statusColumns = ['new', 'active', 'completed'];
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -152,7 +154,6 @@ const TaskBoardPage = () => {
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
-      background: 'red',
     };
 
     return (
@@ -182,12 +183,11 @@ const TaskBoardPage = () => {
       >
         <Box
           sx={{
-            flex: 1,
-            minWidth: 0,
             display: 'flex',
             flexDirection: 'column',
             margin: '0 8px',
-            height: '100%',
+            minWidth: '360px',
+            flex: '0 0 auto',
           }}
         >
           <Paper
@@ -196,14 +196,14 @@ const TaskBoardPage = () => {
               padding: 1,
               display: 'flex',
               flexDirection: 'column',
-              height: '100%',
+              height: '80vh',
               borderRadius: '6px',
               border: isOver ? '1px solid blue' : '1px solid #777',
             }}
           >
             <Typography
               variant="h6"
-              sx={{ textAlign: 'center', marginBottom: '16px' }}
+              sx={{ marginLeft: '8px', fontWeight: '600', marginBottom: '16px' }}
               data-testid={`heading-${status}`}>
               {title}
             </Typography>
@@ -231,7 +231,8 @@ const TaskBoardPage = () => {
       sx={{
         width: '100%',
         minHeight: '100vh',
-        padding: 16,
+        mt: isMobile ? 6 : 12,
+        mb: isMobile ? 6 : 12,
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
@@ -259,7 +260,8 @@ const TaskBoardPage = () => {
               width: '100%',
               display: 'flex',
               height: 'calc(100vh - 64px)',
-              overflow: 'hidden',
+              overflowY: 'hidden',
+              overflowX: 'auto'
             }}
           >
             {statusColumns.map(status => renderTaskColumns(status))}

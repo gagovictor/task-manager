@@ -96,7 +96,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
         }}
       >
         <CardContent>
-          <Typography variant="h5" component="div">
+          <Typography variant="h6" component="div">
             {task.title}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', my: 1, gap: 1, color: 'text.secondary' }}>

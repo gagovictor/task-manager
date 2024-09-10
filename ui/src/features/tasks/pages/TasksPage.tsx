@@ -68,9 +68,8 @@ const TasksPage = () => {
     <Container
       sx={{
         width: '100%',
-        mt: isMobile ? 8 : 16,
-        mb: isMobile ? 5 : 16,
-        paddingLeft: isMobile ? '8px' : '16px',
+        mt: isMobile ? 4 : 12,
+        mb: isMobile ? 6 : 12,
         position: 'relative'
       }}
     >

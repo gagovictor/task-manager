@@ -5,12 +5,13 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, useMediaQuery } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import { Task } from '../models/task';
 import { useNavigate } from 'react-router-dom';
+import theme from '../../shared/config/theme';
 
 export default function ArchivedTasksPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -22,6 +23,7 @@ export default function ArchivedTasksPage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     dispatch(fetchTasksAsync());
@@ -43,7 +45,14 @@ export default function ArchivedTasksPage() {
   const activeTasks = tasks.filter((task: Task) => task.archivedAt && !task.deletedAt);
 
   return (
-    <Container sx={{ width: '100%', minHeight: '100vh', padding: 16, position: 'relative' }}>
+    <Container
+      sx={{
+        width: '100%',
+        mt: isMobile ? 6 : 12,
+        mb: isMobile ? 6 : 12,
+        position: 'relative'
+      }}
+    >
       {fetchStatus === 'loading' && <CircularProgress />}
       {fetchStatus === 'failed' &&
         <Alert
@@ -54,14 +63,19 @@ export default function ArchivedTasksPage() {
         </Alert>
       }
       {fetchStatus === 'succeeded' && activeTasks.length > 0 && (
-        <Masonry columns={3} spacing={2}>
+        <Masonry
+          columns={isMobile ? 1 : 3}
+          spacing={isMobile ? 0 : 2}>
           {activeTasks.map((task: Task) => (
-            <TaskCard
+            <Box
               key={task.id}
-              task={task}
-              onEdit={() => handleEditTask(task)}
-              showSnackbar={showSnackbar}
-            />
+              sx={{ mb: isMobile ? 2 : 0 }}>
+              <TaskCard
+                task={task}
+                onEdit={() => handleEditTask(task)}
+                showSnackbar={showSnackbar}
+              />
+            </Box>
           ))}
         </Masonry>
       )}
