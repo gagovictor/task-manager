@@ -15,9 +15,8 @@ export interface LoginResponse {
 }
 
 export const login = async (request: LoginRequest): Promise<LoginResponse> => {
-  console.log(process.env)
-const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/login`, request);
-return response.data;
+  const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/login`, request);
+  return response.data;
 };
 
 export interface SignupRequest {

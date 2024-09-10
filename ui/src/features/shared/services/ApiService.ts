@@ -13,10 +13,7 @@ apiClient.interceptors.response.use(
       // Redirect to login if a 401 response is detected
       window.location.assign('/login');
     }
-    return Promise.reject({
-      status: 401,
-      message: error
-    });
+    return Promise.reject(error);
   }
 );
 

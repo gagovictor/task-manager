@@ -5,6 +5,7 @@ import { signupUser } from '../redux/authSlice';
 import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert } from '@mui/material';
 import { SignupRequest } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
+import PasswordField from './PasswordField';
 
 const SignupForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -12,13 +13,22 @@ const SignupForm: React.FC = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const authStatus = useSelector((state: RootState) => { return state.auth.status });
-  
+  const authStatus = useSelector((state: RootState) => state.auth.status);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setErrorMessage(null);
+
+    // Check if passwords match before proceeding
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match');
+      setSnackbarOpen(true);
+      return;
+    }
 
     try {
       // User does not input username directly. Instead, copy email to username
@@ -31,8 +41,24 @@ const SignupForm: React.FC = () => {
     }
   };
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setPasswordError(confirmPassword && newPassword !== confirmPassword ? 'Passwords do not match' : '');
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newConfirmPassword = e.target.value;
+    setConfirmPassword(newConfirmPassword);
+    setPasswordError(newConfirmPassword && newConfirmPassword !== password ? 'Passwords do not match' : '');
+  };
+
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
+  };
+
+  const isFormInvalid = () => {
+    return !email || !password || !confirmPassword || password !== confirmPassword;
   };
 
   return (
@@ -55,21 +81,25 @@ const SignupForm: React.FC = () => {
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              inputProps={{ "data-testid": "input-username" }}
+              inputProps={{ "data-testid": "input-email" }}
             />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
+            <PasswordField
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              inputProps={{ "data-testid": "input-password" }}
+              onChange={handlePasswordChange}
+              label="Password"
+              id="password"
+              required
+              testId="input-password"
+            />
+            <PasswordField
+              value={confirmPassword}
+              onChange={handleConfirmPasswordChange}
+              label="Confirm password"
+              id="confirm-password"
+              required
+              error={!!passwordError}
+              helperText={passwordError}
+              testId="input-confirm-password"
             />
             <Button
               type="submit"
@@ -77,7 +107,7 @@ const SignupForm: React.FC = () => {
               variant="contained"
               color="primary"
               sx={{ mt: 2 }}
-              disabled={authStatus === 'loading'}
+              disabled={authStatus === 'loading' || isFormInvalid()}
               data-testid="submit"
             >
               Sign Up

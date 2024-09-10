@@ -18,8 +18,6 @@ import { Task } from '../models/task';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PendingActionsOutlined } from '@mui/icons-material';
-import { useState } from 'react';
-import './TaskCard.css';
 import theme from '../../shared/config/theme';
 
 interface TaskCardProps {
@@ -89,12 +87,12 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
   return (
     <Box sx={{ width: '100%', marginBottom: 2 }}>
       <Card
-        className="no-select"
         variant="outlined"
         onClick={handleCardClick}
         sx={{
           backgroundColor: '#fefefe',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          userSelect: 'no-select'
         }}
       >
         <CardContent>

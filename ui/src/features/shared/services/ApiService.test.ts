@@ -2,31 +2,30 @@ import { http } from 'msw';
 import { setupServer } from 'msw/node';
 import apiClient from './ApiService';
 
-const handlers = [
-    http.get(`${process.env.REACT_APP_API_BASE_URL}/test-success`, () => {
-        return new Response(
-            JSON.stringify({ message: 'Success' }), 
-            {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-            }
-        );
-    }),
-    http.get(`${process.env.REACT_APP_API_BASE_URL}/test-unauthorized`, () => {
-        return new Response(
-            JSON.stringify({ message: 'Unauthorized' }), 
-            {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' }
-            }
-        );
-    }),
-];
-
-const server = setupServer(...handlers);
-
-
 describe('apiClient', () => {
+    const handlers = [
+        http.get(`test-success`, () => {
+            return new Response(
+                JSON.stringify({ message: 'Success' }), 
+                {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+        }),
+        http.get(`test-unauthorized`, () => {
+            return new Response(
+                JSON.stringify({ message: 'Unauthorized' }), 
+                {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+        }),
+    ];
+    
+    const server = setupServer(...handlers);
+
     beforeAll(() => server.listen());
     
     afterEach(() => server.resetHandlers());
@@ -48,7 +47,8 @@ describe('apiClient', () => {
         });
         
         await apiClient.get(`test-unauthorized`).catch(error => {
-            expect(error.status).toBe(401);
+            const { response } = error;
+            expect(response.status).toBe(401);
             expect(window.location.assign).toHaveBeenCalledWith('/login');
         });
 

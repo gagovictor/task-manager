@@ -5,7 +5,7 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card, useMediaQuery } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
@@ -22,10 +22,10 @@ const TasksPage = () => {
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
-
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterText, setFilterText] = useState<string>('');
-
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   useEffect(() => {
     dispatch(fetchTasksAsync());
   }, [dispatch]);
@@ -65,9 +65,26 @@ const TasksPage = () => {
   };
 
   return (
-    <Container sx={{ width: '100%', minHeight: '100vh', padding: 16, position: 'relative' }}>
+    <Container
+      sx={{
+        width: '100%',
+        mt: isMobile ? 8 : 16,
+        mb: isMobile ? 5 : 16,
+        paddingLeft: isMobile ? '8px' : '16px',
+        position: 'relative'
+      }}
+    >
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: isMobile ? 'stretch' : 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 2,
+            flexDirection: isMobile ? 'column' : 'row'
+          }}
+        >
           <Box sx={{ flex: 1, minWidth: 200 }}>
             <FormControl fullWidth margin="normal">
               <InputLabel>Status</InputLabel>
@@ -99,7 +116,6 @@ const TasksPage = () => {
             variant="outlined"
             color="primary"
             onClick={handleClearFilters}
-            sx={{ ml: 2 }}
           >
             Clear Filters
           </Button>
@@ -116,21 +132,25 @@ const TasksPage = () => {
         </Alert>
       }
       {fetchStatus === 'succeeded' && (
-        <Masonry columns={3} spacing={2}>
+        <Masonry
+          columns={isMobile ? 1 : 3}
+          spacing={isMobile ? 0 : 2}>
           {filteredTasks.length > 0 ? (
             filteredTasks.map((task: Task) => (
-              <TaskCard
+              <Box
                 key={task.id}
-                task={task}
-                onEdit={() => handleEditTask(task)}
-                showSnackbar={showSnackbar}
-              />
+                sx={{ mb: isMobile ? 2 : 0 }}>
+                <TaskCard
+                  task={task}
+                  onEdit={() => handleEditTask(task)}
+                  showSnackbar={showSnackbar}
+                />
+              </Box>
             ))
           ) : (
             <Card
               variant="outlined"
               sx={{
-                width: 300,
                 height: 198,
                 display: 'flex',
                 alignItems: 'center',

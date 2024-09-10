@@ -5,6 +5,7 @@ import { loginUser } from '../redux/authSlice';
 import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert, Link } from '@mui/material';
 import { LoginRequest } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
+import PasswordField from './PasswordField';
 
 const LoginForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -58,19 +59,13 @@ const LoginForm: React.FC = () => {
               onChange={(e) => setUsername(e.target.value)}
               inputProps={{ "data-testid": "input-username" }}
             />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
+            <PasswordField
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              inputProps={{ "data-testid": "input-password" }}
+              label="Password"
+              id="password"
+              required
+              testId="input-password"
             />
             <Button
               type="submit"

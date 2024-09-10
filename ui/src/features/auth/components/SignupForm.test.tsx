@@ -33,14 +33,16 @@ describe('SignupForm', () => {
     
     const submitForm = async (request: SignupRequest) => {
         await act(async () => {
-            fireEvent.change(screen.getByLabelText(/Email Address/i), {
+            fireEvent.change(screen.getByTestId('input-email'), {
                 target: { value: request.username },
             });
-            fireEvent.change(screen.getByLabelText(/Password/i), {
+            fireEvent.change(screen.getByTestId('input-password'), {
+                target: { value: request.password },
+            });
+            fireEvent.change(screen.getByTestId('input-confirm-password'), {
                 target: { value: request.password },
             });
             fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
-
         });
     };
     
@@ -48,8 +50,9 @@ describe('SignupForm', () => {
         const store = setupStore();
         renderWithProviders(store);
         
-        expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
+        expect(screen.getByTestId('input-email')).toBeInTheDocument();
+        expect(screen.getByTestId('input-password')).toBeInTheDocument();
+        expect(screen.getByTestId('input-confirm-password')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /Sign Up/i })).toBeInTheDocument();
     });
     
@@ -78,8 +81,9 @@ describe('SignupForm', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByLabelText(/Email Address/i)).toHaveValue(mockUser.username);
-            expect(screen.getByLabelText(/Password/i)).toHaveValue('password123');
+            expect(screen.getByTestId('input-email')).toHaveValue(mockUser.username);
+            expect(screen.getByTestId('input-password')).toHaveValue('password123');
+            expect(screen.getByTestId('input-confirm-password')).toHaveValue('password123');
         });
     });
     
@@ -176,5 +180,32 @@ describe('SignupForm', () => {
             expect(screen.queryByText(/Signup failed. Please check your details./i)).toBeNull();
         });
         server.dispose();
+    });
+
+    it('should show an error message if passwords do not match', async () => {
+        const store = setupStore();
+        renderWithProviders(store);
+
+        userEvent.type(screen.getByTestId('input-email'), mockUser.username);
+        userEvent.type(screen.getByTestId('input-password'), 'password123');
+        userEvent.type(screen.getByTestId('input-confirm-password'), 'password456');
+
+        const signUpButton = screen.getByRole('button', { name: /Sign Up/i });
+        
+        expect(signUpButton).toBeDisabled();
+        expect(screen.getByText(/Passwords do not match/i)).toBeInTheDocument();
+    });
+
+    it('should not show a password error message if confirm password is empty', async () => {
+        const store = setupStore();
+        renderWithProviders(store);
+
+        userEvent.type(screen.getByTestId('input-email'), mockUser.username);
+        userEvent.type(screen.getByTestId('input-password'), 'password123');
+
+        const signUpButton = screen.getByRole('button', { name: /Sign Up/i });
+        
+        expect(signUpButton).toBeDisabled();
+        expect(screen.queryByText(/Passwords do not match/i)).toBeNull();
     });
 });
