@@ -213,11 +213,11 @@ const TasksPage = () => {
           onClose={handleSnackbarClose}
           severity={snackbarSeverity}
           action={
-            snackbarUndoAction ? (
+            snackbarUndoAction && (
               <Button color="inherit" onClick={handleSnackbarAction}>
                 Undo
               </Button>
-            ) : null
+            )
           }>
           {snackbarMessage}
         </Alert>

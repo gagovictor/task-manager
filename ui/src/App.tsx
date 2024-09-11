@@ -9,6 +9,7 @@ import TasksPage from './features/tasks/pages/TasksPage';
 import ArchivedTasksPage from './features/tasks/pages/ArchivedTasksPage';
 import AuthGuard from './features/shared/components/AuthGuard';
 import TaskBoardPage from './features/tasks/pages/TaskBoardPage';
+import PwaInstallPrompt from './features/shared/components/PwaInstallPrompt';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <PwaInstallPrompt />
       </div>
     </BrowserRouter>
   );

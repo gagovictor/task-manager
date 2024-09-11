@@ -1,6 +1,7 @@
 {
   "short_name": "Tasks",
   "name": "Tasks",
+  "description": "Manage your tasks",
   "icons": [
     {
       "src": "favicon.ico",

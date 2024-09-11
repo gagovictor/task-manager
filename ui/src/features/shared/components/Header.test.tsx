@@ -26,7 +26,7 @@ jest.mock('../../../features/auth/redux/authSlice', () => ({
 describe('Header component', () => {
   const mockStore = configureStore([]);
 
-  it('should render Task Manager title', () => {
+  it('should render Tasks title', () => {
     const store = mockStore({
       auth: {
         isAuthenticated: false,
@@ -42,7 +42,7 @@ describe('Header component', () => {
       </Provider>
     );
 
-    expect(screen.getByText('Task Manager')).toBeInTheDocument();
+    expect(screen.getByText('Tasks')).toBeInTheDocument();
   });
 
   it('should display Login button when not authenticated', () => {
