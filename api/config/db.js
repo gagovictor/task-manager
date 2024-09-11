@@ -2,7 +2,7 @@ require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
 const dialect = process.env.DB_DIALECT || 'postgres';
-let connstring, host, port, database, user, password;
+let host, port, database, user, password;
 
 switch (dialect) {
   case 'postgres':
@@ -14,16 +14,11 @@ switch (dialect) {
     break;
 
   case 'mssql':
-    host = process.env.MYSQL_HOST;
-    port = process.env.MYSQL_PORT;
-    database = process.env.MYSQL_DATABASE;
-    user = process.env.MYSQL_USER;
-    password = process.env.MYSQL_PASSWORD;
-    break;
-
-  case 'cosmosdb':
-    connstring = process.env.COSMOSDB_CONNECTION_STRING;
-    console.log(connstring);
+    host = process.env.SQL_HOST;
+    port = process.env.SQL_PORT;
+    database = process.env.SQL_DATABASE;
+    user = process.env.SQL_USER;
+    password = process.env.SQL_PASSWORD;
     break;
 
   default:
