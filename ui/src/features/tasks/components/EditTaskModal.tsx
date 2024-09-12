@@ -20,12 +20,12 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
   const [time, setTime] = useState('');
   const [status, setStatus] = useState('');
   const dispatch = useDispatch<AppDispatch>();
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
     setTitle(task.title);
     setDescription(task.description);
     if (task.dueDate) {
-      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const zonedDate = toZonedTime(task.dueDate, timeZone);
       setDate(format(zonedDate, 'yyyy-MM-dd'));
       setTime(format(zonedDate, 'HH:mm'));
@@ -38,9 +38,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
 
   const handleUpdate = async () => {
     if (title) {
-      let dueDate = '';
+      let dueDate: string | null = null;
       if (date || time) {
-        const finalDate = date || new Date().toISOString().split('T')[0];
+        const zonedToday = toZonedTime(new Date(), timeZone);
+        const finalDate = date || format(zonedToday, 'yyyy-MM-dd');
         const finalTime = time || '00:00:00';
         const localDateTime = new Date(`${finalDate}T${finalTime}`);
         dueDate = localDateTime.toISOString();

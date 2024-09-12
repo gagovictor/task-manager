@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { createTaskAsync } from '../redux/tasksSlice';
 import { taskStatuses } from '../models/task';
+import { format, toZonedTime } from 'date-fns-tz';
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -19,12 +20,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
   const [status, setStatus] = useState(taskStatuses[0]);
   const dispatch = useDispatch<AppDispatch>();
   const { createStatus } = useSelector((state: RootState) => state.tasks);
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const handleCreate = async () => {
     if (title) {
-      let dueDate = '';
+      let dueDate: string | null = null;
       if (date || time) {
-        const finalDate = date || new Date().toISOString().split('T')[0];
+        const zonedToday = toZonedTime(new Date(), timeZone);
+        const finalDate = date || format(zonedToday, 'yyyy-MM-dd');
         const finalTime = time || '00:00:00';
         const localDateTime = new Date(`${finalDate}T${finalTime}`);
         dueDate = localDateTime.toISOString();
