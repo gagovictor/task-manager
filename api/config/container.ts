@@ -1,7 +1,7 @@
 import TaskController from "../controllers/taskController";
 import AuthController from "../controllers/authController";
-import SequelizeTaskRepository from "../repositories/sql/taskRepository";
-import SequelizeUserRepository from "../repositories/sql/userRepository";
+import SequelizeTaskRepository from "../repositories/sequelize/taskRepository";
+import SequelizeUserRepository from "../repositories/sequelize/userRepository";
 import CosmosTaskRepository from "../repositories/cosmos/taskRepository";
 import CosmosUserRepository from "../repositories/cosmos/userRepository";
 import TaskService from "../services/taskService";
@@ -9,6 +9,8 @@ import AuthService from "../services/authService";
 import ITaskRepository from "../repositories/taskRepository";
 import IUserRepository from "../repositories/userRepository";
 import { cosmosClient, cosmosDatabaseId, cosmosContainerId, dbType } from "./db";
+import MongooseTaskRepository from "../repositories/mongoose/taskRepository";
+import MongooseUserRepository from "../repositories/mongoose/userRepository";
 
 class Container {
     private static taskController: TaskController;
@@ -29,6 +31,9 @@ class Container {
                 case 'cosmos':
                     this.taskRepository = new CosmosTaskRepository(cosmosClient, cosmosDatabaseId, cosmosContainerId);
                     break;
+                case 'mongodb':
+                    this.taskRepository = new MongooseTaskRepository();
+                    break;
                 default:
                     throw new Error(`Unsupported database type ${dbType}`);
             }
@@ -44,6 +49,9 @@ class Container {
                     break;
                 case 'cosmos':
                     this.userRepository = new CosmosUserRepository(cosmosClient, cosmosDatabaseId, cosmosContainerId);
+                    break;
+                case 'mongodb':
+                    this.userRepository = new MongooseUserRepository();
                     break;
                 default:
                     throw new Error(`Unsupported database type ${dbType}`);

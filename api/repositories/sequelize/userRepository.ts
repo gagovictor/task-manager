@@ -1,4 +1,4 @@
-import { User } from '../../models/sql/user';
+import { SequelizeUser as User } from '../../models/sequelize/user';
 import IUserRepository from '../userRepository';
 import { Op } from 'sequelize';
 

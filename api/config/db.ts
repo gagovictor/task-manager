@@ -1,7 +1,8 @@
 import { DataTypes, Sequelize } from 'sequelize';
 import { CosmosClient } from '@azure/cosmos';
-import User from '../models/sql/user';
-import { Task } from '../models/sql/task';
+import User from '../models/sequelize/user';
+import { SequelizeTask } from '../models/sequelize/task';
+import mongoose, { ConnectOptions } from 'mongoose';
 
 export const dbType: string = process.env.DB_TYPE || '';
 
@@ -87,7 +88,7 @@ async function connectToDatabase() {
             timestamps: true,
         });
         
-        Task.init({
+        SequelizeTask.init({
           id: {
               type: DataTypes.UUID,
               defaultValue: DataTypes.UUIDV4,
@@ -127,8 +128,8 @@ async function connectToDatabase() {
             timestamps: true,
         });
 
-        Task.belongsTo(User, { foreignKey: 'userId' });
-        User.hasMany(Task, { foreignKey: 'userId' });
+        SequelizeTask.belongsTo(User, { foreignKey: 'userId' });
+        User.hasMany(SequelizeTask, { foreignKey: 'userId' });
       } catch (err) {
         console.error('Unable to connect to the SQL database:', err);
         throw err;
@@ -137,6 +138,7 @@ async function connectToDatabase() {
 
     case 'cosmos':
       const cosmosConnectionString = process.env.COSMOS_CONNECTION_STRING;
+      console.log(cosmosConnectionString)
       cosmosDatabaseId = process.env.COSMOS_DATABASE_ID || '';
       cosmosContainerId = process.env.COSMOS_CONTAINER_ID || '';
 
@@ -147,10 +149,25 @@ async function connectToDatabase() {
       cosmosClient = new CosmosClient(cosmosConnectionString);
 
       try {
-        const { database } = await cosmosClient.databases.createIfNotExists({ id: cosmosContainerId });
+        const { database } = await cosmosClient.databases.createIfNotExists({ id: cosmosDatabaseId });
         console.log(`Connected to CosmosDB. Database: ${database.id}`);
       } catch (err) {
         console.error('Unable to connect to CosmosDB:', err);
+        throw err;
+      }
+      break;
+
+    case 'mongodb':
+      const mongoDbUri = process.env.MONGO_URI || '';
+      if (!mongoDbUri) {
+        throw new Error('MongoDB connection URI is missing.');
+      }
+
+      try {
+        await mongoose.connect(mongoDbUri);
+        console.log('Connected to MongoDB.');
+      } catch (err) {
+        console.error('Failed to connect to MongoDB:', err);
         throw err;
       }
       break;

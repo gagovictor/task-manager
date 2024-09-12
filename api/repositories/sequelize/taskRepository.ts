@@ -1,10 +1,10 @@
 import ITaskRepository from '../taskRepository';
-import { Task } from '../../models/sql/task';
+import { SequelizeTask } from '../../models/sequelize/task';
 
 export default class SequelizeTaskRepository implements ITaskRepository {
-    async createTask(task: Task): Promise<Task> {
+    async createTask(task: SequelizeTask): Promise<SequelizeTask> {
         try {
-            const newTask = await Task.create({ ...task });
+            const newTask = await SequelizeTask.create({ ...task });
             return newTask;
         } catch (error: any) {
             console.error('Task creation error:', error);
@@ -12,9 +12,9 @@ export default class SequelizeTaskRepository implements ITaskRepository {
         }
     }
 
-    async getTasksByUser(userId: string): Promise<Task[]> {
+    async getTasksByUser(userId: string): Promise<SequelizeTask[]> {
         try {
-            const tasks = await Task.findAll({
+            const tasks = await SequelizeTask.findAll({
                 where: {
                     userId,
                     deletedAt: null
@@ -27,10 +27,10 @@ export default class SequelizeTaskRepository implements ITaskRepository {
         }
     }
 
-    async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
+    async updateTask(id: string, updates: Partial<SequelizeTask>): Promise<SequelizeTask> {
         console.log(id, updates)
         try {
-            const task = await Task.findOne({
+            const task = await SequelizeTask.findOne({
                 where: {
                     id,
                     deletedAt: null
@@ -55,7 +55,7 @@ export default class SequelizeTaskRepository implements ITaskRepository {
 
     async deleteTask(id: string, userId: string): Promise<void> {
         try {
-            const task = await Task.findOne({
+            const task = await SequelizeTask.findOne({
                 where: {
                     id,
                     userId,
@@ -79,7 +79,7 @@ export default class SequelizeTaskRepository implements ITaskRepository {
 
     async archiveTask(id: string, userId: string): Promise<void> {
         try {
-            const task = await Task.findOne({
+            const task = await SequelizeTask.findOne({
                 where: {
                     id,
                     userId,
@@ -101,7 +101,7 @@ export default class SequelizeTaskRepository implements ITaskRepository {
 
     async unarchiveTask(id: string, userId: string): Promise<void> {
         try {
-            const task = await Task.findOne({
+            const task = await SequelizeTask.findOne({
                 where: {
                     id,
                     userId,
@@ -121,9 +121,9 @@ export default class SequelizeTaskRepository implements ITaskRepository {
         }
     }
 
-    async updateTaskStatus(taskId: string, status: string, userId: string): Promise<Task | null> {
+    async updateTaskStatus(taskId: string, status: string, userId: string): Promise<SequelizeTask | null> {
         try {
-            const task = await Task.findOne({
+            const task = await SequelizeTask.findOne({
                 where: {
                     id: taskId,
                     userId

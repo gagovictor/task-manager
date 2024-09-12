@@ -1,6 +1,6 @@
 import { Model } from 'sequelize';
 
-export class Task extends Model {
+export class SequelizeTask extends Model {
     public id!: string;
     public title!: string;
     public description?: string;
@@ -10,3 +10,5 @@ export class Task extends Model {
     public deletedAt?: Date;
     public archivedAt?: Date;
 }
+
+export default SequelizeTask;
