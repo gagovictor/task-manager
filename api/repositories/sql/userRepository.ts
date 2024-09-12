@@ -1,31 +1,31 @@
-import User from '../../models/sql/user';
-import UserRepository from '../userRepository';
+import { User } from '../../models/sql/user';
+import IUserRepository from '../userRepository';
+import { Op } from 'sequelize';
 
-class SqlUserRepository implements UserRepository {
-    async createUser(user: User): Promise<User> {
-        return User.create(user);
+export class SequelizeUserRepository implements IUserRepository {
+    async findByUsernameOrEmail(username: string, email: string): Promise<User | null> {
+        return User.findOne({
+            where: {
+                [Op.or]: [{ username }, { email }],
+            },
+        });
     }
     
-    async getUserById(id: string): Promise<User | null> {
-        return User.findByPk(id);
+    async createUser(userData: Partial<User>): Promise<User> {
+        return User.create(userData);
     }
     
-    async updateUser(id: string, userData: Partial<User>): Promise<User | null> {
-        const user = await User.findByPk(id);
+    async findByUsername(username: string): Promise<User | null> {
+        return User.findOne({ where: { username } });
+    }
+    
+    async findById(userId: string): Promise<User | null> {
+        return User.findByPk(userId);
+    }
+    
+    async updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
+        const user = await User.findByPk(userId);
         if (!user) return null;
-        return user.update(userData);
-    }
-    
-    async deleteUser(id: string): Promise<User | null> {
-        const user = await User.findByPk(id);
-        if (!user) return null;
-        await user.destroy();
-        return user;
-    }
-    
-    async getAllUsers(): Promise<User[]> {
-        return User.findAll();
+        return user.update(updates);
     }
 }
-
-export default SqlUserRepository;

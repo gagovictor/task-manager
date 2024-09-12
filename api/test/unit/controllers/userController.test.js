@@ -1,9 +1,9 @@
 
-const { signup, login } = require('../../../controllers/userController');
-const userService = require('../../../services/userService');
+const { signup, login } = require('../../../controllers/authController');
+const authService = require('../../../services/authService');
 const httpMocks = require('node-mocks-http');
 
-jest.mock('../../../services/userService');
+jest.mock('../../../services/authService');
 
 jest.mock('sequelize', () => {
   const DataTypes = {
@@ -26,7 +26,7 @@ jest.mock('sequelize', () => {
   };
 });
 
-describe('UserController', () => {
+describe('AuthController', () => {
   let req, res;
   
   beforeAll(() => {
@@ -63,7 +63,7 @@ describe('UserController', () => {
     it('should log in a user successfully', async () => {
       // Arrange
       const token = 'fake-jwt-token';
-      userService.login.mockResolvedValue(token);
+      authService.login.mockResolvedValue(token);
       
       req.body = { username: 'testuser', password: 'password' };
       
@@ -78,7 +78,7 @@ describe('UserController', () => {
     it('should handle login error', async () => {
       // Arrange
       const error = new Error('Login failed');
-      userService.login.mockRejectedValue(error);
+      authService.login.mockRejectedValue(error);
       
       req.body = { username: 'testuser', password: 'password' };
       

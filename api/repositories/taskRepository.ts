@@ -1,20 +1,11 @@
-interface Task {
-    id: string;
-    title: string;
-    description?: string;
-    dueDate?: Date;
-    status?: string;
-    archivedAt?: Date;
-    deletedAt?: Date;
-    userId?: string;
-}
+import { Task } from '../models/task';
 
-interface TaskRepository {
+export default interface ITaskRepository {
     createTask(task: Task): Promise<Task>;
-    getTaskById(id: string): Promise<Task | null>;
-    updateTask(id: string, task: Partial<Task>): Promise<Task | null>;
-    deleteTask(id: string): Promise<Task | null>;
-    getAllTasks(): Promise<Task[]>;
+    getTasksByUser(userId: string): Promise<Task[]>;
+    updateTask(id: string, updates: Partial<Task>): Promise<Task>;
+    deleteTask(id: string, userId: string): Promise<void>;
+    archiveTask(id: string, userId: string): Promise<void>;
+    unarchiveTask(id: string, userId: string): Promise<void>;
+    updateTaskStatus(taskId: string, status: string, userId: string): Promise<Task | null>;
 }
-
-export default TaskRepository;

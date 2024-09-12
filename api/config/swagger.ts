@@ -1,15 +1,12 @@
-// swagger.js or your swagger configuration file
+import swaggerJsdoc, { Options } from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
-
-// Basic swagger definition
 const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
-    title: 'Your API',
+    title: 'Task Manager API',
     version: '1.0.0',
-    description: 'Description of your API',
+    description: 'REST API for CRUD operations of Task Manager',
   },
   servers: [
     {
@@ -33,15 +30,11 @@ const swaggerDefinition = {
   ],
 };
 
-const options = {
+const options: Options = {
   swaggerDefinition,
-  // Paths to files containing OpenAPI definitions
-  apis: ['./routes/*.js'], // adjust the path as needed
+  apis: ['./routes/*.ts'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
-module.exports = {
-  swaggerUi,
-  swaggerSpec,
-};
+export { swaggerUi, swaggerSpec };

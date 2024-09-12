@@ -35,7 +35,7 @@ jest.mock('sequelize', () => {
   };
 });
 
-const { signup, login } = require('../../../services/userService');
+const { signup, login } = require('../../../services/authService');
 
 describe('User Service', () => {
   beforeAll(() => {

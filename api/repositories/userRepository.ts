@@ -1,16 +1,10 @@
-interface User {
-    id: string;
-    username: string;
-    password: string;
-    email: string;
+import { User } from "../models/user";
+
+export default interface IUserRepository {
+    findByUsernameOrEmail(username: string, email: string): Promise<User | null>;
+    createUser(userData: Partial<User>): Promise<User>;
+    findByUsername(username: string): Promise<User | null>;
+    findById(userId: string): Promise<User | null>;
+    updateUser(userId: string, updates: Partial<User>): Promise<User | null>;
 }
 
-interface UserRepository {
-    createUser(user: User): Promise<User>;
-    getUserById(id: string): Promise<User | null>;
-    updateUser(id: string, user: Partial<User>): Promise<User | null>;
-    deleteUser(id: string): Promise<User | null>;
-    getAllUsers(): Promise<User[]>;
-}
-
-export default UserRepository;

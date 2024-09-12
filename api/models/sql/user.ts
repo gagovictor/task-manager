@@ -1,7 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/db';
 
-class User extends Model {
+export class User extends Model {
     public id!: string;
     public username!: string;
     public password!: string;
@@ -30,7 +30,9 @@ User.init({
     },
 }, {
     sequelize,
+    tableName: 'Users',
     modelName: 'User',
+    timestamps: true,
 });
 
 export default User;

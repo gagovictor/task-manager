@@ -1,16 +1,16 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../../config/db';
-import SequelizeUser from './user';
+import User from './user';
 
-class Task extends Model {
+export class Task extends Model {
     public id!: string;
     public title!: string;
     public description?: string;
     public dueDate?: Date;
-    public status?: string;
-    public archivedAt?: Date;
+    public status!: string;
+    public userId!: string;
     public deletedAt?: Date;
-    public userId?: string;
+    public archivedAt?: Date;
 }
 
 Task.init({
@@ -48,11 +48,9 @@ Task.init({
     },
 }, {
     sequelize,
+    tableName: 'Tasks',
     modelName: 'Task',
-    paranoid: true, // To enable soft deletes with Sequelize
 });
 
-Task.belongsTo(SequelizeUser, { foreignKey: 'userId' });
-SequelizeUser.hasMany(Task, { foreignKey: 'userId' });
-
-export default Task;
+Task.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Task, { foreignKey: 'userId' });

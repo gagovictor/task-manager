@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, { Application } from 'express';
 import cors, { CorsOptions } from 'cors';
-import { swaggerUi, swaggerSpec } from './swagger';
+import { swaggerUi, swaggerSpec } from './config/swagger';
 import sequelize from './config/db';
 import morgan from 'morgan';
 import logger from './config/logger';
@@ -21,12 +21,14 @@ const corsOptions: CorsOptions = {
 app.use(cors(corsOptions));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json());
-app.use(morgan('combined', { stream: { write: (message: string) => logger.info(message.trim()) } }));
+app.use(morgan('combined', {
+  stream: {
+    write: (message: string) => logger.info(message.trim())
+  }
+}));
 
-// Public routes (no authentication)
+// API Routes
 app.use(publicRouter);
-
-// Protected routes (authentication required)
 app.use(protectedRouter);
 
 // Sync database and start server
@@ -34,6 +36,10 @@ async function connectToDatabase() {
   try {
     await sequelize.authenticate();
     console.log('Database connection successful.');
+
+    sequelize.sync()
+      .then(() => console.log('Database & tables created!'))
+      .catch(err => console.error('Unable to connect to the database:', err));
   } catch (err) {
     console.error('Unable to connect to the database:', err);
   }
