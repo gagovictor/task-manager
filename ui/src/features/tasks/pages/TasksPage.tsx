@@ -130,11 +130,16 @@ const TasksPage = () => {
           {fetchError}
         </Alert>
       }
+      {fetchStatus === 'succeeded' && filteredTasks.length == 0 && (
+        <Alert severity="info" sx={{ mb: 4, flex: 1 }}>
+          No tasks match the filter criteria.
+        </Alert>
+      )}
       {fetchStatus === 'succeeded' && (
         <Masonry
           columns={isMobile ? 1 : 3}
           spacing={isMobile ? 0 : 2}>
-          {filteredTasks.length > 0 ? (
+          {filteredTasks.length > 0 ?? (
             filteredTasks.map((task: Task) => (
               <Box
                 key={task.id}
@@ -146,19 +151,6 @@ const TasksPage = () => {
                 />
               </Box>
             ))
-          ) : (
-            <Card
-              variant="outlined"
-              sx={{
-                height: 198,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: theme.palette.background.paper,
-              }}
-            >
-              <Typography>No tasks match the filter criteria.</Typography>
-            </Card>
           )}
           <Card
             variant="outlined"
