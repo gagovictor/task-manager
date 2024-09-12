@@ -1,11 +1,16 @@
 import express from 'express';
 import authMiddleware from '../middlewares/auth';
 import createTaskRouter from './tasks';
+import Container from '../config/container';
 
-const protectedRouter = express.Router();
+const getProtectedRouter = () => {
+    const protectedRouter = express.Router();
+    
+    protectedRouter.use(authMiddleware(Container.getUserRepository()));
+    
+    protectedRouter.use('/tasks', createTaskRouter());
+    
+    return protectedRouter;
+}
 
-protectedRouter.use(authMiddleware);
-
-protectedRouter.use('/tasks', createTaskRouter());
-
-export default protectedRouter;
+export default getProtectedRouter;

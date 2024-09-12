@@ -1,7 +1,7 @@
 import ITaskRepository from '../taskRepository';
 import { Task } from '../../models/sql/task';
 
-export class SequelizeTaskRepository implements ITaskRepository {
+export default class SequelizeTaskRepository implements ITaskRepository {
     async createTask(task: Task): Promise<Task> {
         try {
             const newTask = await Task.create({ ...task });

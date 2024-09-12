@@ -1,8 +1,12 @@
 import express from 'express';
 import createAuthRouter from './auth';
 
-const publicRouter = express.Router();
+const getPublicRouter = () => {
+    const publicRouter = express.Router();
+    
+    publicRouter.use('/', createAuthRouter());
 
-publicRouter.use('/', createAuthRouter());
+    return publicRouter;    
+};
 
-export default publicRouter;
+export default getPublicRouter;

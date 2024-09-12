@@ -2,7 +2,7 @@ import { User } from '../../models/sql/user';
 import IUserRepository from '../userRepository';
 import { Op } from 'sequelize';
 
-export class SequelizeUserRepository implements IUserRepository {
+export default class SequelizeUserRepository implements IUserRepository {
     async findByUsernameOrEmail(username: string, email: string): Promise<User | null> {
         return User.findOne({
             where: {
