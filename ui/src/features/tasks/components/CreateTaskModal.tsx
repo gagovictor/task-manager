@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select, Checkbox, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { createTaskAsync } from '../redux/tasksSlice';
 import { taskStatuses } from '../models/task';
 import { format, toZonedTime } from 'date-fns-tz';
+import { ChecklistItem } from '../models/checklist';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -21,6 +23,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { createStatus } = useSelector((state: RootState) => state.tasks);
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [alignment, setAlignment] = useState('text');
+  const [isChecklistMode, setIsChecklistMode] = useState(false);
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
 
   const handleCreate = async () => {
     if (title) {
@@ -45,6 +50,43 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
     }
   };
 
+  const addChecklistItem = () => {
+    setChecklistItems([...checklistItems, { id: uuidv4(), text: '', completed: false }]);
+  };
+  
+  const removeChecklistItem = (id: string) => {
+    setChecklistItems(checklistItems.filter(item => item.id !== id));
+  };
+  
+  const toggleChecklistItemCompletion = (id: string) => {
+    setChecklistItems(checklistItems.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
+  };
+    
+  const handleModeChange = (event: React.MouseEvent<HTMLElement>, newAlignment: string) => {
+    if (newAlignment !== null) {
+      setAlignment(newAlignment);
+      setIsChecklistMode(newAlignment === 'checklist');
+      if(!checklistItems.length) {
+        setChecklistItems([{ id: uuidv4(), text: '' , completed: false }]);
+      }
+    }
+  };
+
+  const handleChecklistFocus = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    if(checklistItems[index].text && index == checklistItems.length - 1) {
+      addChecklistItem();
+    }
+  };
+  
+  const handleChecklistChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const newItems = [...checklistItems];
+    newItems[index] = { ...newItems[index], text: e.target.value };
+    setChecklistItems(newItems);
+    if(index == checklistItems.length - 1) {
+      addChecklistItem();
+    }
+  };
+  
   return (
     <Modal open={open} onClose={onClose}>
       <Box
@@ -83,7 +125,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           onChange={(e) => setTitle(e.target.value)}
           required
         />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mb: 1 }}>
           <TextField
             fullWidth
             margin="normal"
@@ -105,16 +147,56 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             onChange={(e) => setTime(e.target.value)}
           />
         </Box>
-        <TextField
-          fullWidth
-          multiline
-          rows={6}
-          margin="normal"
-          label="Description"
-          variant="outlined"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+
+        <Box display="flex" justifyContent="flex-end" alignItems="center" sx={{ mb: isChecklistMode ? 2 : 0 }}>
+          <ToggleButtonGroup
+            color="primary"
+            value={alignment}
+            exclusive
+            onChange={handleModeChange}
+            aria-label="Task Input Mode"
+          >
+            <ToggleButton value="text">Text</ToggleButton>
+            <ToggleButton value="checklist">Checklist</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+        
+        {isChecklistMode ? (
+          <Box sx={{ height: '178px', overflowY: 'auto' }}>
+            {checklistItems.map((item, index) => (
+              <Box
+                key={item.id} display="flex" alignItems="center" mb={1}>
+                <Checkbox
+                  checked={item.completed}
+                  onChange={() => toggleChecklistItemCompletion(item.id)}
+                />
+                <TextField
+                  value={item.text}
+                  onFocus={(e) => handleChecklistFocus(e as any, index)}
+                  onChange={(e) => handleChecklistChange(e as any, index)}
+                  placeholder={`Item ${index + 1}`}
+                  fullWidth
+                />
+                <IconButton onClick={() => removeChecklistItem(item.id)} aria-label="Remove item">
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <TextField
+            fullWidth
+            multiline
+            rows={6}
+            margin="normal"
+            label="Description"
+            variant="outlined"
+            value={description}
+            sx={{ height: '170px' }}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        )}
+
         <FormControl fullWidth margin="normal">
           <InputLabel>Status</InputLabel>
           <Select

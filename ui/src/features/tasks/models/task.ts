@@ -1,3 +1,5 @@
+import { ChecklistItem } from './checklist';
+
 export interface Task {
   id: string; // UUID
   title: string;
@@ -7,6 +9,7 @@ export interface Task {
   userId: string;
   archivedAt: string|null;
   deletedAt: string|null;
+  checklist?: ChecklistItem[];
 }
 
 export type TaskStatus = 'new' | 'active' | 'completed' | 'removed';
