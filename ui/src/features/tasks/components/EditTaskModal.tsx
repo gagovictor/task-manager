@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../store';
 import { updateTaskAsync } from '../redux/tasksSlice';
 import { Task, taskStatuses } from '../models/task';
 import { format, toZonedTime } from 'date-fns-tz';
@@ -14,6 +14,7 @@ interface EditTaskModalProps {
 }
 
 const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) => {
+  const { updateStatus } = useSelector((state: RootState) => state.tasks);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -47,7 +48,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
         dueDate = localDateTime.toISOString();
       }
       try {
-        await dispatch(updateTaskAsync({ id: task.id, title, description, dueDate, status: status as string })).unwrap();
+        await dispatch(updateTaskAsync({ id: task.id, title, description, checklist: null, dueDate, status: status as string })).unwrap();
         setTitle('');
         setDescription('');
         setDate('');
@@ -148,6 +149,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
           color="primary"
           sx={{ mt: 2 }}
           onClick={handleUpdate}
+          disabled={updateStatus == 'loading' || !title }
         >
           Update
         </Button>

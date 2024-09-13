@@ -91,6 +91,7 @@ describe('CreateTaskModal component', () => {
         const task: CreateTaskRequest = {
             title: 'Test Title',
             description: 'Test Description',
+            checklist: null,
             dueDate: new Date().toISOString(),
             status: 'new',
         };
@@ -105,4 +106,31 @@ describe('CreateTaskModal component', () => {
         });
     });
     
+    it('should disable submit button if title is empty', async () => {
+        const store = setupStore(initialState);
+        
+        renderWithProviders(store, true);
+        const titleInput = await screen.getByLabelText(/Title/i);
+        await userEvent.clear(titleInput);
+        
+        const submitButton = await screen.getByRole('button', { name: /Create/i });
+        expect(submitButton).toBeDisabled();
+    });
+    
+    it('should disable submit button when createStatus is loading', async () => {
+        const store = setupStore({
+            ...initialState,
+            tasks: {
+                ...initialState.tasks,
+                createStatus: 'loading',
+            },
+        });
+
+        renderWithProviders(store, true);
+        const titleInput = await screen.getByLabelText(/Title/i);
+        await userEvent.type(titleInput, 'Sample Task');
+        
+        const submitButton = await screen.getByRole('button', { name: /Create/i });
+        expect(submitButton).toBeDisabled();
+    });
 });

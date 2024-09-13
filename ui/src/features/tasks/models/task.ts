@@ -9,7 +9,7 @@ export interface Task {
   userId: string;
   archivedAt: string|null;
   deletedAt: string|null;
-  checklist?: ChecklistItem[];
+  checklist?: ChecklistItem[]|null;
 }
 
 export type TaskStatus = 'new' | 'active' | 'completed' | 'removed';

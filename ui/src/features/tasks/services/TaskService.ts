@@ -1,4 +1,5 @@
 import apiClient from '../../shared/services/ApiService';
+import { ChecklistItem } from '../models/checklist';
 import { Task } from '../models/task';
 
 export const fetchTasks = async (token: string) => {
@@ -11,7 +12,8 @@ export const fetchTasks = async (token: string) => {
 export interface CreateTaskRequest {
     title: string;
     description: string;
-    dueDate: string|null;
+    checklist: ChecklistItem[] | null;
+    dueDate: string | null;
     status:  string/*TaskStatus*/;
 }
 
@@ -29,7 +31,8 @@ export interface UpdateTaskRequest {
     id: string;
     title: string;
     description: string;
-    dueDate: string|null;
+    checklist: string | null;
+    dueDate: string | null;
     status:  string/*TaskStatus*/;
 }
 

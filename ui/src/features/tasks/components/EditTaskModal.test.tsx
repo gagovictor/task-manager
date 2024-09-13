@@ -117,6 +117,7 @@ describe('EditTaskModal component', () => {
         const updatedTask: CreateTaskRequest = {
             title: 'Updated Title',
             description: 'Updated Description',
+            checklist: null,
             dueDate: new Date().toISOString(),
             status: 'completed',
         };
@@ -129,5 +130,33 @@ describe('EditTaskModal component', () => {
             expect(screen.getByLabelText(/Time/i)).toHaveValue('');
             expect(screen.getByLabelText(/Description/i)).toHaveValue('');
         });
+    });
+    
+    it('should disable submit button if title is empty', async () => {
+        const store = setupStore(initialState);
+        
+        renderWithProviders(store, true, mockTask);
+        const titleInput = await screen.getByLabelText(/Title/i);
+        await userEvent.clear(titleInput);
+        
+        const submitButton = await screen.getByRole('button', { name: /Update/i });
+        expect(submitButton).toBeDisabled();
+    });
+    
+    it('should disable submit button when createStatus is loading', async () => {
+        const store = setupStore({
+            ...initialState,
+            tasks: {
+                ...initialState.tasks,
+                updateStatus: 'loading',
+            },
+        });
+
+        renderWithProviders(store, true, mockTask);
+        const titleInput = await screen.getByLabelText(/Title/i);
+        await userEvent.type(titleInput, 'Sample Task');
+        
+        const submitButton = await screen.getByRole('button', { name: /Update/i });
+        expect(submitButton).toBeDisabled();
     });
 });

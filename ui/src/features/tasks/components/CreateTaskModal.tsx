@@ -38,7 +38,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
         dueDate = localDateTime.toISOString();
       }
       try {
-        await dispatch(createTaskAsync({ title, description, dueDate, status })).unwrap();
+        await dispatch(createTaskAsync({ title, description, checklist: checklistItems, dueDate, status })).unwrap();
         setTitle('');
         setDescription('');
         setDate('');
@@ -217,7 +217,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           color="primary"
           sx={{ mt: 2 }}
           onClick={handleCreate}
-          disabled={createStatus == 'loading'}
+          disabled={createStatus == 'loading' || !title }
         >
           Create
         </Button>

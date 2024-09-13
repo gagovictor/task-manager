@@ -44,7 +44,7 @@ describe('TaskService', () => {
 
     describe('createTask', () => {
         it('should return created task data when API call is successful', async () => {
-            const request = { title: 'New Task', description: 'Task Description', dueDate: new Date().toISOString(), status: 'active' };
+            const request = { title: 'New Task', description: 'Task Description', checklist: null, dueDate: new Date().toISOString(), status: 'active' };
             const token = 'fake-token';
             const response: Task = { id: '1', ...request, userId: 'userId', archivedAt: null, deletedAt: null };
             mockedApiClient.post.mockResolvedValue({ data: response });
@@ -59,7 +59,7 @@ describe('TaskService', () => {
         });
 
         it('should throw an error if the API call fails', async () => {
-            const request = { title: 'New Task', description: 'Task Description', dueDate: new Date().toISOString(), status: 'active' };
+            const request = { title: 'New Task', description: 'Task Description', checklist: null, dueDate: new Date().toISOString(), status: 'active' };
             const token = 'fake-token';
             mockedApiClient.post.mockRejectedValue(new Error('Network Error'));
 
@@ -69,7 +69,7 @@ describe('TaskService', () => {
 
     describe('updateTask', () => {
         it('should return updated task data when API call is successful', async () => {
-            const request = { id: '1', title: 'Updated Task', description: 'Updated Description', dueDate: new Date().toISOString(), status: 'completed' };
+            const request = { id: '1', title: 'Updated Task', description: 'Updated Description', checklist: null, dueDate: new Date().toISOString(), status: 'completed' };
             const token = 'fake-token';
             const response: Task = { ...request, userId: 'userId', archivedAt: null, deletedAt: null };
             mockedApiClient.patch.mockResolvedValue({ data: response });
@@ -84,7 +84,7 @@ describe('TaskService', () => {
         });
 
         it('should throw an error if the API call fails', async () => {
-            const request = { id: '1', title: 'Updated Task', description: 'Updated Description', dueDate: new Date().toISOString(), status: 'completed' };
+            const request = { id: '1', title: 'Updated Task', description: 'Updated Description', checklist: null, dueDate: new Date().toISOString(), status: 'completed' };
             const token = 'fake-token';
             mockedApiClient.patch.mockRejectedValue(new Error('Network Error'));
 

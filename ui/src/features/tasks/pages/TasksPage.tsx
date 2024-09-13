@@ -5,11 +5,12 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card, useMediaQuery, useTheme } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card, useMediaQuery, useTheme, IconButton, InputAdornment } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
 import { Task, taskStatuses } from '../models/task';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const TasksPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -59,20 +60,18 @@ const TasksPage = () => {
     return !task.archivedAt && !task.deletedAt && matchesStatus && matchesText;
   });
 
-  const handleClearFilters = () => {
-    setFilterStatus('');
-    setFilterText('');
-  };
-
+  const handleClearStatus = () => setFilterStatus('');
+  const handleClearSearch = () => setFilterText('');
+  
   return (
     <Container
       sx={{
         width: '100%',
+        minHeight: 'calc(100vh - 296px)',
         mt: isMobile ? 4 : 12,
         mb: isMobile ? 6 : 12,
         position: 'relative'
-      }}
-    >
+      }}>
       <Box sx={{ mb: 4 }}>
         <Box
           sx={{
@@ -84,13 +83,27 @@ const TasksPage = () => {
             flexDirection: isMobile ? 'column' : 'row'
           }}
         >
-          <Box sx={{ flex: 1, minWidth: 200 }}>
+          {/* Status Filter */}
+          <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
             <FormControl fullWidth margin="normal">
               <InputLabel>Status</InputLabel>
               <Select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as string)}
                 label="Status"
+                endAdornment={filterStatus && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="clear status filter"
+                      size="small"
+                      edge="end"
+                      sx={{ marginRight: '8px' }}
+                      onClick={handleClearStatus}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                )}
               >
                 <MenuItem value="">All</MenuItem>
                 {taskStatuses.map((statusOption) => (
@@ -101,7 +114,9 @@ const TasksPage = () => {
               </Select>
             </FormControl>
           </Box>
-          <Box sx={{ flex: 1, minWidth: 200 }}>
+
+          {/* Search Filter */}
+          <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
             <TextField
               fullWidth
               margin="normal"
@@ -109,18 +124,26 @@ const TasksPage = () => {
               variant="outlined"
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
+              InputProps={{
+                endAdornment: filterText && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="clear search"
+                      size="small"
+                      edge="end"
+                      onClick={handleClearSearch}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
             />
           </Box>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={handleClearFilters}
-          >
-            Clear Filters
-          </Button>
         </Box>
       </Box>
 
+      {/* Task Cards and Loading/Error Handling */}
       {fetchStatus === 'loading' && <CircularProgress />}
       {fetchStatus === 'failed' &&
         <Alert
@@ -139,7 +162,7 @@ const TasksPage = () => {
         <Masonry
           columns={isMobile ? 1 : 3}
           spacing={isMobile ? 0 : 2}>
-          {filteredTasks.length > 0 ?? (
+          {filteredTasks.length > 0 && (
             filteredTasks.map((task: Task) => (
               <Box
                 key={task.id}
