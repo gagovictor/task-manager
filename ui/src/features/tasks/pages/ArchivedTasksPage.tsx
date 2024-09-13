@@ -48,6 +48,7 @@ export default function ArchivedTasksPage() {
     <Container
       sx={{
         width: '100%',
+        minHeight: 'calc(100vh - 296px)',
         mt: isMobile ? 6 : 12,
         mb: isMobile ? 6 : 12,
         position: 'relative'
