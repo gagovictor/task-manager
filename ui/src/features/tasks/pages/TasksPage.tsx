@@ -165,8 +165,7 @@ const TasksPage = () => {
           {filteredTasks.length > 0 && (
             filteredTasks.map((task: Task) => (
               <Box
-                key={task.id}
-                sx={{ mb: isMobile ? 2 : 0 }}>
+                key={task.id}>
                 <TaskCard
                   task={task}
                   onEdit={() => handleEditTask(task)}

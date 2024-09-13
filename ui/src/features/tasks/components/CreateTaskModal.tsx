@@ -79,12 +79,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
   };
   
   const handleChecklistChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    console.log(e.target.value);
     const newItems = [...checklistItems];
     newItems[index] = { ...newItems[index], text: e.target.value };
-    setChecklistItems(newItems);
-    if(index == checklistItems.length - 1) {
-      addChecklistItem();
+    if(index == newItems.length - 1) {
+      newItems.push({ id: uuidv4(), text: '', completed: false });
     }
+    setChecklistItems(newItems);
   };
   
   return (
@@ -172,7 +173,6 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
                 />
                 <TextField
                   value={item.text}
-                  onFocus={(e) => handleChecklistFocus(e as any, index)}
                   onChange={(e) => handleChecklistChange(e as any, index)}
                   placeholder={`Item ${index + 1}`}
                   fullWidth
