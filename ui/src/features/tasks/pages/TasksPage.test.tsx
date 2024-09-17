@@ -172,7 +172,7 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
         });
     });
-
+    
     it('shows filtered tasks', async () => {
         renderWithProviders(store);
         
@@ -198,10 +198,10 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
         });
     });
-    
+
     it('clears filters when the clear button is clicked', async () => {
         renderWithProviders(store);
-     
+        
         await waitFor(() => {
             expect(screen.getByText('Task 1')).toBeInTheDocument();
             expect(screen.getByText('Task 2')).toBeInTheDocument();
@@ -209,23 +209,23 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 4')).toBeNull(); // Deleted
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
         });
-
-        waitFor(() => {
+        
+        await waitFor(() => {
             const searchInput = screen.getByLabelText(/Search/i);
             userEvent.type(searchInput, '1');
         });
-    
+        
         await waitFor(() => {
             expect(screen.queryByText('No tasks match the filter criteria.')).toBeNull();
             expect(screen.getByText('Task 1')).toBeInTheDocument();
             expect(screen.queryByText('Task 2')).toBeNull(); // No text match
         });
-
-        waitFor(() => {
-            const clearButton = screen.getByText(/Clear Filters/i);
-            userEvent.click(clearButton);
+        
+        await waitFor(() => {
+            const clearSearchButton = screen.getByLabelText('clear search');
+            userEvent.click(clearSearchButton);
         });
-    
+        
         await waitFor(() => {
             expect(screen.queryByText('No tasks match the filter criteria.')).toBeNull();
             expect(screen.getByText('Task 1')).toBeInTheDocument();

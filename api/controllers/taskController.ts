@@ -10,14 +10,14 @@ export default class TaskController {
   }
 
   public createTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { title, description, dueDate, status } = req.body;
+    const { title, description, checklist, dueDate, status } = req.body;
 
     try {
       if (!req.user) {
         res.status(401).json({ error: 'User not authenticated' });
         return;
       }
-      const task = await this.taskService.createTask({ title, description, dueDate, status, userId: req.user.id });
+      const task = await this.taskService.createTask({ title, description, checklist, dueDate, status, userId: req.user.id });
       res.status(201).json(task);
     } catch (error) {
       console.error('Task creation error:', error);
@@ -41,14 +41,14 @@ export default class TaskController {
 
   public updateTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { id } = req.params;
-    const { title, description, dueDate, status } = req.body;
+    const { title, description, checklist, dueDate, status } = req.body;
 
     try {
       if (!req.user) {
         res.status(401).json({ error: 'User not authenticated' });
         return;
       }
-      const task = await this.taskService.updateTask(id, { title, description, dueDate, status, userId: req.user.id });
+      const task = await this.taskService.updateTask(id, { title, description, checklist, dueDate, status, userId: req.user.id });
       res.status(200).json(task);
     } catch (error) {
       console.error('Task update error:', error);

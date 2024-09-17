@@ -31,7 +31,7 @@ export interface UpdateTaskRequest {
     id: string;
     title: string;
     description: string;
-    checklist: string | null;
+    checklist: ChecklistItem[] | null;
     dueDate: string | null;
     status:  string/*TaskStatus*/;
 }

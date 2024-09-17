@@ -10,6 +10,7 @@ export default class MongooseTaskRepository implements ITaskRepository {
             id: doc.id.toString(),
             title: doc.title,
             description: doc.description,
+            checklist: doc.checklist,
             dueDate: doc.dueDate,
             status: doc.status,
             archivedAt: doc.archivedAt,
