@@ -29,8 +29,8 @@ jobs:
 
       - name: Zip artifact for deployment
         run: |
-          cd ./api
-          zip -r ../release.zip . -x '*.git*' -x 'node_modules/*' -x 'tests/*'
+          cd ./api/dist
+          zip -r ../../release.zip . -x '*.git*' -x 'node_modules/*' -x 'tests/*'
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
