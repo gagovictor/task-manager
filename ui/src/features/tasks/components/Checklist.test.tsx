@@ -40,7 +40,6 @@ describe('Checklist component', () => {
         await userEvent.clear(textField);
         await userEvent.type(textField, 'Item 1 Updated');
         
-        // Check that the text field now displays the updated text
         expect(screen.getByDisplayValue('Item 1 Updated')).toBeInTheDocument();
     });
     
@@ -60,7 +59,6 @@ describe('Checklist component', () => {
         const textField = screen.getByPlaceholderText('Item 1');
         await userEvent.type(textField, 'First item');
         
-        // Since we are typing into the last item and it's not empty, a new item should be added
         expect(screen.getAllByRole('textbox')).toHaveLength(2);
         expect(screen.getByDisplayValue('First item')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Item 2')).toBeInTheDocument();
@@ -84,10 +82,8 @@ describe('Checklist component', () => {
         
         await userEvent.click(checkbox);
         
-        // After clicking, the checkbox should be checked
         expect(checkbox).toBeChecked();
         
-        // Clicking again should toggle back to unchecked
         await userEvent.click(checkbox);
         expect(checkbox).not.toBeChecked();
     });
@@ -108,7 +104,6 @@ describe('Checklist component', () => {
         const textField = screen.getByPlaceholderText('Item 1');
         await userEvent.type(textField, '');
         
-        // Since the text is empty, it should not add a new item
         expect(screen.getAllByRole('textbox')).toHaveLength(1);
     });
     
