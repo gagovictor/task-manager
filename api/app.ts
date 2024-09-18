@@ -1,5 +1,4 @@
 
-import 'dotenv/config';
 import express, { Application } from 'express';
 import cors, { CorsOptions } from 'cors';
 import { swaggerUi, swaggerSpec } from './config/swagger';

@@ -2,7 +2,7 @@ import { DataTypes, Sequelize } from 'sequelize';
 import { CosmosClient } from '@azure/cosmos';
 import User from '../models/sequelize/user';
 import { SequelizeTask } from '../models/sequelize/task';
-import mongoose, { ConnectOptions } from 'mongoose';
+import mongoose from 'mongoose';
 
 export const dbType: string = process.env.DB_TYPE || '';
 
