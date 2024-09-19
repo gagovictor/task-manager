@@ -13,7 +13,7 @@ export default class TaskController {
     const { title, description, checklist, dueDate, status } = req.body;
 
     try {
-      const task = await this.taskService.createTask({ title, description, checklist, dueDate, status, userId: req.user.id });
+      const task = await this.taskService.createTask({ title, description, checklist, dueDate, status, userId: req.user!.id });
       res.status(201).json(task);
     } catch (error) {
       console.error('Task creation error:', error);
@@ -23,8 +23,8 @@ export default class TaskController {
 
   public getTasks = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const tasks = await this.taskService.getTasksByUser(req.user.id);
-      res.status(200).json([]);
+      const tasks = await this.taskService.getTasksByUser(req.user!.id);
+      res.status(200).json(tasks);
     } catch (error) {
       console.error('Fetching tasks error:', error);
       res.status(500).json({ error: (error as Error).message });
@@ -36,7 +36,7 @@ export default class TaskController {
     const { title, description, checklist, dueDate, status } = req.body;
 
     try {
-      const task = await this.taskService.updateTask(id, { title, description, checklist, dueDate, status, userId: req.user.id });
+      const task = await this.taskService.updateTask(id, { title, description, checklist, dueDate, status, userId: req.user!.id });
       res.status(200).json(task);
     } catch (error) {
       console.error('Task update error:', error);
@@ -48,7 +48,7 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      await this.taskService.deleteTask(id, req.user.id);
+      await this.taskService.deleteTask(id, req.user!.id);
       res.status(204).json();
     } catch (error) {
       console.error('Task deletion error:', error);
@@ -60,7 +60,7 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      await this.taskService.archiveTask(id, req.user.id);
+      await this.taskService.archiveTask(id, req.user!.id);
       res.status(204).json();
     } catch (error) {
       console.error('Task archive error:', error);
@@ -72,7 +72,7 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      await this.taskService.unarchiveTask(id, req.user.id);
+      await this.taskService.unarchiveTask(id, req.user!.id);
       res.status(204).json();
     } catch (error) {
       console.error('Task unarchive error:', error);
@@ -85,7 +85,7 @@ export default class TaskController {
     const { status } = req.body;
 
     try {
-      const updatedTask = await this.taskService.updateTaskStatus(id, status, req.user.id);
+      const updatedTask = await this.taskService.updateTaskStatus(id, status, req.user!.id);
       if (!updatedTask) {
         res.status(404).json({ error: 'Task not found' });
         return;

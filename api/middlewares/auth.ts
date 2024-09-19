@@ -4,7 +4,7 @@ import IUserRepository from '../repositories/userRepository';
 import { User } from '../models/user';
 
 export interface AuthenticatedRequest extends Request {
-  user: User;
+  user?: User;
 }
 
 interface JwtPayload {
