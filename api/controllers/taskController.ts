@@ -13,10 +13,6 @@ export default class TaskController {
     const { title, description, checklist, dueDate, status } = req.body;
 
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
       const task = await this.taskService.createTask({ title, description, checklist, dueDate, status, userId: req.user.id });
       res.status(201).json(task);
     } catch (error) {
@@ -27,12 +23,8 @@ export default class TaskController {
 
   public getTasks = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
       const tasks = await this.taskService.getTasksByUser(req.user.id);
-      res.status(200).json(tasks);
+      res.status(200).json([]);
     } catch (error) {
       console.error('Fetching tasks error:', error);
       res.status(500).json({ error: (error as Error).message });
@@ -44,10 +36,6 @@ export default class TaskController {
     const { title, description, checklist, dueDate, status } = req.body;
 
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
       const task = await this.taskService.updateTask(id, { title, description, checklist, dueDate, status, userId: req.user.id });
       res.status(200).json(task);
     } catch (error) {
@@ -60,10 +48,6 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
       await this.taskService.deleteTask(id, req.user.id);
       res.status(204).json();
     } catch (error) {
@@ -76,10 +60,6 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
       await this.taskService.archiveTask(id, req.user.id);
       res.status(204).json();
     } catch (error) {
@@ -92,10 +72,6 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
       await this.taskService.unarchiveTask(id, req.user.id);
       res.status(204).json();
     } catch (error) {
@@ -109,10 +85,6 @@ export default class TaskController {
     const { status } = req.body;
 
     try {
-      if (!req.user) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
       const updatedTask = await this.taskService.updateTaskStatus(id, status, req.user.id);
       if (!updatedTask) {
         res.status(404).json({ error: 'Task not found' });

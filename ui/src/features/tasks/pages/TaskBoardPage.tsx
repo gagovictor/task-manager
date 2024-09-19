@@ -34,7 +34,6 @@ const TaskBoardPage = () => {
   const [draggingTask, setDraggingTask] = useState<Task | null>(null);
   const statusColumns = ['new', 'active', 'completed'];
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -186,7 +185,7 @@ const TaskBoardPage = () => {
             display: 'flex',
             flexDirection: 'column',
             margin: '0 8px',
-            minWidth: isMobile ? '60vw' : '360px',
+            minWidth: { sm: '60vw', md: '360px' },
             flex: '0 0 auto',
           }}
         >
@@ -235,8 +234,7 @@ const TaskBoardPage = () => {
       sx={{
         width: '100%',
         minHeight: 'calc(100vh - 296px)',
-        mt: isMobile ? 6 : 12,
-        mb: isMobile ? 6 : 12,
+        my: { sm: 6, md: 12 },
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',

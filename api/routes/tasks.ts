@@ -58,7 +58,6 @@ const createTaskRouter = (): Router => {
    *                 $ref: '#/components/schemas/Task'
    */
   router.get('/', async (req: Request, res: Response, next: NextFunction) => {
-    console.log('here')
     try {
       await taskController.getTasks(req, res);
     } catch (error) {

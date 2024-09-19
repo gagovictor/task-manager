@@ -5,7 +5,7 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, useMediaQuery, useTheme } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
@@ -22,8 +22,6 @@ export default function ArchivedTasksPage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     dispatch(fetchTasksAsync());
@@ -49,11 +47,10 @@ export default function ArchivedTasksPage() {
       sx={{
         width: '100%',
         minHeight: 'calc(100vh - 296px)',
-        mt: isMobile ? 6 : 12,
-        mb: isMobile ? 6 : 12,
+        mt: { sm: 4, md: 12 },
+        mb: { sm: 6, md: 12 },
         position: 'relative'
-      }}
-    >
+      }}>
       {fetchStatus === 'loading' && <CircularProgress />}
       {fetchStatus === 'failed' &&
         <Alert
@@ -65,12 +62,15 @@ export default function ArchivedTasksPage() {
       }
       {fetchStatus === 'succeeded' && activeTasks.length > 0 && (
         <Masonry
-          columns={isMobile ? 1 : 3}
-          spacing={isMobile ? 0 : 2}>
+          columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+          spacing={2}
+          data-testid="masonry"
+        >
           {activeTasks.map((task: Task) => (
             <Box
               key={task.id}
-              sx={{ mb: isMobile ? 2 : 0 }}>
+              data-testid="task-card"
+            >
               <TaskCard
                 task={task}
                 onEdit={() => handleEditTask(task)}

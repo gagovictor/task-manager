@@ -6,9 +6,8 @@
   "scripts": {
     "start": "node ./dist/app.js",
     "dev": "nodemon --watch . --exec \"npx ts-node\" ./app.ts",
-    "build": "npx tsc",
-    "test": "jest",
-    "postinstall": "npm run build"
+    "build": "tsc",
+    "test": "jest"
   },
   "engines": {
     "node": ">=18.0.0"

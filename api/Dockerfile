@@ -1,20 +1,14 @@
-# Use the official Node.js image
-FROM node:14
-
-# Set the working directory
-WORKDIR /app
-
-# Copy package.json and package-lock.json
+FROM node:20-bullseye AS build
+WORKDIR /usr/src/app
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
-
-# Copy the rest of the application code
 COPY . .
+RUN npm run build
 
-# Expose the application port
+FROM node:20-bullseye
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install --only=production
+COPY --from=build /usr/src/app/dist ./dist
 EXPOSE 8080
-
-# Start the application
-CMD ["node", "app.ts"]
+CMD ["node", "./dist/app.js"]

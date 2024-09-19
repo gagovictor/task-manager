@@ -5,7 +5,7 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card, useMediaQuery, useTheme, IconButton, InputAdornment } from '@mui/material';
+import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card, useTheme, IconButton, InputAdornment } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
@@ -25,7 +25,6 @@ const TasksPage = () => {
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterText, setFilterText] = useState<string>('');
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   useEffect(() => {
     dispatch(fetchTasksAsync());
@@ -68,19 +67,19 @@ const TasksPage = () => {
       sx={{
         width: '100%',
         minHeight: 'calc(100vh - 296px)',
-        mt: isMobile ? 4 : 12,
-        mb: isMobile ? 6 : 12,
+        mt: { sm: 4, md: 12 },
+        mb: { sm: 6, md: 12 },
         position: 'relative'
       }}>
       <Box sx={{ mb: 4 }}>
         <Box
           sx={{
             display: 'flex',
-            alignItems: isMobile ? 'stretch' : 'center',
+            alignItems: { sm: 'stretch', md: 'center' },
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: 2,
-            flexDirection: isMobile ? 'column' : 'row'
+            flexDirection: { sm: 'column', md: 'row' }
           }}
         >
           {/* Status Filter */}
@@ -160,11 +159,14 @@ const TasksPage = () => {
       )}
       {fetchStatus === 'succeeded' && (
         <Masonry
-          columns={isMobile ? 1 : 3}
-          spacing={isMobile ? 0 : 2}>
+          columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+          spacing={2}
+          data-testid="masonry"
+        >
           {filteredTasks.length > 0 && (
             filteredTasks.map((task: Task) => (
               <Box
+                data-testid="task-card"
                 key={task.id}>
                 <TaskCard
                   task={task}
