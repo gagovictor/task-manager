@@ -13,7 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { archiveTaskAsync, deleteTaskAsync, unarchiveTaskAsync } from '../redux/tasksSlice';
-import { Chip, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import { Task } from '../models/task';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
@@ -125,21 +125,41 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
               color={task.status == 'active' ? 'primary' : 'default'}
               label={formattedStatus} />
           </Box>
-          <Typography
-            sx={{ 
-              mb: 1.5, 
-              whiteSpace: 'pre-line', 
-              overflow: 'hidden', 
-              textOverflow: 'ellipsis', 
-              maxHeight: '5em',
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical'
-            }}
-            color="text.secondary"
-          >
-            {task.description ? task.description : 'No description provided'}
-          </Typography>
+
+          {task.checklist && task.checklist.length > 0 ? (
+            <List>
+              {task.checklist.slice(0, 3).map((item) => (
+                <ListItem key={item.id} disablePadding>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      checked={item.completed}
+                      tabIndex={-1}
+                      disableRipple
+                      inputProps={{ 'aria-labelledby': `checkbox-list-label-${item.id}` }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText id={`checkbox-list-label-${item.id}`} primary={item.text} />
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            <Typography
+              sx={{ 
+                mb: 1.5, 
+                whiteSpace: 'pre-line', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis', 
+                maxHeight: '5em',
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical'
+              }}
+              color="text.secondary"
+            >
+              {task.description ? task.description : 'No description provided'}
+            </Typography>
+          )}
         </CardContent>
         <CardActions>
           <Tooltip title="Edit Task">

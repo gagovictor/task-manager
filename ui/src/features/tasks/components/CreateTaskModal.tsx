@@ -41,7 +41,21 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
         dueDate = localDateTime.toISOString();
       }
       try {
-        await dispatch(createTaskAsync({ title, description, checklist: checklistItems, dueDate, status })).unwrap();
+        let checklist: ChecklistItem[] | null = null;
+        let descriptionToSend = description;
+        
+        const filteredChecklist = checklistItems.filter(
+          (item) => item.text.trim() !== ''
+        );
+        checklist = filteredChecklist;
+  
+        if (isChecklistMode) {
+          descriptionToSend = '';
+        } else {
+          checklist = null;
+        }
+
+        await dispatch(createTaskAsync({ title, description, checklist, dueDate, status })).unwrap();
         setTitle('');
         setDescription('');
         setDate('');

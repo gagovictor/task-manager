@@ -51,6 +51,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
       setChecklistItems([]);
     }
   }, [task]);
+  
   const handleUpdate = async () => {
     if (title) {
       let dueDate: string | null = null;
@@ -64,12 +65,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
       try {
         let checklist: ChecklistItem[] | null = null;
         let descriptionToSend = description;
+        
+        const filteredChecklist = checklistItems.filter(
+          (item) => item.text.trim() !== ''
+        );
+        checklist = filteredChecklist;
   
         if (isChecklistMode) {
-          const filteredChecklist = checklistItems.filter(
-            (item) => item.text.trim() !== ''
-          );
-          checklist = filteredChecklist;
           descriptionToSend = '';
         } else {
           checklist = null;

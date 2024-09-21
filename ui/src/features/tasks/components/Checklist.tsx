@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, TextField, Checkbox, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,15 +10,24 @@ interface ChecklistProps {
 }
 
 const Checklist: React.FC<ChecklistProps> = ({ items, onItemsChange }) => {
+
+  useEffect(() => {
+    if (items[items.length - 1]?.text.trim() !== '') {
+      onItemsChange([...items, { id: uuidv4(), text: '', completed: false }])
+    }
+  }, [items]);
+
   const handleChecklistChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], text: e.target.value };
-    if (index === newItems.length - 1 && e.target.value.trim() !== '') {
-      newItems.push({ id: uuidv4(), text: '', completed: false });
-    }
+    onItemsChange(newItems);
+  };
+
+  const removeChecklistItem = (id: string) => {
+    const newItems = items.filter((item) => item.id !== id);
     onItemsChange(newItems);
   };
 
@@ -26,11 +35,6 @@ const Checklist: React.FC<ChecklistProps> = ({ items, onItemsChange }) => {
     const newItems = items.map((item) =>
       item.id === id ? { ...item, completed: !item.completed } : item
     );
-    onItemsChange(newItems);
-  };
-
-  const removeChecklistItem = (id: string) => {
-    const newItems = items.filter((item) => item.id !== id);
     onItemsChange(newItems);
   };
 
@@ -51,6 +55,7 @@ const Checklist: React.FC<ChecklistProps> = ({ items, onItemsChange }) => {
           <IconButton
             onClick={() => removeChecklistItem(item.id)}
             aria-label="Remove item"
+            disabled={index === items.length - 1 && item.text === ''}
           >
             <CloseIcon />
           </IconButton>

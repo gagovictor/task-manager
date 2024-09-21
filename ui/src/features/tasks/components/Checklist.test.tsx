@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import Checklist from './Checklist';
 import { ChecklistItem } from '../models/checklist';
 import userEvent from '@testing-library/user-event';
@@ -21,7 +21,6 @@ describe('Checklist component', () => {
         expect(checkboxes[0]).not.toBeChecked();
         expect(checkboxes[1]).toBeChecked();
     });
-    
     
     it('calls onItemsChange when an item text is changed', async () => {
         const initialItems: ChecklistItem[] = [
@@ -63,7 +62,29 @@ describe('Checklist component', () => {
         expect(screen.getByDisplayValue('First item')).toBeInTheDocument();
         expect(screen.getByPlaceholderText('Item 2')).toBeInTheDocument();
     });
-    
+
+    it('adds a new item when clicking the last item and it is not empty', async () => {
+        const initialItems: ChecklistItem[] = [
+            { id: '1', text: 'Item 1', completed: false },
+        ];
+        
+        const TestWrapper = () => {
+            const [items, setItems] = useState(initialItems);
+            
+            return <Checklist items={items} onItemsChange={setItems} />;
+        };
+        
+        render(<TestWrapper />);
+        
+        const textField = screen.getByDisplayValue('Item 1');
+        await userEvent.click(textField);
+        await userEvent.tab(); // Mimic leaving the text field (blur)
+        
+        expect(screen.getAllByRole('textbox')).toHaveLength(2);
+        expect(screen.getByDisplayValue('Item 1')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Item 2')).toBeInTheDocument();
+    });
+
     it('toggles completion status when checkbox is clicked', async () => {
         const initialItems: ChecklistItem[] = [
             { id: '1', text: 'Item 1', completed: false },
@@ -77,15 +98,19 @@ describe('Checklist component', () => {
         
         render(<TestWrapper />);
         
-        const checkbox = screen.getByRole('checkbox');
-        expect(checkbox).not.toBeChecked();
-        
-        await userEvent.click(checkbox);
-        
-        expect(checkbox).toBeChecked();
-        
-        await userEvent.click(checkbox);
-        expect(checkbox).not.toBeChecked();
+        await waitFor(async () => {
+            const checkbox = await screen.findAllByRole('checkbox');
+            expect(checkbox[0]).not.toBeChecked();
+            expect(checkbox[1]).not.toBeChecked();
+            
+            await userEvent.click(checkbox[0]);
+            
+            expect(checkbox[0]).toBeChecked();
+            expect(checkbox[1]).not.toBeChecked(); // Empty checklist item added at the end
+            
+            await userEvent.click(checkbox[0]);
+            expect(checkbox[0]).not.toBeChecked();
+        });
     });
     
     it('does not add a new item when the last item\'s text is empty', async () => {
@@ -113,6 +138,7 @@ describe('Checklist component', () => {
             { id: '2', text: 'Item 2', completed: false },
         ];
         const onItemsChange = jest.fn();
+
         render(<Checklist items={items} onItemsChange={onItemsChange} />);
         
         expect(screen.getByDisplayValue('Item 1')).toBeInTheDocument();
@@ -129,13 +155,24 @@ describe('Checklist component', () => {
         expect(updatedItems[0].text).toBe('Item 2');
     });
     
-    it('correctly handles an empty list of items', () => {
+    it('handles an empty list by rendering one empty item', () => {
         const items: ChecklistItem[] = [];
         const onItemsChange = jest.fn();
+
         render(<Checklist items={items} onItemsChange={onItemsChange} />);
+    
+        waitFor(() => {
+            const textFields = screen.getAllByRole('textbox');
+            expect(textFields).toHaveLength(1);
+            expect(textFields[0]).toHaveValue('');
         
-        expect(screen.queryByRole('textbox')).toBeNull();
-        expect(screen.queryByRole('checkbox')).toBeNull();
-        expect(screen.queryByLabelText('Remove item')).toBeNull();
+            const checkboxes = screen.getAllByRole('checkbox');
+            expect(checkboxes).toHaveLength(1);
+            
+            // The remove button for the single item should be disabled
+            const removeButtons = screen.getAllByLabelText('Remove item');
+            expect(removeButtons).toHaveLength(1);
+            expect(removeButtons[0]).toBeDisabled();
+        })
     });
 });
