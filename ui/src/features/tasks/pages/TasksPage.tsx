@@ -67,8 +67,6 @@ const TasksPage = () => {
       sx={{
         width: '100%',
         minHeight: 'calc(100vh - 296px)',
-        mt: { sm: 4, md: 12 },
-        mb: { sm: 6, md: 12 },
         position: 'relative'
       }}>
       <Box sx={{ mb: 4 }}>

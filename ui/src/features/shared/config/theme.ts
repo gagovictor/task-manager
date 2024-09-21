@@ -6,7 +6,13 @@ const theme = createTheme({
     MuiContainer: {
       styleOverrides: {
         root: {
-          padding: '32px 16px',
+          paddingBottom: '32px',
+          '@media (min-width:0px)': {  // xs breakpoint
+            paddingTop: 'calc(32px + 56px)',
+          },
+          '@media (min-width:600px)': {  // sm breakpoint
+            paddingTop: 'calc(32px + 64px)',
+          },
         },
       },
     },

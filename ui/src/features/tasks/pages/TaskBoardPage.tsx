@@ -172,7 +172,7 @@ const TaskBoardPage = () => {
   const renderTaskColumns = (status: string) => {
     const title = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
     const tasksByStatus = filteredTasks.filter(task => task.status === status);
-    const { isOver, setNodeRef } = taskColumnRefs[status].droppable;
+    const { setNodeRef } = taskColumnRefs[status].droppable;
 
     return (
       <SortableContext
@@ -184,20 +184,20 @@ const TaskBoardPage = () => {
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            margin: '0 8px',
             minWidth: { sm: '60vw', md: '360px' },
             flex: '0 0 auto',
           }}
         >
           <Paper
             ref={setNodeRef}
+            elevation={0}
             sx={{
               padding: 1,
               display: 'flex',
               flexDirection: 'column',
               height: '80vh',
               borderRadius: '6px',
-              border: `1px solid ${theme.palette.secondary.contrastText}`,
+              border: `1px solid rgba(0, 0, 0, 0.23)`,
             }}
           >
             <Typography
@@ -234,7 +234,6 @@ const TaskBoardPage = () => {
       sx={{
         width: '100%',
         minHeight: 'calc(100vh - 296px)',
-        my: { sm: 6, md: 12 },
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',

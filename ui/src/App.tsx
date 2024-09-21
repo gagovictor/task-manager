@@ -10,8 +10,12 @@ import ArchivedTasksPage from './features/tasks/pages/ArchivedTasksPage';
 import AuthGuard from './features/shared/components/AuthGuard';
 import TaskBoardPage from './features/tasks/pages/TaskBoardPage';
 import PwaInstallPrompt from './features/shared/components/PwaInstallPrompt';
+import { useMediaQuery, useTheme } from '@mui/material';
 
 function App() {
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
+
   return (
     <BrowserRouter>
       <div className="App">
@@ -22,7 +26,7 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/logout" element={<LogoutPage />} />
-            
+
             <Route element={<AuthGuard />}>
               <Route path="/tasks" element={<TasksPage />} />
               <Route path="/archived" element={<ArchivedTasksPage />} />
@@ -32,7 +36,9 @@ function App() {
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         </main>
-        <Footer />
+
+        {isSmUp && <Footer />}
+
         <PwaInstallPrompt />
       </div>
     </BrowserRouter>

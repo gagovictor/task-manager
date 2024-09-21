@@ -121,7 +121,7 @@ describe('ArchivedTasksPage component', () => {
         })
     });
     
-    it('shows "No archived tasks available" if no tasks are archived', async () => {
+    it('shows "No tasks archived" if no tasks are archived', async () => {
         server.use(
             http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
                 return HttpResponse.json([
@@ -142,7 +142,7 @@ describe('ArchivedTasksPage component', () => {
         renderWithProviders(store);
 
         await waitFor(() => {
-            expect(screen.getByText(/No archived tasks available/i)).toBeInTheDocument();
+            expect(screen.getByText(/No tasks archived/i)).toBeInTheDocument();
         });
     });
 });

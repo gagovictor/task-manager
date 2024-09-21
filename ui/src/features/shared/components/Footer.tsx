@@ -8,7 +8,7 @@ export default function Footer() {
   const theme = useTheme();
   
   return (
-    <AppBar position="relative">
+    <AppBar position="relative" elevation={0}>
       <Toolbar component="footer" sx={{ backgroundColor: theme.palette.background.paper }}>
         <Container 
           sx={{ 

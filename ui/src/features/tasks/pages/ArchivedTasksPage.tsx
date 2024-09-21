@@ -46,9 +46,7 @@ export default function ArchivedTasksPage() {
     <Container
       sx={{
         width: '100%',
-        minHeight: 'calc(100vh - 296px)',
-        mt: { sm: 4, md: 12 },
-        mb: { sm: 6, md: 12 },
+        minHeight: { xs: 'calc(100vh - 134px)', md: 'calc(100vh - 104px)' },
         position: 'relative'
       }}>
       {fetchStatus === 'loading' && <CircularProgress />}
@@ -83,15 +81,15 @@ export default function ArchivedTasksPage() {
       {fetchStatus === 'succeeded' && activeTasks.length === 0 && (
         <Box
           sx={{
+            height: '100%',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            height: 'calc(100vh - 64px)',
             textAlign: 'center',
           }}
         >
-          <Typography variant="h4" gutterBottom>No archived tasks available</Typography>
+          <Typography variant="h6" gutterBottom>No tasks archived</Typography>
           <Button variant="contained" color="primary" onClick={() => navigate('/tasks')}>
             Back to tasks
           </Button>
