@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PendingActionsOutlined } from '@mui/icons-material';
 import theme from '../../shared/config/theme';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
 interface TaskCardProps {
   task: Task;
@@ -30,6 +31,14 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
   const dispatch = useDispatch<AppDispatch>();
   const [openConfirm, setOpenConfirm] = React.useState(false);
   const { deleteStatus, deleteError, archiveStatus, archiveError } = useSelector((state: RootState) => state.tasks);
+  const [isDescriptionOverflow, setIsDescriptionOverflow] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      setIsDescriptionOverflow(descriptionRef.current.scrollHeight > descriptionRef.current.clientHeight);
+    }
+  }, [task.description]);
 
   const handleCloseConfirm = () => setOpenConfirm(false);
 
@@ -84,6 +93,27 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
 
   const formattedStatus = task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase();
 
+  const moreCaption = (
+    <Typography
+      variant="caption"
+      sx={{
+        marginTop: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        textAlign: 'left',
+        color: 'text.secondary',
+      }}
+    >
+      <UnfoldMoreIcon
+        sx={{
+          fontSize: '1.5em',
+          marginRight: '4px',
+        }}
+      />
+      More
+    </Typography>
+  );
+
   return (
     <Box sx={{ width: '100%', marginBottom: 2 }}>
       <Card
@@ -129,7 +159,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
           {task.checklist && task.checklist.length > 0 ? (
             <List>
               {task.checklist.slice(0, 3).map((item) => (
-                <ListItem key={item.id} disablePadding>
+                <ListItem key={item.id} disablePadding sx={{ mt: -1.25 }}>
                   <ListItemIcon>
                     <Checkbox
                       edge="start"
@@ -142,23 +172,28 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
                   <ListItemText id={`checkbox-list-label-${item.id}`} primary={item.text} />
                 </ListItem>
               ))}
+              {task.checklist.length > 3 && moreCaption}
             </List>
           ) : (
-            <Typography
-              sx={{ 
-                mb: 1.5, 
-                whiteSpace: 'pre-line', 
-                overflow: 'hidden', 
-                textOverflow: 'ellipsis', 
-                maxHeight: '5em',
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical'
-              }}
-              color="text.secondary"
-            >
-              {task.description ? task.description : 'No description provided'}
-            </Typography>
+            <>
+              <Typography
+                ref={descriptionRef}
+                sx={{ 
+                  mb: 1.5, 
+                  whiteSpace: 'pre-line', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  maxHeight: '5em',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical'
+                }}
+                color="text.secondary"
+              >
+                {task.description ? task.description : 'No description provided'}
+              </Typography>
+              {isDescriptionOverflow && moreCaption}
+            </>
           )}
         </CardContent>
         <CardActions>

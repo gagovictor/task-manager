@@ -87,32 +87,36 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           width: '85%',
           maxWidth: 500,
           margin: 'auto',
-          padding: 2,
           backgroundColor: 'white',
           borderRadius: 1,
           position: 'relative',
-          marginTop: '10%',
+          marginTop: '10vh',
+          maxHeight: '80vh',
           overflowX: 'hidden',
-          overflowY: 'auto',
+          overflowY: 'auto'
         }}
       >
-        <Box 
+        <IconButton
+          onClick={onClose}
           sx={{
-            position: 'relative',
-            overflowX: 'hidden',
+            position: 'absolute',
+            top: 8,
+            right: 8
+          }}
+          aria-label="Close"
+        >
+          <CloseIcon />
+        </IconButton>
+
+        {/* Scrollable content */}
+        <Box
+          sx={{
+            flex: 1,
             overflowY: 'auto',
-          }}>
-          <IconButton
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-            }}
-            aria-label="Close"
-          >
-            <CloseIcon />
-          </IconButton>
+            padding: 2,
+            marginBottom: 2,    // Add space for the fixed button at the bottom
+          }}
+        >
           <Typography variant="h6" gutterBottom>
             Create New Task
           </Typography>
@@ -199,13 +203,25 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
               ))}
             </Select>
           </FormControl>
+        </Box>
+
+        {/* Fixed button at the bottom */}
+        <Box
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            backgroundColor: 'white',
+            padding: 2,
+            zIndex: 2,
+            borderTop: '1px solid rgba(0, 0, 0, 0.23)'
+          }}
+        >
           <Button
             fullWidth
             variant="contained"
             color="primary"
-            sx={{ mt: 2 }}
             onClick={handleCreate}
-            disabled={createStatus == 'loading' || !title }
+            disabled={createStatus === 'loading' || !title}
           >
             Create
           </Button>

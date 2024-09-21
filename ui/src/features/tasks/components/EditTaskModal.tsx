@@ -102,6 +102,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
       }
     }
   };
+  
   const handleModeChange = (
     event: React.MouseEvent<HTMLElement>,
     newAlignment: string
@@ -129,12 +130,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
           width: '85%',
           maxWidth: 500,
           margin: 'auto',
-          padding: 2,
           backgroundColor: 'white',
           borderRadius: 1,
           position: 'relative',
-          marginTop: '10%',
-          overflow: 'hidden'
+          marginTop: '10vh',
+          maxHeight: '80vh',
+          overflowX: 'hidden',
+          overflowY: 'auto'
         }}
       >
         <IconButton
@@ -148,100 +150,123 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
         >
           <CloseIcon />
         </IconButton>
-        <Typography variant="h6" gutterBottom>
-          Edit Task
-        </Typography>
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Title"
-          variant="outlined"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Date"
-            variant="outlined"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Time"
-            variant="outlined"
-            type="time"
-            InputLabelProps={{ shrink: true }}
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-          />
-        </Box>
-        
+
+        {/* Scrollable content */}
         <Box
-          display="flex"
-          justifyContent="flex-end"
-          alignItems="center"
-          sx={{ mb: isChecklistMode ? 2 : 0 }}
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: 2,
+            marginBottom: 2,    // Add space for the fixed button at the bottom
+          }}
         >
-          <ToggleButtonGroup
-            color="primary"
-            value={alignment}
-            exclusive
-            onChange={handleModeChange}
-            aria-label="Task Input Mode"
-          >
-            <ToggleButton value="text">Text</ToggleButton>
-            <ToggleButton value="checklist">Checklist</ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
-
-        {isChecklistMode ? (
-          <Checklist
-            items={checklistItems}
-            onItemsChange={setChecklistItems}
-          />
-        ) : (
+          <Typography variant="h6" gutterBottom>
+            Edit Task
+          </Typography>
           <TextField
             fullWidth
-            multiline
-            rows={6}
             margin="normal"
-            label="Description"
+            label="Title"
             variant="outlined"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
-        )}
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as string)}
-            label="Status"
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Date"
+              variant="outlined"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Time"
+              variant="outlined"
+              type="time"
+              InputLabelProps={{ shrink: true }}
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+            />
+          </Box>
+          
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+            sx={{ mb: isChecklistMode ? 2 : 0 }}
           >
-            {taskStatuses.map((statusOption) => (
-              <MenuItem key={statusOption} value={statusOption}>
-                {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-          onClick={handleUpdate}
-          disabled={updateStatus == 'loading' || !title }
+            <ToggleButtonGroup
+              color="primary"
+              value={alignment}
+              exclusive
+              onChange={handleModeChange}
+              aria-label="Task Input Mode"
+            >
+              <ToggleButton value="text">Text</ToggleButton>
+              <ToggleButton value="checklist">Checklist</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {isChecklistMode ? (
+            <Checklist
+              items={checklistItems}
+              onItemsChange={setChecklistItems}
+            />
+          ) : (
+            <TextField
+              fullWidth
+              multiline
+              rows={6}
+              margin="normal"
+              label="Description"
+              variant="outlined"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          )}
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as string)}
+              label="Status"
+            >
+              {taskStatuses.map((statusOption) => (
+                <MenuItem key={statusOption} value={statusOption}>
+                  {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        {/* Fixed button at the bottom */}
+        <Box
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            backgroundColor: 'white',
+            padding: 2,
+            zIndex: 2,
+            borderTop: '1px solid rgba(0, 0, 0, 0.23)'
+          }}
         >
-          Update
-        </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={handleUpdate}
+            disabled={updateStatus === 'loading' || !title}
+          >
+            Update
+          </Button>
+        </Box>
       </Box>
     </Modal>
   );
