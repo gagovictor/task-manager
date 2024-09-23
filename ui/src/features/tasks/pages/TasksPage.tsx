@@ -174,24 +174,6 @@ const TasksPage = () => {
               </Box>
             ))
           )}
-          <Card
-            variant="outlined"
-            sx={{
-              width: 300,
-              height: 198,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px dashed grey',
-              backgroundColor: theme.palette.background.paper,
-              cursor: 'pointer'
-            }}
-            onClick={() => setCreateModalOpen(true)}
-          >
-            <Typography variant="h6">
-              Create New Task
-            </Typography>
-          </Card>
         </Masonry>
       )}
 

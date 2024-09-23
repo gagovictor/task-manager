@@ -43,9 +43,6 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
       onChange={onChange}
       error={error}
       helperText={helperText}
-      inputProps={{
-        "data-testid": testId,
-      }}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">
@@ -58,6 +55,9 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
             </IconButton>
           </InputAdornment>
         ),
+      }}
+      inputProps={{
+        "data-testid": testId,
       }}
     />
   );

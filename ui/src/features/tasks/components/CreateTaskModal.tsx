@@ -1,5 +1,19 @@
 import { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select, Checkbox, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  ToggleButtonGroup,
+  ToggleButton,
+  Grid, // Import Grid
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
@@ -43,19 +57,19 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
       try {
         let checklist: ChecklistItem[] | null = null;
         let descriptionToSend = description;
-        
+
         const filteredChecklist = checklistItems.filter(
           (item) => item.text.trim() !== ''
         );
         checklist = filteredChecklist;
-  
+
         if (isChecklistMode) {
           descriptionToSend = '';
         } else {
           checklist = null;
         }
 
-        await dispatch(createTaskAsync({ title, description, checklist, dueDate, status })).unwrap();
+        await dispatch(createTaskAsync({ title, description: descriptionToSend, checklist, dueDate, status })).unwrap();
         setTitle('');
         setDescription('');
         setDate('');
@@ -63,6 +77,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
         setStatus(taskStatuses[0]);
         onClose();
       } catch (error) {
+        // Handle error appropriately
       }
     }
   };
@@ -85,7 +100,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
       <Box
         sx={{
           width: '85%',
-          maxWidth: 500,
+          maxWidth: 600, // Increased maxWidth for better layout
           margin: 'auto',
           backgroundColor: 'white',
           borderRadius: 1,
@@ -93,7 +108,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           marginTop: '10vh',
           maxHeight: '80vh',
           overflowX: 'hidden',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         <IconButton
@@ -101,7 +118,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           sx={{
             position: 'absolute',
             top: 8,
-            right: 8
+            right: 8,
           }}
           aria-label="Close"
         >
@@ -114,12 +131,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             flex: 1,
             overflowY: 'auto',
             padding: 2,
-            marginBottom: 2,    // Add space for the fixed button at the bottom
+            paddingBottom: 4, // Adjusted padding for better spacing
           }}
         >
           <Typography variant="h6" gutterBottom>
             Create New Task
           </Typography>
+
           <TextField
             fullWidth
             margin="normal"
@@ -129,7 +147,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             onChange={(e) => setTitle(e.target.value)}
             required
           />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mb: 1 }}>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
             <TextField
               fullWidth
               margin="normal"
@@ -152,24 +171,41 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             />
           </Box>
 
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            alignItems="center"
-            sx={{ mb: isChecklistMode ? 2 : 0 }}
-          >
-            <ToggleButtonGroup
-              color="primary"
-              value={alignment}
-              exclusive
-              onChange={handleModeChange}
-              aria-label="Task Input Mode"
-            >
-              <ToggleButton value="text">Text</ToggleButton>
-              <ToggleButton value="checklist">Checklist</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
+          {/* Grid container for Toggle Button and Status Selector */}
+          <Grid container spacing={2} alignItems="center" sx={{ mb: isChecklistMode ? 2 : 0 }}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as string)}
+                  label="Status"
+                >
+                  {taskStatuses.map((statusOption) => (
+                    <MenuItem key={statusOption} value={statusOption}>
+                      {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
+            <Grid item xs={12} sm={6}>
+              <ToggleButtonGroup
+                color="primary"
+                value={alignment}
+                exclusive
+                onChange={handleModeChange}
+                aria-label="Task Input Mode"
+                fullWidth
+              >
+                <ToggleButton value="text">Text</ToggleButton>
+                <ToggleButton value="checklist">Checklist</ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
+          </Grid>
+
+          {/* Description or Checklist */}
           {isChecklistMode ? (
             <Checklist
               items={checklistItems}
@@ -184,25 +220,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
               label="Description"
               variant="outlined"
               value={description}
-              sx={{ height: '170px' }}
               onChange={(e) => setDescription(e.target.value)}
             />
           )}
-          
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as string)}
-              label="Status"
-            >
-              {taskStatuses.map((statusOption) => (
-                <MenuItem key={statusOption} value={statusOption}>
-                  {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         </Box>
 
         {/* Fixed button at the bottom */}
@@ -213,7 +233,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             backgroundColor: 'white',
             padding: 2,
             zIndex: 2,
-            borderTop: '1px solid rgba(0, 0, 0, 0.23)'
+            borderTop: '1px solid rgba(0, 0, 0, 0.23)',
           }}
         >
           <Button
