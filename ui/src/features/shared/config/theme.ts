@@ -16,6 +16,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiSnackbarContent: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#444E5E'
+        },
+      },
+    },
   },
   palette: {
     primary: {
@@ -36,6 +43,9 @@ const theme = createTheme({
       primary: '#212121',
       secondary: '#757575',
     },
+    info: {
+      main: '#3269C2'
+    }
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
