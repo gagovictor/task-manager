@@ -239,7 +239,11 @@ const TaskBoardPage = () => {
         flexDirection: 'column',
       }}
     >
-      {fetchStatus === 'loading' && <CircularProgress />}
+      {fetchStatus === 'loading' && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
       {fetchStatus === 'failed' &&
         <Alert
           severity="error"

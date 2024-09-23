@@ -100,7 +100,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
       <Box
         sx={{
           width: '85%',
-          maxWidth: 600, // Increased maxWidth for better layout
+          maxWidth: '540px',
           margin: 'auto',
           backgroundColor: 'white',
           borderRadius: 1,
@@ -148,6 +148,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             required
           />
           
+          {/* DateTime selectors */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
             <TextField
               fullWidth
@@ -159,6 +160,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
+
             <TextField
               fullWidth
               margin="normal"
@@ -172,7 +174,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           </Box>
 
           {/* Grid container for Toggle Button and Status Selector */}
-          <Grid container spacing={2} alignItems="center" sx={{ mb: isChecklistMode ? 2 : 0 }}>
+          <Grid
+            container
+            spacing={2}
+            sx={{
+              mb: isChecklistMode ? 2 : 0,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth margin="normal">
                 <InputLabel>Status</InputLabel>
@@ -197,7 +206,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
                 exclusive
                 onChange={handleModeChange}
                 aria-label="Task Input Mode"
-                fullWidth
+                fullWidth sx={{ height: '56px', mt: '8px' }}
               >
                 <ToggleButton value="text">Text</ToggleButton>
                 <ToggleButton value="checklist">Checklist</ToggleButton>

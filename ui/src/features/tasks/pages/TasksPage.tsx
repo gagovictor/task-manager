@@ -141,7 +141,11 @@ const TasksPage = () => {
       </Box>
 
       {/* Task Cards and Loading/Error Handling */}
-      {fetchStatus === 'loading' && <CircularProgress />}
+      {fetchStatus === 'loading' && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
       {fetchStatus === 'failed' &&
         <Alert
           severity="error"
@@ -160,6 +164,7 @@ const TasksPage = () => {
           columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
           spacing={2}
           data-testid="masonry"
+          sx={{ mb: 4 }}
         >
           {filteredTasks.length > 0 && (
             filteredTasks.map((task: Task) => (

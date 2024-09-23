@@ -49,7 +49,11 @@ export default function ArchivedTasksPage() {
         minHeight: { xs: 'calc(100vh - 134px)', md: 'calc(100vh - 104px)' },
         position: 'relative'
       }}>
-      {fetchStatus === 'loading' && <CircularProgress />}
+      {fetchStatus === 'loading' && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
       {fetchStatus === 'failed' &&
         <Alert
           severity="error"

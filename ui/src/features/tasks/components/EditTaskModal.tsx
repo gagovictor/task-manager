@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select, ToggleButton, ToggleButtonGroup, Grid } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
@@ -128,7 +128,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
       <Box
         sx={{
           width: '85%',
-          maxWidth: 500,
+          maxWidth: '540px',
           margin: 'auto',
           backgroundColor: 'white',
           borderRadius: 1,
@@ -163,6 +163,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
           <Typography variant="h6" gutterBottom>
             Edit Task
           </Typography>
+
           <TextField
             fullWidth
             margin="normal"
@@ -171,6 +172,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+
+          {/* DateTime selectors */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
             <TextField
               fullWidth
@@ -182,6 +185,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
+
             <TextField
               fullWidth
               margin="normal"
@@ -193,24 +197,47 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
               onChange={(e) => setTime(e.target.value)}
             />
           </Box>
-          
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            alignItems="center"
-            sx={{ mb: isChecklistMode ? 2 : 0 }}
-          >
-            <ToggleButtonGroup
-              color="primary"
-              value={alignment}
-              exclusive
-              onChange={handleModeChange}
-              aria-label="Task Input Mode"
-            >
-              <ToggleButton value="text">Text</ToggleButton>
-              <ToggleButton value="checklist">Checklist</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
+
+          {/* Grid container for Toggle Button and Status Selector */}
+          <Grid
+            container
+            spacing={2}
+            sx={{
+              mb: isChecklistMode ? 2 : 0,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as string)}
+                  label="Status"
+                >
+                  {taskStatuses.map((statusOption) => (
+                    <MenuItem key={statusOption} value={statusOption}>
+                      {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <ToggleButtonGroup
+                color="primary"
+                value={alignment}
+                exclusive
+                onChange={handleModeChange}
+                aria-label="Task Input Mode"
+                fullWidth sx={{ height: '56px', mt: '8px' }}
+              >
+                <ToggleButton value="text">Text</ToggleButton>
+                <ToggleButton value="checklist">Checklist</ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
+          </Grid>
 
           {isChecklistMode ? (
             <Checklist
@@ -229,21 +256,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
               onChange={(e) => setDescription(e.target.value)}
             />
           )}
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as string)}
-              label="Status"
-            >
-              {taskStatuses.map((statusOption) => (
-                <MenuItem key={statusOption} value={statusOption}>
-                  {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         </Box>
 
         {/* Fixed button at the bottom */}
