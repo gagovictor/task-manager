@@ -1,12 +1,12 @@
 
 import express, { Application } from 'express';
 import cors, { CorsOptions } from 'cors';
-import { swaggerUi, swaggerSpec } from './config/swagger';
+import { swaggerUi, swaggerSpec } from './src/config/swagger';
 import morgan from 'morgan';
-import logger from './config/logger';
-import { connectToDatabase } from './config/db';
-import getPublicRouter from './routes/public';
-import getProtectedRouter from './routes/protected';
+import logger from './src/config/logger';
+import DatabaseConnection from './src/config/db';
+import getPublicRouter from './src/routes/public';
+import getProtectedRouter from './src/routes/protected';
 const app: Application = express();
 
 // CORS configuration
@@ -27,16 +27,18 @@ app.use(morgan('combined', {
 }));
 
 // Connect to database and start server
-connectToDatabase().then(() => {
+const dbConnection: DatabaseConnection = DatabaseConnection.getInstance();
+
+dbConnection.connectToDatabase().then(async () => {
   const port = process.env.PORT || 8080;
 
   // Init API Routes
-  app.use(getPublicRouter());
-  app.use(getProtectedRouter());
+  app.use(await getPublicRouter());
+  app.use(await getProtectedRouter());
 
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
-}).catch((error) => {
+}).catch((error: any) => {
   console.error('Failed to connect to the database:', error);
 });
