@@ -4,8 +4,10 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/lib/node';
 import TasksPage from './TasksPage';
-import { initialState, setupStore } from '../../../store';
+import { initialState, setupStore } from '../../../redux/store';
 import userEvent from '@testing-library/user-event';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 
 describe('TasksPage component', () => {
     const store = setupStore(initialState);
@@ -94,22 +96,15 @@ describe('TasksPage component', () => {
     });
     
     const renderWithProviders = (store: any) => render(
-        <Provider store={store}>
-        <Router>
-        <TasksPage />
-        </Router>
-        </Provider>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Provider store={store}>
+                <Router>
+                    <TasksPage />
+                </Router>
+            </Provider>
+        </LocalizationProvider>
     );
-    
-    it('renders the loading spinner when loading', async () => {
-        renderWithProviders(store);
-        await waitFor(() => {
-            expect(screen.getByRole('progressbar')).toBeInTheDocument();
-            expect(screen.queryByText(/Failed to load tasks./i)).toBeNull();
-            expect(screen.queryByTestId('fetch-error-alert')).toBeNull();
-        })
-    });
-    
+
     it('renders typography and alert on failure', async () => {
         server.use(
             http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {

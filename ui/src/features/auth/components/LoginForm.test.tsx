@@ -2,7 +2,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import userEvent from "@testing-library/user-event";
-import { initialState, setupStore } from '../../../store';
+import { initialState, setupStore } from '../../../redux/store';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { LoginRequest, LoginResponse, SignupRequest } from '../services/AuthService';
 import { User } from '../models/user';

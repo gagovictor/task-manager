@@ -2,6 +2,7 @@ import { ChecklistItem } from "./checklist";
 
 export interface Task {
   id: string;
+  userId: string;
   title: string;
   description?: string;
   checklist?: ChecklistItem[];
@@ -11,7 +12,6 @@ export interface Task {
   modifiedAt?: Date;
   archivedAt?: Date;
   deletedAt?: Date;
-  userId?: string;
 }
 
 export interface CreateTaskRequestBody {
@@ -20,7 +20,15 @@ export interface CreateTaskRequestBody {
   checklist?: ChecklistItem[];
   dueDate?: Date;
   status?: string;
+}
+
+export interface CreateTaskDto {
   userId: string;
+  title: string;
+  description?: string;
+  checklist?: ChecklistItem[];
+  dueDate?: Date;
+  status?: string;
 }
 
 export interface UpdateTaskRequestBody {
@@ -31,6 +39,22 @@ export interface UpdateTaskRequestBody {
   status?: string;
 }
 
+export interface UpdateTaskDto {
+  userId: string;
+  title?: string;
+  description?: string;
+  checklist?: ChecklistItem[];
+  dueDate?: Date;
+  status?: string;
+}
+
 export interface UpdateTaskStatusRequestBody {
   status: string;
 }
+
+export const TaskStatus = {
+  New: 'new',
+  Active: 'active',
+  Completed: 'completed',
+  Removed: 'removed'
+};

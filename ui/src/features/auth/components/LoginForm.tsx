@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { loginUser } from '../redux/authSlice';
 import { Button, TextField, Container, Typography, Paper, Box, Snackbar, Alert, Link } from '@mui/material';
 import { LoginRequest } from '../services/AuthService';
@@ -38,7 +38,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xs">
+    <Box sx={{ width: '400px', maxWidth: '100%' }}>
       <Paper elevation={3} sx={{ padding: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography variant="h5" gutterBottom>
@@ -104,7 +104,7 @@ const LoginForm: React.FC = () => {
           {errorMessage}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

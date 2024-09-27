@@ -7,6 +7,7 @@ export interface Task {
   dueDate: string|null;
   status: string/*TaskStatus*/;
   userId: string;
+  createdAt: string;
   archivedAt: string|null;
   deletedAt: string|null;
   checklist?: ChecklistItem[]|null;

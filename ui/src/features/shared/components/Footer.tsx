@@ -1,4 +1,3 @@
-import React from 'react';
 import { Toolbar, Typography, Link, IconButton, Container, Box, useTheme, AppBar } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -30,7 +29,8 @@ export default function Footer() {
             sx={{ 
               display: 'flex', 
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              mr: '24px'
             }}
           >
             <Link
@@ -58,7 +58,7 @@ export default function Footer() {
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                textDecoration: 'none'
+                textDecoration: 'none',
               }}
             >
               <IconButton color="inherit">

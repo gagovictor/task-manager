@@ -1,18 +1,64 @@
 import ITaskRepository from '../taskRepository';
 import { SequelizeTask } from '../../models/sequelize/task';
+import TaskEncryptionService from '../../services/taskEncryptionService';
+import { Task } from '../../models/task';
 
 export default class SequelizeTaskRepository implements ITaskRepository {
-    async createTask(task: SequelizeTask): Promise<SequelizeTask> {
+    private encryptionService: TaskEncryptionService;
+
+    constructor(encryptionService: TaskEncryptionService) {
+        this.encryptionService = encryptionService;
+    }
+
+    private parseTask(task: SequelizeTask): Task {
+        return {
+            ...task.get(),
+            title: this.encryptionService.decrypt(task.title),
+            description: task.description ? this.encryptionService.decrypt(task.description) : '',
+            checklist: task.checklist ? JSON.parse(this.encryptionService.decrypt(task.checklist)) : [],
+        };
+    }
+
+
+    async bulkCreateTasks(tasks: Task[]): Promise<Task[]> {
+        if (!tasks || !Array.isArray(tasks)) {
+            throw new Error('Invalid tasks data provided.');
+        }
+
+        const encryptedTasks = tasks.map(task => ({
+            ...task,
+            title: task.title ? this.encryptionService.encrypt(task.title) : '',
+            description: task.description ? this.encryptionService.encrypt(task.description) : '',
+            checklist: task.checklist ? this.encryptionService.encrypt(JSON.stringify(task.checklist)) : '',
+        }));
+
         try {
-            const newTask = await SequelizeTask.create({ ...task });
-            return newTask;
+            const createdTasks = await SequelizeTask.bulkCreate(encryptedTasks, { returning: true });
+
+            return createdTasks.map(task => this.parseTask(task));
+        } catch (error: any) {
+            console.error('Bulk task creation error:', error);
+            throw new Error('Bulk task creation failed.');
+        }
+    }
+
+    async createTask(task: Task): Promise<Task> {
+        const encryptedTask = {
+            ...task,
+            title: task.title ? this.encryptionService.encrypt(task.title) : '',
+            description: task.description ? this.encryptionService.encrypt(task.description) : '',
+            checklist: task.checklist ? this.encryptionService.encrypt(JSON.stringify(task.checklist)) : '',
+        };
+        try {
+            const newTask = await SequelizeTask.create(encryptedTask);
+            return this.parseTask(newTask);
         } catch (error: any) {
             console.error('Task creation error:', error);
             throw new Error('Task creation failed');
         }
     }
 
-    async getTasksByUser(userId: string): Promise<SequelizeTask[]> {
+    async getTasksByUser(userId: string): Promise<Task[]> {
         try {
             const tasks = await SequelizeTask.findAll({
                 where: {
@@ -20,15 +66,14 @@ export default class SequelizeTaskRepository implements ITaskRepository {
                     deletedAt: null
                 }
             });
-            return tasks;
+            return tasks.map(task => this.parseTask(task));
         } catch (error: any) {
             console.error('Fetching tasks error:', error);
             throw new Error('Failed to fetch tasks');
         }
     }
 
-    async updateTask(id: string, updates: Partial<SequelizeTask>): Promise<SequelizeTask> {
-        console.log(id, updates)
+    async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
         try {
             const task = await SequelizeTask.findOne({
                 where: {
@@ -36,22 +81,28 @@ export default class SequelizeTaskRepository implements ITaskRepository {
                     deletedAt: null
                 }
             });
-
             if (!task) {
                 throw new Error('Task not found');
             }
 
-            await task.update({
-                ...updates,
-                modifiedAt: new Date()
-            });
-            
-            return task;
+            const encryptedUpdates: Partial<SequelizeTask> = { modifiedAt: new Date() };
+
+            if (updates.title) {
+                encryptedUpdates.title = this.encryptionService.encrypt(updates.title);
+            }
+
+            if (updates.description) {
+                encryptedUpdates.description = this.encryptionService.encrypt(updates.description);
+            }
+
+            if (updates.checklist) {
+                encryptedUpdates.checklist = this.encryptionService.encrypt(JSON.stringify(updates.checklist));
+            }
+
+            await task.update(encryptedUpdates);
+            return this.parseTask(task);
         } catch (error: any) {
             console.error('Task update error:', error);
-            if (error.message === 'Task not found') {
-                throw error;
-            }
             throw new Error('Task update failed');
         }
     }
@@ -68,14 +119,9 @@ export default class SequelizeTaskRepository implements ITaskRepository {
             if (!task) {
                 throw new Error('Task not found');
             }
-            await task.update({
-                deletedAt: new Date(),
-            });
+            await task.update({ deletedAt: new Date() });
         } catch (error: any) {
             console.error('Task deletion error:', error);
-            if (error.message === 'Task not found') {
-                throw error;
-            }
             throw new Error('Task deletion failed');
         }
     }
@@ -89,15 +135,12 @@ export default class SequelizeTaskRepository implements ITaskRepository {
                     deletedAt: null
                 }
             });
-            if (!task) throw new Error('Task not found');
-            await task.update({
-                archivedAt: new Date(),
-            });
+            if (!task) {
+                throw new Error('Task not found');
+            }
+            await task.update({ archivedAt: new Date() });
         } catch (error: any) {
             console.error('Task archive error:', error);
-            if (error.message === 'Task not found') {
-                throw error;
-            }
             throw new Error('Task archive failed');
         }
     }
@@ -111,36 +154,30 @@ export default class SequelizeTaskRepository implements ITaskRepository {
                     deletedAt: null
                 }
             });
-            if (!task) throw new Error('Task not found');
-            await task.update({
-                archivedAt: null,
-            });
+            if (!task) {
+                throw new Error('Task not found');
+            }
+            await task.update({ archivedAt: null });
         } catch (error: any) {
             console.error('Task unarchive error:', error);
-            if (error.message === 'Task not found') {
-                throw error;
-            }
             throw new Error('Task unarchive failed');
         }
     }
 
-    async updateTaskStatus(taskId: string, status: string, userId: string): Promise<SequelizeTask | null> {
+    async updateTaskStatus(taskId: string, status: string, userId: string): Promise<Task | null> {
         try {
             const task = await SequelizeTask.findOne({
                 where: {
                     id: taskId,
-                    userId
+                    userId,
                 }
             });
-
             if (!task) {
                 return null;
             }
-
             task.status = status;
             await task.save();
-
-            return task;
+            return this.parseTask(task);
         } catch (error: any) {
             console.error('Update task status error:', error);
             throw new Error('Could not update task status');

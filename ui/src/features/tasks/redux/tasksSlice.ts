@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, unarchiveTask, updateTask, UpdateTaskRequest, updateTaskStatus } from '../services/TaskService';
-import { RootState } from '../../../store';
+import { RootState } from '../../../redux/store';
 import { Task } from '../models/task';
+import { loadTasksFromLocalStorage, saveTasksToLocalStorage } from './persistTasks';
 
 export interface TasksState {
   tasks: Task[];
@@ -18,7 +19,7 @@ export interface TasksState {
 }
 
 export const initialState: TasksState = {
-  tasks: [],
+  tasks: loadTasksFromLocalStorage() || [],
   fetchStatus: 'idle',
   fetchError: null,
   createStatus: 'idle',
@@ -38,6 +39,7 @@ const tasksSlice = createSlice({
     reorderTasksLocally(state, action: PayloadAction<{ updatedTasks: Task[] }>) {
       const { updatedTasks } = action.payload;
       state.tasks = updatedTasks;
+      saveTasksToLocalStorage(state.tasks);
     },
   },
   extraReducers: (builder) => {
@@ -50,6 +52,7 @@ const tasksSlice = createSlice({
       .addCase(fetchTasksAsync.fulfilled, (state, action: PayloadAction<Task[]>) => {
         state.fetchStatus = 'succeeded';
         state.tasks = action.payload;
+        saveTasksToLocalStorage(state.tasks);
       })
       .addCase(fetchTasksAsync.rejected, (state, action) => {
         state.fetchStatus = 'failed';
@@ -64,6 +67,7 @@ const tasksSlice = createSlice({
       .addCase(createTaskAsync.fulfilled, (state, action: PayloadAction<Task>) => {
         state.createStatus = 'succeeded';
         state.tasks.push(action.payload);
+        saveTasksToLocalStorage(state.tasks);
       })
       .addCase(createTaskAsync.rejected, (state, action) => {
         state.createStatus = 'failed';
@@ -81,6 +85,7 @@ const tasksSlice = createSlice({
         if (index >= 0) {
           state.tasks[index] = action.payload;
         }
+        saveTasksToLocalStorage(state.tasks);
       })
       .addCase(updateTaskAsync.rejected, (state, action) => {
         state.updateStatus = 'failed';
@@ -98,6 +103,7 @@ const tasksSlice = createSlice({
         if (task) {
           task.deletedAt = new Date().toISOString();
         }
+        saveTasksToLocalStorage(state.tasks);
       })
       .addCase(deleteTaskAsync.rejected, (state, action) => {
         state.deleteStatus = 'failed';
@@ -115,6 +121,7 @@ const tasksSlice = createSlice({
         if (task) {
           task.archivedAt = new Date().toISOString();
         }
+        saveTasksToLocalStorage(state.tasks);
       })
       .addCase(archiveTaskAsync.rejected, (state, action) => {
         state.archiveStatus = 'failed';
@@ -129,6 +136,7 @@ const tasksSlice = createSlice({
         if (task) {
           task.archivedAt = null;
         }
+        saveTasksToLocalStorage(state.tasks);
       })
       .addCase(unarchiveTaskAsync.rejected, (state, action) => {
         state.archiveStatus = 'failed';
@@ -145,6 +153,7 @@ const tasksSlice = createSlice({
         if (index >= 0) {
           state.tasks[index] = action.payload;
         }
+        saveTasksToLocalStorage(state.tasks);
       })
       .addCase(updateTaskStatusAsync.rejected, (state, action) => {
         state.updateStatus = 'failed';

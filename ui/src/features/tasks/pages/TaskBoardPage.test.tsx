@@ -1,7 +1,7 @@
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import TaskBoardPage from './TaskBoardPage';
 import { Provider } from 'react-redux';
-import { initialState, setupStore } from '../../../store';
+import { initialState, setupStore } from '../../../redux/store';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -63,8 +63,6 @@ describe('TaskBoardPage', () => {
 
     it('renders tasks and fetches tasks successfully from the API', async () => {
         renderWithProviders(store);
-        
-        expect(screen.getByRole('progressbar')).toBeInTheDocument();
         
         await waitFor(() => {
             expect(screen.getByText('Task 1')).toBeInTheDocument();

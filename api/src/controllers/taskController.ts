@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import TaskService from '../services/taskService';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import { CreateTaskRequestBody, Task, UpdateTaskRequestBody, UpdateTaskStatusRequestBody } from '../models/task';
 
 export default class TaskController {
   private taskService: TaskService;
@@ -10,7 +11,8 @@ export default class TaskController {
   }
 
   public createTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { title, description, checklist, dueDate, status } = req.body;
+    const { title, description, checklist, dueDate, status } = req.body as CreateTaskRequestBody;
+    // TODO validate request payload
 
     try {
       const task = await this.taskService.createTask({ title, description, checklist, dueDate, status, userId: req.user!.id });
@@ -33,7 +35,8 @@ export default class TaskController {
 
   public updateTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { id } = req.params;
-    const { title, description, checklist, dueDate, status } = req.body;
+    const { title, description, checklist, dueDate, status } = req.body as UpdateTaskRequestBody;
+    // TODO validate request payload
 
     try {
       const task = await this.taskService.updateTask(id, { title, description, checklist, dueDate, status, userId: req.user!.id });
@@ -82,7 +85,7 @@ export default class TaskController {
 
   public updateTaskStatus = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status } = req.body as UpdateTaskStatusRequestBody;
 
     try {
       const updatedTask = await this.taskService.updateTaskStatus(id, status, req.user!.id);
@@ -93,6 +96,23 @@ export default class TaskController {
       res.status(200).json(updatedTask);
     } catch (error) {
       console.error('Task status update error:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  };
+
+  public bulkImportTasks = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const tasks: CreateTaskRequestBody[] = req.body;
+
+    if (!Array.isArray(tasks)) {
+      res.status(400).json({ error: 'Request body must be an array of tasks.' });
+      return;
+    }
+
+    try {
+      const importedTasks = await this.taskService.bulkImportTasks(tasks, req.user!.id);
+      res.status(201).json(importedTasks);
+    } catch (error) {
+      console.error('Bulk import error:', error);
       res.status(500).json({ error: (error as Error).message });
     }
   };

@@ -12,7 +12,7 @@ import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate } from 'workbox-strategies';
+import { StaleWhileRevalidate, NetworkFirst } from 'workbox-strategies';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -69,6 +69,53 @@ registerRoute(
   })
 );
 
+// **Add the following code to cache API requests**
+
+// Define a regex or a function to match your API requests.
+const apiRoute = ({ url }: { url: URL }) => url.hostname === 'task-manager-api-dev.livelyriver-1eedac27.centralus.azurecontainerapps.io';
+
+registerRoute(
+  apiRoute,
+  new StaleWhileRevalidate({
+    cacheName: 'api-cache',
+    plugins: [
+      // Optionally, limit the number of entries and cache age
+      new ExpirationPlugin({
+        maxEntries: 100, // Adjust based on your needs
+        maxAgeSeconds: 5 * 60, // Cache for 5 minutes
+      }),
+      // Optionally, add a plugin to handle caching based on response status
+      {
+        cacheWillUpdate: async ({ response }) => {
+          if (response && response.status === 200) {
+            console.log('Caching API response:', response.url);
+            return response;
+          }
+          return null;
+        },
+      },
+    ],
+  })
+);
+
+// **Alternative Strategy: NetworkFirst for APIs**
+
+/*
+registerRoute(
+  apiRoute,
+  new NetworkFirst({
+    cacheName: 'api-cache',
+    networkTimeoutSeconds: 3, // Fallback to cache if network doesn't respond within 3 seconds
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 5 * 60, // 5 minutes
+      }),
+    ],
+  })
+);
+*/
+
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener('message', (event) => {
@@ -77,4 +124,15 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Any other custom service worker logic can go here.
+self.addEventListener('fetch', (event) => {
+  if (event.request.url.includes('task-manager-api-dev.livelyriver-1eedac27.centralus.azurecontainerapps.io')) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          console.log('Serving from cache:', event.request.url);
+        }
+        return cachedResponse || fetch(event.request);
+      })
+    );
+  }
+});

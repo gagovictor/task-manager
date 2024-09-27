@@ -11,6 +11,7 @@ import IUserRepository from "../repositories/userRepository";
 import DatabaseConnection from "./db";
 import MongooseTaskRepository from "../repositories/mongoose/taskRepository";
 import MongooseUserRepository from "../repositories/mongoose/userRepository";
+import TaskEncryptionService from "../services/taskEncryptionService";
 
 class Container {
     private static taskController: TaskController;
@@ -23,7 +24,10 @@ class Container {
     private static authService: AuthService;
     
     private static dbConnection: DatabaseConnection = DatabaseConnection.getInstance();
-    
+
+    // Create an instance of TaskEncryptionService with the secret key from environment
+    private static encryptionService: TaskEncryptionService = new TaskEncryptionService(process.env.ENCRYPTION_KEY!);
+
     private static async ensureDatabaseConnection(): Promise<void> {
         await this.dbConnection.connectToDatabase();
     }
@@ -32,18 +36,18 @@ class Container {
         if (!this.taskRepository) {
             await this.ensureDatabaseConnection();
             const dbType = this.dbConnection.getDbType();
-            switch(dbType) {
+            switch (dbType) {
                 case 'sequelize':
-                    this.taskRepository = new SequelizeTaskRepository();
+                    this.taskRepository = new SequelizeTaskRepository(this.encryptionService);
                     break;
                 case 'cosmos':
                     const cosmosClient = this.dbConnection.getCosmosClient();
                     const cosmosDatabaseId = this.dbConnection.getCosmosDatabaseId();
                     const cosmosContainerId = this.dbConnection.getCosmosContainerId();
-                    this.taskRepository = new CosmosTaskRepository(cosmosClient, cosmosDatabaseId, cosmosContainerId);
+                    this.taskRepository = new CosmosTaskRepository(cosmosClient, cosmosDatabaseId, cosmosContainerId, this.encryptionService);
                     break;
                 case 'mongodb':
-                    this.taskRepository = new MongooseTaskRepository();
+                    this.taskRepository = new MongooseTaskRepository(this.encryptionService);
                     break;
                 default:
                     throw new Error(`Unsupported database type ${dbType}`);
@@ -56,7 +60,7 @@ class Container {
         if (!this.userRepository) {
             await this.ensureDatabaseConnection();
             const dbType = this.dbConnection.getDbType();
-            switch(this.dbConnection.getDbType()) {
+            switch (dbType) {
                 case 'sequelize':
                     this.userRepository = new SequelizeUserRepository();
                     break;

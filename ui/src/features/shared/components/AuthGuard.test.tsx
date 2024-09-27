@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import AuthGuard from './AuthGuard';
-import { initialState, setupStore } from '../../../store';
+import { initialState, setupStore } from '../../../redux/store';
 
 describe('AuthGuard component', () => {
   const renderWithProviders = (store: any, initialRoute: string = '/') =>

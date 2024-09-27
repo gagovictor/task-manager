@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { login, LoginRequest, LoginResponse, signup, SignupRequest, SignupResponse } from '../services/AuthService';
 import { User } from '../models/user';
+import { saveTasksToLocalStorage } from '../../tasks/redux/persistTasks';
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -28,6 +29,9 @@ const authSlice = createSlice({
     logout(state) {
       state.isAuthenticated = false;
       state.user = null;
+      localStorage.setItem('token', "");
+      localStorage.setItem('user', "");
+      saveTasksToLocalStorage([]);
     },
   },
   extraReducers: (builder) => {

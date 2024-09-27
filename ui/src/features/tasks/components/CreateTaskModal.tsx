@@ -12,17 +12,19 @@ import {
   Select,
   ToggleButtonGroup,
   ToggleButton,
-  Grid, // Import Grid
+  Grid,
+  useTheme,
+  Paper,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { createTaskAsync } from '../redux/tasksSlice';
 import { taskStatuses } from '../models/task';
-import { format, toZonedTime } from 'date-fns-tz';
 import { ChecklistItem } from '../models/checklist';
 import Checklist from '../components/Checklist';
 import { v4 as uuidv4 } from 'uuid';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -32,27 +34,22 @@ interface CreateTaskModalProps {
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [dateTime, setDateTime] = useState<Date | null>(null);
   const [status, setStatus] = useState(taskStatuses[0]);
   const dispatch = useDispatch<AppDispatch>();
   const { createStatus } = useSelector((state: RootState) => state.tasks);
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [alignment, setAlignment] = useState('text');
   const [isChecklistMode, setIsChecklistMode] = useState(false);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([
     { id: uuidv4(), text: '', completed: false },
   ]);
+  const theme = useTheme();
 
   const handleCreate = async () => {
     if (title) {
       let dueDate: string | null = null;
-      if (date || time) {
-        const zonedToday = toZonedTime(new Date(), timeZone);
-        const finalDate = date || format(zonedToday, 'yyyy-MM-dd');
-        const finalTime = time || '00:00:00';
-        const localDateTime = new Date(`${finalDate}T${finalTime}`);
-        dueDate = localDateTime.toISOString();
+      if (dateTime) {
+        dueDate = dateTime.toISOString();
       }
       try {
         let checklist: ChecklistItem[] | null = null;
@@ -70,17 +67,23 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
         }
 
         await dispatch(createTaskAsync({ title, description: descriptionToSend, checklist, dueDate, status })).unwrap();
-        setTitle('');
-        setDescription('');
-        setDate('');
-        setTime('');
-        setStatus(taskStatuses[0]);
+        resetForm();
         onClose();
-      } catch (error) {
-        // Handle error appropriately
+      } catch (error: any) {
+        console.error(`An error ocurred during matter creation: ${error?.message}`);
       }
     }
   };
+
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setDateTime(null);
+    setChecklistItems([]);
+    setIsChecklistMode(false);
+    setAlignment('text');
+    setStatus(taskStatuses[0]);
+  }
 
   const handleModeChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -94,15 +97,22 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
       }
     }
   };
+  
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  }
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box
+    <Modal
+      open={open}
+      onClose={handleClose}
+    >
+      <Paper
         sx={{
           width: '85%',
           maxWidth: '540px',
           margin: 'auto',
-          backgroundColor: 'white',
           borderRadius: 1,
           position: 'relative',
           marginTop: '10vh',
@@ -111,10 +121,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
+          backgroundColor: theme.palette.background.default,
         }}
       >
         <IconButton
-          onClick={onClose}
+          onClick={handleClose}
           sx={{
             position: 'absolute',
             top: 8,
@@ -131,7 +142,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             flex: 1,
             overflowY: 'auto',
             padding: 2,
-            paddingBottom: 4, // Adjusted padding for better spacing
+            paddingBottom: 4,
           }}
         >
           <Typography variant="h6" gutterBottom>
@@ -147,31 +158,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             onChange={(e) => setTitle(e.target.value)}
             required
           />
-          
-          {/* DateTime selectors */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Date"
-              variant="outlined"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
 
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Time"
-              variant="outlined"
-              type="time"
-              InputLabelProps={{ shrink: true }}
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
-          </Box>
+          <DateTimePicker
+            value={dateTime}
+            onChange={(newValue) => setDateTime(newValue)}
+            views={['year', 'month', 'day', 'hours', 'minutes']}
+            sx={{ width: '100%' }}
+          />
 
           {/* Grid container for Toggle Button and Status Selector */}
           <Grid
@@ -235,14 +228,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
         </Box>
 
         {/* Fixed button at the bottom */}
-        <Box
+        <Paper
           sx={{
             position: 'sticky',
             bottom: 0,
-            backgroundColor: 'white',
             padding: 2,
             zIndex: 2,
             borderTop: '1px solid rgba(0, 0, 0, 0.23)',
+            backgroundColor: theme.palette.background.default,
           }}
         >
           <Button
@@ -254,8 +247,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
           >
             Create
           </Button>
-        </Box>
-      </Box>
+        </Paper>
+      </Paper>
     </Modal>
   );
 };

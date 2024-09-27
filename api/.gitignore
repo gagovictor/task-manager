@@ -1,4 +1,14 @@
-.env
+# dependencies
 node_modules
-*log
+
+# production
 dist
+
+# testing
+coverage
+
+# misc
+.env
+.env.sample
+.env.test
+*log

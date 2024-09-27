@@ -12,7 +12,7 @@ import {
 } from './tasksSlice';
 import { AnyAction } from 'redux';
 import { Task } from '../models/task';
-import { setupStore, initialState as initialRootState } from '../../../store';
+import { setupStore, initialState as initialRootState } from '../../../redux/store';
 import { createTask } from '../services/TaskService';
 
 const mockTask: Task = {
@@ -22,6 +22,7 @@ const mockTask: Task = {
     description: '',
     dueDate: null,
     status: 'new',
+    createdAt: new Date().toISOString(),
     archivedAt: null,
     deletedAt: null
 };
@@ -29,6 +30,12 @@ const mockTask: Task = {
 const mockTasks: Task[] = [mockTask];
 
 describe('tasksSlice', () => {
+    let saveTasksSpy: jest.SpyInstance;
+  
+    beforeEach(() => {
+      saveTasksSpy = jest.spyOn(require('./persistTasks'), 'saveTasksToLocalStorage');
+    });
+
     it('should return the initial state', () => {
         expect(tasksReducer(undefined, {} as AnyAction)).toEqual(initialState);
     });
@@ -45,6 +52,7 @@ describe('tasksSlice', () => {
         const action = reorderTasksLocally({ updatedTasks });
         const state = tasksReducer({ ...initialState, tasks: initialTasks }, action);
         expect(state.tasks).toEqual(updatedTasks);
+        expect(saveTasksSpy).toHaveBeenCalledTimes(1);
     });
     
     it('should handle fetchTasksAsync.pending', () => {
@@ -58,6 +66,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer(initialState, action);
         expect(state.fetchStatus).toBe('succeeded');
         expect(state.tasks).toEqual(mockTasks);
+        expect(saveTasksSpy).toHaveBeenCalledTimes(1);
     });
     
     it('should handle fetchTasksAsync.rejected and set fixed error message', () => {
@@ -65,6 +74,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer(initialState, action);
         expect(state.fetchStatus).toBe('failed');
         expect(state.fetchError).toBe('Failed to load tasks.');
+        expect(saveTasksSpy).toHaveBeenCalledTimes(0);
     });
     
     it('should handle createTaskAsync.pending', () => {
@@ -78,6 +88,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer(initialState, action);
         expect(state.createStatus).toBe('succeeded');
         expect(state.tasks).toEqual([mockTask]);
+        expect(saveTasksSpy).toHaveBeenCalledTimes(1);
     });
     
     it('should handle createTaskAsync.rejected', () => {
@@ -85,6 +96,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer(initialState, action);
         expect(state.createStatus).toBe('failed');
         expect(state.createError).toBe('Create failed');
+        expect(saveTasksSpy).toHaveBeenCalledTimes(0);
     });
     
     it('should handle updateTaskAsync.pending', () => {
@@ -100,6 +112,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer({ ...initialState, tasks: initialTasks }, action);
         expect(state.updateStatus).toBe('succeeded');
         expect(state.tasks[0]).toEqual(updatedTask);
+        expect(saveTasksSpy).toHaveBeenCalledTimes(1);
     });
     
     it('should handle updateTaskAsync.rejected', () => {
@@ -107,6 +120,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer(initialState, action);
         expect(state.updateStatus).toBe('failed');
         expect(state.updateError).toBe('Update failed');
+        expect(saveTasksSpy).toHaveBeenCalledTimes(0);
     });
     
     it('should handle deleteTaskAsync.pending', () => {
@@ -121,6 +135,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer({ ...initialState, tasks: initialTasks }, action);
         expect(state.deleteStatus).toBe('succeeded');
         expect(state.tasks.find(task => task.id === '1')?.deletedAt).toBeDefined();
+        expect(saveTasksSpy).toHaveBeenCalledTimes(1);
     });
     
     it('should handle deleteTaskAsync.rejected', () => {
@@ -128,6 +143,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer(initialState, action);
         expect(state.deleteStatus).toBe('failed');
         expect(state.deleteError).toBe('Delete failed');
+        expect(saveTasksSpy).toHaveBeenCalledTimes(0);
     });
     
     it('should handle archiveTaskAsync.pending', () => {
@@ -142,6 +158,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer({ ...initialState, tasks: initialTasks }, action);
         expect(state.archiveStatus).toBe('succeeded');
         expect(state.tasks[0].archivedAt).toBeDefined();
+        expect(saveTasksSpy).toHaveBeenCalledTimes(1);
     });
     
     it('should handle archiveTaskAsync.rejected', () => {
@@ -149,6 +166,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer(initialState, action);
         expect(state.archiveStatus).toBe('failed');
         expect(state.archiveError).toBe('Archive failed');
+        expect(saveTasksSpy).toHaveBeenCalledTimes(0);
     });
     
     it('should handle unarchiveTaskAsync.pending', () => {

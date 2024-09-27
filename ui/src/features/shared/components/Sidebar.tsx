@@ -16,8 +16,9 @@ import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../store';
+import { RootState } from '../../../redux/store';
 import { logout } from '../../../features/auth/redux/authSlice';
+import ThemeToggle from './ThemeToggle';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export default function Sidebar() {
 
   const handleLogoutClick = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate('/logout');
   };
   
   const DrawerList = (
@@ -72,6 +73,9 @@ export default function Sidebar() {
             <ListItemText primary="Login" />
           </ListItemButton>
         }
+        </ListItem>
+        <ListItem>
+          <ThemeToggle />
         </ListItem>
       </List>
     </Box>

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select, ToggleButton, ToggleButtonGroup, Grid } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, IconButton, MenuItem, FormControl, InputLabel, Select, ToggleButton, ToggleButtonGroup, Grid, useTheme, Paper } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { updateTaskAsync } from '../redux/tasksSlice';
 import { Task, taskStatuses } from '../models/task';
 import { format, toZonedTime } from 'date-fns-tz';
 import { ChecklistItem } from '../models/checklist';
 import { v4 as uuidv4 } from 'uuid';
 import Checklist from './Checklist';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 interface EditTaskModalProps {
   open: boolean;
@@ -20,26 +21,19 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
   const { updateStatus } = useSelector((state: RootState) => state.tasks);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [dateTime, setDateTime] = useState<Date | null>(null);
   const [status, setStatus] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [isChecklistMode, setIsChecklistMode] = useState(false);
   const [alignment, setAlignment] = useState('text');
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+  const theme = useTheme();
   
   useEffect(() => {
     setTitle(task.title);
     setDescription(task.description);
-    if (task.dueDate) {
-      const zonedDate = toZonedTime(task.dueDate, timeZone);
-      setDate(format(zonedDate, 'yyyy-MM-dd'));
-      setTime(format(zonedDate, 'HH:mm'));
-    } else {
-      setDate('');
-      setTime('');
-    }
+    setDateTime(task.dueDate ? new Date(task.dueDate) : null);
     setStatus(task.status);
     if (task.checklist && task.checklist.length > 0) {
       setIsChecklistMode(true);
@@ -55,12 +49,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
   const handleUpdate = async () => {
     if (title) {
       let dueDate: string | null = null;
-      if (date || time) {
-        const zonedToday = toZonedTime(new Date(), timeZone);
-        const finalDate = date || format(zonedToday, 'yyyy-MM-dd');
-        const finalTime = time || '00:00:00';
-        const localDateTime = new Date(`${finalDate}T${finalTime}`);
-        dueDate = localDateTime.toISOString();
+      if (dateTime) {
+        dueDate = dateTime.toISOString();
       }
       try {
         let checklist: ChecklistItem[] | null = null;
@@ -87,21 +77,28 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
             status: status as string,
           })
         ).unwrap();
-  
-        setTitle('');
-        setDescription('');
-        setDate('');
-        setTime('');
-        setStatus('');
-        setChecklistItems([]);
-        setIsChecklistMode(false);
-        setAlignment('text');
-  
+        
+        resetForm();
         onClose();
       } catch (error) {
       }
     }
   };
+  
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setDateTime(null);
+    setChecklistItems([]);
+    setIsChecklistMode(false);
+    setAlignment('text');
+    setStatus(taskStatuses[0]);
+  }
+  
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  }
   
   const handleModeChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -122,29 +119,32 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
       }
     }
   };
-  
+
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box
+    <Modal
+      open={open}
+      onClose={handleClose}
+    >
+      <Paper
         sx={{
           width: '85%',
           maxWidth: '540px',
           margin: 'auto',
-          backgroundColor: 'white',
           borderRadius: 1,
           position: 'relative',
           marginTop: '10vh',
           maxHeight: '80vh',
           overflowX: 'hidden',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          backgroundColor: theme.palette.background.default,
         }}
       >
         <IconButton
-          onClick={onClose}
+          onClick={handleClose}
           sx={{
             position: 'absolute',
             top: 8,
-            right: 8
+            right: 8,
           }}
           aria-label="Close"
         >
@@ -157,7 +157,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
             flex: 1,
             overflowY: 'auto',
             padding: 2,
-            marginBottom: 2,    // Add space for the fixed button at the bottom
+            marginBottom: 2,
           }}
         >
           <Typography variant="h6" gutterBottom>
@@ -174,29 +174,12 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
           />
 
           {/* DateTime selectors */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Date"
-              variant="outlined"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Time"
-              variant="outlined"
-              type="time"
-              InputLabelProps={{ shrink: true }}
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
-          </Box>
+          <DateTimePicker
+            value={dateTime}
+            onChange={(newValue) => setDateTime(newValue)}
+            views={['year', 'month', 'day', 'hours', 'minutes']}
+            sx={{ width: '100%' }}
+          />
 
           {/* Grid container for Toggle Button and Status Selector */}
           <Grid
@@ -259,14 +242,14 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
         </Box>
 
         {/* Fixed button at the bottom */}
-        <Box
+        <Paper
           sx={{
             position: 'sticky',
             bottom: 0,
-            backgroundColor: 'white',
             padding: 2,
             zIndex: 2,
-            borderTop: '1px solid rgba(0, 0, 0, 0.23)'
+            borderTop: '1px solid rgba(0, 0, 0, 0.23)',
+            backgroundColor: theme.palette.background.default,
           }}
         >
           <Button
@@ -278,8 +261,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ open, onClose, task }) =>
           >
             Update
           </Button>
-        </Box>
-      </Box>
+        </Paper>
+      </Paper>
     </Modal>
   );
 };

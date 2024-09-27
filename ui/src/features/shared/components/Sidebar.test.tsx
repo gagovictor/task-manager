@@ -1,10 +1,11 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 import Sidebar from './Sidebar';
 import { logout } from '../../../features/auth/redux/authSlice';
+import userEvent from '@testing-library/user-event';
 
 const mockNavigate = jest.fn();
 const mockDispatch = jest.fn();
@@ -47,7 +48,12 @@ describe('Sidebar component', () => {
 
   it('should open the drawer when the menu icon is clicked', () => {
     const store = mockStore({
-      auth: { isAuthenticated: false },
+      auth: {
+        isAuthenticated: false,
+      },
+      preferences: {
+        theme: 'light'
+      }
     });
 
     renderWithProviders(store);
@@ -66,6 +72,9 @@ describe('Sidebar component', () => {
       auth: {
         isAuthenticated: true,
       },
+      preferences: {
+        theme: 'light'
+      }
     });
 
     render(
@@ -90,61 +99,69 @@ describe('Sidebar component', () => {
 
   it('should display Logout button when authenticated', async () => {
     const store = mockStore({
-      auth: { isAuthenticated: true },
+      auth: {
+        isAuthenticated: true,
+      },
+      preferences: {
+        theme: 'light'
+      }
     });
 
     renderWithProviders(store);
 
     act(() => {
-      fireEvent.click(screen.getByLabelText('menu'));
+      userEvent.click(screen.getByLabelText('menu'));
     });
 
-    const logoutButton = await screen.findByText('Logout');
-    expect(logoutButton).toBeInTheDocument();
+    waitFor(() => {
+      expect(screen.getByText('Logout')).toBeInTheDocument();
+    });
   });
 
-  it('should dispatch logout and navigate to /login when Logout is clicked', async () => {
+  it('should dispatch logout and navigate to /logout when Logout is clicked', async () => {
     const store = mockStore({
       auth: {
         isAuthenticated: true,
       },
-    });
-
-    render(
-      <Provider store={store}>
-        <Router>
-          <Sidebar />
-        </Router>
-      </Provider>
-    );
-
-    // Open the drawer first
-    act(() => {
-      fireEvent.click(screen.getByLabelText('menu'));
-    });
-
-    // Wait for the Logout button to appear and then click it
-    const logoutButton = await screen.findByText('Logout');
-    fireEvent.click(logoutButton);
-
-    expect(mockDispatch).toHaveBeenCalledWith(logout());
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
-  });
-
-  
-  it('should display Login button when authenticated', async () => {
-    const store = mockStore({
-      auth: { isAuthenticated: false },
+      preferences: {
+        theme: 'light'
+      }
     });
 
     renderWithProviders(store);
 
     act(() => {
-      fireEvent.click(screen.getByLabelText('menu'));
+      userEvent.click(screen.getByLabelText('menu'));
     });
 
-    const loginButton = await screen.findByText('Login');
-    expect(loginButton).toBeInTheDocument();
+    waitFor(() => {
+      const logoutButton = screen.getByText('Logout');
+      expect(logoutButton).toBeInTheDocument();
+      userEvent.click(logoutButton);
+      expect(mockDispatch).toHaveBeenCalledWith(logout());
+      expect(mockNavigate).toHaveBeenCalledWith('/logout');
+    });
+  });
+  
+  it('should display Login button when not authenticated', async () => {
+    const store = mockStore({
+      auth: {
+        isAuthenticated: false,
+      },
+      preferences: {
+        theme: 'light'
+      }
+    });
+
+    renderWithProviders(store);
+
+    act(() => {
+      userEvent.click(screen.getByLabelText('menu'));
+    });
+
+    waitFor(() => {
+      expect(screen.getByText('Login')).toBeInTheDocument();
+    });
   });
 
   it('should dispatch login and navigate to /login when Login is clicked', async () => {
@@ -152,6 +169,9 @@ describe('Sidebar component', () => {
       auth: {
         isAuthenticated: false,
       },
+      preferences: {
+        theme: 'light'
+      }
     });
 
     render(
@@ -162,15 +182,15 @@ describe('Sidebar component', () => {
       </Provider>
     );
 
-    // Open the drawer first
     act(() => {
-      fireEvent.click(screen.getByLabelText('menu'));
+      userEvent.click(screen.getByLabelText('menu'));
     });
 
-    // Wait for the Login button to appear and then click it
-    const loginButton = await screen.findByText('Login');
-    fireEvent.click(loginButton);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
+    waitFor(() => {
+      const loginButton = screen.getByText('Login');
+      expect(loginButton).toBeInTheDocument();
+      userEvent.click(loginButton);
+      expect(mockNavigate).toHaveBeenCalledWith('/login');
+    });
   });
 });

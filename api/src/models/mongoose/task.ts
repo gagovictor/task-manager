@@ -5,7 +5,7 @@ import { checklistItemSchema } from './checklist';
 export interface IMongooseTask extends Document {
   title: string;
   description?: string;
-  checklist?: ChecklistItem[];
+  checklist?: string;
   dueDate?: Date;
   status: string;
   userId: string;
@@ -18,11 +18,11 @@ export interface IMongooseTask extends Document {
 const taskSchema = new Schema<IMongooseTask>({
   title: { type: String, required: true },
   description: { type: String, default: null },
-  checklist: { type: [checklistItemSchema], default: [] },
+  checklist: { type: String, default: null },
   dueDate: { type: Date, default: null },
   status: { type: String, required: true },
   userId: { type: String, ref: 'User', required: true },
-  createdAt: { type: Date, default: new Date(), required: true },
+  createdAt: { type: Date, default: null, required: true },
   modifiedAt: { type: Date, default: null },
   archivedAt: { type: Date, default: null },
   deletedAt: { type: Date, default: null },

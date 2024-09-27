@@ -10,37 +10,50 @@ import ArchivedTasksPage from './features/tasks/pages/ArchivedTasksPage';
 import AuthGuard from './features/shared/components/AuthGuard';
 import TaskBoardPage from './features/tasks/pages/TaskBoardPage';
 import PwaInstallPrompt from './features/shared/components/PwaInstallPrompt';
-import { useMediaQuery, useTheme } from '@mui/material';
+import { Box, ThemeProvider, useMediaQuery } from '@mui/material';
+import { RootState } from './redux/store';
+import { useSelector } from 'react-redux';
+import getTheme from './features/shared/config/theme';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
+import { enUS } from 'date-fns/locale/en-US';
 
 function App() {
-  const theme = useTheme();
+  const mode = useSelector((state: RootState) => state.preferences.theme);
+  const theme = getTheme(mode);
   const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <BrowserRouter>
-      <div className="App">
-        <Header />
-        <main>
-          <Routes>
-            <Route path="/" element={<TasksPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/logout" element={<LogoutPage />} />
+      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
+        <ThemeProvider theme={theme}>
+          <div className="App">
+            <Header />
+            <main>
+              <Box sx={{ backgroundColor: theme.palette.background.default }}>
+                <Routes>
+                  <Route path="/" element={<TasksPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/logout" element={<LogoutPage />} />
 
-            <Route element={<AuthGuard />}>
-              <Route path="/tasks" element={<TasksPage />} />
-              <Route path="/archived" element={<ArchivedTasksPage />} />
-              <Route path="/board" element={<TaskBoardPage />} />
-            </Route>
+                  <Route element={<AuthGuard />}>
+                    <Route path="/tasks" element={<TasksPage />} />
+                    <Route path="/archived" element={<ArchivedTasksPage />} />
+                    <Route path="/board" element={<TaskBoardPage />} />
+                  </Route>
 
-            <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        </main>
+                  <Route path="*" element={<Navigate to="/login" />} />
+                </Routes>
+              </Box>
+            </main>
 
-        {isSmUp && <Footer />}
+            {isSmUp && <Footer />}
 
-        <PwaInstallPrompt />
-      </div>
+            <PwaInstallPrompt />
+          </div>
+        </ThemeProvider>
+      </LocalizationProvider>
     </BrowserRouter>
   );
 }

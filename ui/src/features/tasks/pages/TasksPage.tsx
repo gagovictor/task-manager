@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, Card, useTheme, IconButton, InputAdornment } from '@mui/material';
+import { Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, IconButton, InputAdornment } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
@@ -24,7 +24,6 @@ const TasksPage = () => {
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterText, setFilterText] = useState<string>('');
-  const theme = useTheme();
   
   useEffect(() => {
     dispatch(fetchTasksAsync());
@@ -50,25 +49,41 @@ const TasksPage = () => {
     }
   };
 
-  const filteredTasks = tasks.filter((task: Task) => {
-    const matchesStatus = filterStatus ? task.status === filterStatus : task.status !== 'removed'; // Removed tasks are hidden by default
-    const matchesText = filterText ? 
-      task.title.toLowerCase().includes(filterText.toLowerCase()) || 
-      task.description.toLowerCase().includes(filterText.toLowerCase()) 
-      : true;
-    return !task.archivedAt && !task.deletedAt && matchesStatus && matchesText;
-  });
+  const lowerCaseFilterText = filterText?.toLowerCase() || '';
+
+  const filteredTasks = tasks
+    .filter((task: Task) => {
+      const matchesStatus = filterStatus ? task.status === filterStatus : task.status !== 'removed' && task.status !== 'completed'; // Removed or Completed tasks are hidden by default
+      const matchesText = filterText ? 
+        task.title.toLowerCase().includes(lowerCaseFilterText) || 
+        task.description.toLowerCase().includes(lowerCaseFilterText) 
+        : true;
+      return !task.archivedAt && !task.deletedAt && matchesStatus && matchesText;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
+    });
 
   const handleClearStatus = () => setFilterStatus('');
   const handleClearSearch = () => setFilterText('');
+
+  const handleEditModalClose = () => {
+    setSelectedTask(null);
+    setEditModalOpen(false);
+  }
   
   return (
     <Container
       sx={{
         width: '100%',
-        minHeight: 'calc(100vh - 296px)',
-        position: 'relative'
-      }}>
+        minHeight: 'calc(100vh - 64px)', // full screen height minus footer
+        paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
+        position: 'relative',
+        paddingBottom: '32px',
+      }}
+    >
       <Box sx={{ mb: 4 }}>
         <Box
           sx={{
@@ -92,7 +107,6 @@ const TasksPage = () => {
                   <InputAdornment position="end">
                     <IconButton
                       aria-label="clear status filter"
-                      size="small"
                       edge="end"
                       sx={{ marginRight: '8px' }}
                       onClick={handleClearStatus}
@@ -126,7 +140,6 @@ const TasksPage = () => {
                   <InputAdornment position="end">
                     <IconButton
                       aria-label="clear search"
-                      size="small"
                       edge="end"
                       onClick={handleClearSearch}
                     >
@@ -140,29 +153,29 @@ const TasksPage = () => {
         </Box>
       </Box>
 
-      {/* Task Cards and Loading/Error Handling */}
-      {fetchStatus === 'loading' && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
-      {fetchStatus === 'failed' &&
+      {fetchStatus === 'failed' && (
         <Alert
           severity="error"
           data-testid="fetch-error-alert"
+          sx={{ mb: 4 }}
         >
           {fetchError}
+          { filteredTasks.length > 0 && (
+            <>Tasks shown may not represent their current state. {/*Changes will be saved once connectivity is restored. (TODO)*/} </>
+          )}
         </Alert>
-      }
-      {fetchStatus === 'succeeded' && filteredTasks.length == 0 && (
+      )}
+
+      {(fetchStatus === 'succeeded' && filteredTasks.length == 0) && (
         <Alert severity="info" sx={{ mb: 4, flex: 1 }}>
           No tasks match the filter criteria.
         </Alert>
       )}
-      {fetchStatus === 'succeeded' && (
+      
+      {(fetchStatus === 'succeeded' || filteredTasks.length > 0) && (
         <Masonry
-          columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
-          spacing={2}
+          columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
+          spacing={1}
           data-testid="masonry"
           sx={{ mb: 4 }}
         >
@@ -199,7 +212,7 @@ const TasksPage = () => {
       {selectedTask && (
         <EditTaskModal
           open={editModalOpen}
-          onClose={() => setEditModalOpen(false)}
+          onClose={() => handleEditModalClose()}
           task={selectedTask}
         />
       )}

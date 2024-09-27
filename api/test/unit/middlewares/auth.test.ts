@@ -66,7 +66,7 @@ describe('authMiddleware', () => {
     });
     
     it('should return 401 if no user is found for the provided token', async () => {
-        const token = jwt.sign({ userId: 'user1' }, 'test-secret');
+        const token = jwt.sign({ userId: 'testuser' }, 'test-secret');
         req.headers = {
             authorization: `Bearer ${token}`,
         };
@@ -87,9 +87,9 @@ describe('authMiddleware', () => {
     });
     
     it('should call next if a valid token and user are provided', async () => {
-        const token = jwt.sign({ userId: 'user1' }, 'test-secret');
+        const token = jwt.sign({ userId: 'testuser' }, 'test-secret');
         const mockUser: User = {
-            id: 'user1',
+            id: 'testuser',
             username: 'testuser',
             email: 'test@test.com',
             password: 'hashedPassword',

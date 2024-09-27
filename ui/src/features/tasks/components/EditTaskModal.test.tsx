@@ -1,13 +1,15 @@
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
-import { initialState, setupStore } from '../../../store';
+import { initialState, setupStore } from '../../../redux/store';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
 import { CreateTaskRequest } from '../services/TaskService';
 import { Task } from '../models/task';
 import EditTaskModal from './EditTaskModal';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -49,16 +51,19 @@ describe('EditTaskModal component', () => {
         dueDate: new Date().toISOString(),
         status: 'new',
         userId: '1',
+        createdAt: new Date().toISOString(),
         archivedAt: null,
         deletedAt: null,
     };
     
     const renderWithProviders = (store: any, open: boolean, task: Task) => render(
-        <Provider store={store}>
-            <Router>
-                <EditTaskModal open={open} task={task} onClose={mockOnClose} />
-            </Router>
-        </Provider>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Provider store={store}>
+                <Router>
+                    <EditTaskModal open={open} task={task} onClose={mockOnClose} />
+                </Router>
+            </Provider>
+        </LocalizationProvider>
     );
 
     const extractDateAndTime = (dueDate: string | null) => {
@@ -80,9 +85,6 @@ describe('EditTaskModal component', () => {
 
         const dateInput = await screen.getByLabelText(/Date/i);
         await userEvent.type(dateInput, formattedDate);
-
-        const timeInput = await screen.getByLabelText(/Time/i);
-        await userEvent.type(timeInput, formattedTime);
 
         const descriptionInput = await screen.getByLabelText(/Description/i);
         await userEvent.type(descriptionInput, task.description);
@@ -127,8 +129,9 @@ describe('EditTaskModal component', () => {
         await waitFor(() => {
             expect(screen.getByLabelText(/Title/i)).toHaveValue('');
             expect(screen.getByLabelText(/Date/i)).toHaveValue('');
-            expect(screen.getByLabelText(/Time/i)).toHaveValue('');
             expect(screen.getByLabelText(/Description/i)).toHaveValue('');
+            const statusSelect = screen.getByRole('combobox');
+            expect(statusSelect).toHaveTextContent('New');
         });
     });
     

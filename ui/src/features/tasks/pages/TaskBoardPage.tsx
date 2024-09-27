@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { fetchTasksAsync, reorderTasksLocally, updateTaskStatusAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -233,17 +233,12 @@ const TaskBoardPage = () => {
     <Container
       sx={{
         width: '100%',
-        minHeight: 'calc(100vh - 296px)',
+        minHeight: 'calc(100vh - 64px)', // full screen height minus footer
+        paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
         position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
+        paddingBottom: '32px',
       }}
     >
-      {fetchStatus === 'loading' && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
       {fetchStatus === 'failed' &&
         <Alert
           severity="error"

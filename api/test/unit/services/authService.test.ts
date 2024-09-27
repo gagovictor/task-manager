@@ -59,7 +59,7 @@ describe('AuthService', () => {
                 },
             });
             expect(bcrypt.hash).toHaveBeenCalledWith(signupRequest.password, 10);
-            expect(jwt.sign).toHaveBeenCalledWith({ userId: mockUser.id }, jwtSecret, { expiresIn: '1h' });
+            expect(jwt.sign).toHaveBeenCalledWith({ userId: mockUser.id }, jwtSecret, { expiresIn: '1d' });
             expect(mockUserRepository.createUser).toHaveBeenCalledWith({
                 username: signupRequest.username,
                 email: signupRequest.email,
@@ -132,7 +132,7 @@ describe('AuthService', () => {
                 },
             });
             expect(bcrypt.compare).toHaveBeenCalledWith(loginRequest.password, mockUser.password);
-            expect(jwt.sign).toHaveBeenCalledWith({ userId: mockUser.id }, jwtSecret, { expiresIn: '1h' });
+            expect(jwt.sign).toHaveBeenCalledWith({ userId: mockUser.id }, jwtSecret, { expiresIn: '1d' });
         });
         
         it('should throw an error if no user is found with the given username', async () => {

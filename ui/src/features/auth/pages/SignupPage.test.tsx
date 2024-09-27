@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import SignupPage from './SignupPage';
-import store from '../../../store';
+import store from '../../../redux/store';
 
 describe('SignupPage', () => {
     const renderWithProviders = (component: React.ReactElement) => {

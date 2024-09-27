@@ -8,7 +8,7 @@ const getProtectedRouter = async () => {
     
     protectedRouter.use(authMiddleware(await Container.getUserRepository()));
     
-    protectedRouter.use('/tasks', await createTaskRouter());
+    protectedRouter.use('/tasks', createTaskRouter());
     
     return protectedRouter;
 }

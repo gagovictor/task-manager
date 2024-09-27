@@ -1,51 +1,58 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, Theme } from '@mui/material/styles';
 
-const theme = createTheme({
+export const getTheme = (mode: 'light' | 'dark'): Theme => createTheme({
   spacing: 8,
   components: {
     MuiContainer: {
       styleOverrides: {
         root: {
-          paddingBottom: '32px',
-          '@media (min-width:0px)': {  // xs breakpoint
-            paddingTop: 'calc(32px + 56px)',
-          },
-          '@media (min-width:600px)': {  // sm breakpoint
-            paddingTop: 'calc(32px + 64px)',
-          },
+          maxWidth: '98% !important',
         },
       },
     },
     MuiSnackbarContent: {
       styleOverrides: {
         root: {
-          backgroundColor: '#444E5E'
+          backgroundColor: mode === 'dark' ? '#333' : '#444E5E',
         },
       },
     },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            '& input:-webkit-autofill': {
+              '-webkit-box-shadow': `0 0 0 100px ${mode === 'dark' ? '#55504E' : '#EDF5FF'} inset !important`,
+            },
+            ':has(> input:-webkit-autofill)': {
+              backgroundColor: mode === 'dark' ? '#55504E' : '#EDF5FF',
+            }
+          },
+        },
+      }
+    }
   },
   palette: {
+    mode,
     primary: {
-      main: '#39588A',
-      contrastText: '#EDF5FF'
-      // contrastText: '#4e5155',
+      main: mode === 'dark' ? '#EDF5FF' : '#39588A',
+      contrastText: mode === 'dark' ? '#39588A' : '#EDF5FF',
     },
     secondary: {
-      main: '#FFD0BB',
-      contrastText: '#55504e'
+      main: mode === 'dark' ? '#FFF1EB' : '#E0672F',
+      contrastText: mode === 'dark' ? '#55504E' : '#FFF1EB',
     },
     background: {
-      default: '#FFFFFF',
-      paper: '#FBF6F4',
-      
+      default: mode === 'dark' ? '#1e1e1e' : '#FFFFFF',
+      paper: mode === 'dark' ? '#121212' : '#F7F6F6',
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575',
+      primary: mode === 'dark' ? '#ffffff' : '#212121',
+      secondary: mode === 'dark' ? '#e0e0e0' : '#757575',
     },
     info: {
-      main: '#3269C2'
-    }
+      main: '#3269C2',
+    },
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
@@ -61,4 +68,4 @@ const theme = createTheme({
   },
 });
 
-export default theme;
+export default getTheme;

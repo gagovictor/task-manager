@@ -5,10 +5,11 @@ import TaskCard from './TaskCard';
 import { Provider } from 'react-redux';
 import userEvent from '@testing-library/user-event';
 import { Task } from '../models/task';
-import { initialState, setupStore } from '../../../store';
+import { initialState, setupStore } from '../../../redux/store';
 import { format } from 'date-fns-tz';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
+import { addDays, addSeconds, startOfToday } from 'date-fns';
 
 const mockTask: Task = {
   id: '1',
@@ -17,6 +18,7 @@ const mockTask: Task = {
   dueDate: new Date().toISOString(),
   status: 'new',
   userId: '1',
+  createdAt: new Date().toISOString(),
   archivedAt: null,
   deletedAt: null,
 };
@@ -31,7 +33,7 @@ const mockStore = setupStore({
 const renderComponent = (task = mockTask, store = mockStore) => {
   return render(
     <Provider store={store}>
-    <TaskCard task={task} showSnackbar={mockShowSnackbar} onEdit={mockOnEdit} />
+      <TaskCard task={task} showSnackbar={mockShowSnackbar} onEdit={mockOnEdit} />
     </Provider>
   );
 };
@@ -157,6 +159,34 @@ describe('TaskCard', () => {
     
     const chip = screen.getByText(formattedDate);
     expect(chip).toBeInTheDocument();
+    expect(chip.closest('.MuiChip-root')).toHaveClass('MuiChip-colorError');
+  });
+  
+  it('should display the Chip with secondary color if the task due date is today', () => {
+    const taskWithTodayDueDate = {
+      ...mockTask,
+      dueDate: addSeconds(new Date(), 1).toISOString(),
+    };
+    
+    renderComponent(taskWithTodayDueDate);
+    
+    const chip = screen.getByText(format(new Date(taskWithTodayDueDate.dueDate), 'dd/MM/yyyy HH:mm'));
+    expect(chip).toBeInTheDocument();
+    expect(chip.closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary');
+  });
+  
+  it('should display the Chip with default color if the task is due in more than 1 day', () => {
+    const taskWithFutureDueDate = {
+      ...mockTask,
+      dueDate: addDays(new Date(), 2).toISOString(), // Set the due date to 2 days in the future
+    };
+    
+    renderComponent(taskWithFutureDueDate);
+    
+    const chip = screen.getByText(format(new Date(taskWithFutureDueDate.dueDate), 'dd/MM/yyyy HH:mm'));
+    
+    expect(chip).toBeInTheDocument();
+    expect(chip.closest('.MuiChip-root')).toHaveClass('MuiChip-colorDefault');
   });
   
   it('should disable the archive button when archiving is in progress', async () => {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { act, useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import Checklist from './Checklist';
 import { ChecklistItem } from '../models/checklist';
@@ -134,9 +134,8 @@ describe('Checklist component', () => {
         
         render(<TestWrapper />);
         
-        const textField = screen.getByPlaceholderText('Item 1');
-        await userEvent.type(textField, '');
-        
+        act(() => userEvent.tab());
+
         expect(screen.getAllByRole('textbox')).toHaveLength(1);
     });
     

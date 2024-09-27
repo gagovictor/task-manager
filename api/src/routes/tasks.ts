@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import Container from '../config/container';
 
-const createTaskRouter = async (): Promise<Router> => {
+const createTaskRouter = (): Router => {
   const router = Router();
-  const taskController = await Container.getTaskController();
 
   /**
    * @swagger
@@ -59,6 +58,7 @@ const createTaskRouter = async (): Promise<Router> => {
    */
   router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const taskController = await Container.getTaskController();
       await taskController.getTasks(req, res);
     } catch (error) {
       next(error);
@@ -90,6 +90,7 @@ const createTaskRouter = async (): Promise<Router> => {
    */
 //   router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
 //     try {
+      // const taskController = await Container.getTaskController();
 //       await taskController.getTaskById(req, res);
 //     } catch (error) {
 //       next(error);
@@ -120,6 +121,7 @@ const createTaskRouter = async (): Promise<Router> => {
    */
   router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const taskController = await Container.getTaskController();
       await taskController.createTask(req, res);
     } catch (error) {
       next(error);
@@ -159,6 +161,7 @@ const createTaskRouter = async (): Promise<Router> => {
    */
   router.patch('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const taskController = await Container.getTaskController();
       await taskController.updateTask(req, res);
     } catch (error) {
       next(error);
@@ -186,6 +189,7 @@ const createTaskRouter = async (): Promise<Router> => {
    */
   router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const taskController = await Container.getTaskController();
       await taskController.deleteTask(req, res);
     } catch (error) {
       next(error);
@@ -213,6 +217,7 @@ const createTaskRouter = async (): Promise<Router> => {
    */
   router.post('/:id/archive', async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const taskController = await Container.getTaskController();
       await taskController.archiveTask(req, res);
     } catch (error) {
       next(error);
@@ -240,6 +245,7 @@ const createTaskRouter = async (): Promise<Router> => {
    */
   router.post('/:id/unarchive', async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const taskController = await Container.getTaskController();
       await taskController.unarchiveTask(req, res);
     } catch (error) {
       next(error);
@@ -283,12 +289,26 @@ const createTaskRouter = async (): Promise<Router> => {
    */
   router.post('/:id/status', async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const taskController = await Container.getTaskController();
       await taskController.updateTaskStatus(req, res);
     } catch (error) {
       next(error);
     }
   });
 
+  /**
+   * Bulk import tasks.
+   * Expects an array of tasks in the request body.
+   */
+  router.post('/bulk-import', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const taskController = await Container.getTaskController();
+      await taskController.bulkImportTasks(req, res);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   return router;
 };
 

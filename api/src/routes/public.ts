@@ -1,10 +1,10 @@
 import express from 'express';
 import createAuthRouter from './auth';
 
-const getPublicRouter = async () => {
+const getPublicRouter = () => {
     const publicRouter = express.Router();
     
-    publicRouter.use('/', await createAuthRouter());
+    publicRouter.use('/', createAuthRouter());
 
     return publicRouter;    
 };

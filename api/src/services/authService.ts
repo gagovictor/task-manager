@@ -6,6 +6,7 @@ import { SignupRequest, AuthResponse, LoginRequest } from '../models/user';
 class AuthService {
   private userRepository: IUserRepository;
   private jwtSecret: string;
+  private jwtExpirationTime: string = process.env.JWT_EXPIRATION_TIME || '1d';
   
   constructor(userRepository: IUserRepository, jwtSecret: string) {
     this.userRepository = userRepository;
@@ -33,7 +34,7 @@ class AuthService {
         password: hashedPassword,
       });
       
-      const token = jwt.sign({ userId: user.id }, this.jwtSecret, { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user.id }, this.jwtSecret, { expiresIn: this.jwtExpirationTime });
       
       return {
         token,
@@ -64,7 +65,7 @@ class AuthService {
         throw new Error('Incorrect password');
       }
       
-      const token = jwt.sign({ userId: user.id }, this.jwtSecret, { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user.id }, this.jwtSecret, { expiresIn: this.jwtExpirationTime });
       
       return {
         token,

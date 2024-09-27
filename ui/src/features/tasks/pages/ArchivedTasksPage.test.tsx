@@ -3,8 +3,10 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/lib/node';
-import { initialState, setupStore } from '../../../store';
+import { initialState, setupStore } from '../../../redux/store';
 import ArchivedTasksPage from './ArchivedTasksPage';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 
 describe('ArchivedTasksPage component', () => {
     const store = setupStore(initialState);
@@ -73,21 +75,14 @@ describe('ArchivedTasksPage component', () => {
     });
     
     const renderWithProviders = (store: any) => render(
-        <Provider store={store}>
-            <Router>
-                <ArchivedTasksPage />
-            </Router>
-        </Provider>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Provider store={store}>
+                <Router>
+                    <ArchivedTasksPage />
+                </Router>
+            </Provider>
+        </LocalizationProvider>
     );
-
-    it('renders the loading spinner when loading', async () => {
-        renderWithProviders(store);
-        await waitFor(() => {
-            expect(screen.getByRole('progressbar')).toBeInTheDocument();
-            expect(screen.queryByText(/Failed to load tasks./i)).toBeNull();
-            expect(screen.queryByTestId('fetch-error-alert')).toBeNull();
-        })
-    });
 
     it('renders only archived tasks after successful fetching', async () => {
         renderWithProviders(store);

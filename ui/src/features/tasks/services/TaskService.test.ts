@@ -20,6 +20,7 @@ describe('TaskService', () => {
                 description: 'Test Description',
                 dueDate: new Date().toISOString(),
                 status: 'pending',
+                createdAt: new Date().toISOString(),
                 archivedAt: null,
                 deletedAt: null
             }];
@@ -46,7 +47,7 @@ describe('TaskService', () => {
         it('should return created task data when API call is successful', async () => {
             const request = { title: 'New Task', description: 'Task Description', checklist: null, dueDate: new Date().toISOString(), status: 'active' };
             const token = 'fake-token';
-            const response: Task = { id: '1', ...request, userId: 'userId', archivedAt: null, deletedAt: null };
+            const response: Task = { id: '1', ...request, userId: 'userId', createdAt: new Date().toISOString(), archivedAt: null, deletedAt: null };
             mockedApiClient.post.mockResolvedValue({ data: response });
 
             const result = await createTask(request, token);
@@ -71,7 +72,7 @@ describe('TaskService', () => {
         it('should return updated task data when API call is successful', async () => {
             const request = { id: '1', title: 'Updated Task', description: 'Updated Description', checklist: null, dueDate: new Date().toISOString(), status: 'completed' };
             const token = 'fake-token';
-            const response: Task = { ...request, userId: 'userId', archivedAt: null, deletedAt: null };
+            const response: Task = { ...request, userId: 'userId', createdAt: new Date().toISOString(), archivedAt: null, deletedAt: null };
             mockedApiClient.patch.mockResolvedValue({ data: response });
 
             const result = await updateTask(request, token);

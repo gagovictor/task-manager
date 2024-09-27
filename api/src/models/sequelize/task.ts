@@ -5,7 +5,7 @@ export class SequelizeTask extends Model {
     public id!: string;
     public title!: string;
     public description?: string;
-    public checklist?: ChecklistItem[];
+    public checklist?: string;
     public dueDate?: Date;
     public status!: string;
     public userId!: string;

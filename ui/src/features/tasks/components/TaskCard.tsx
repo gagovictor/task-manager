@@ -11,14 +11,13 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import Tooltip from '@mui/material/Tooltip';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { archiveTaskAsync, deleteTaskAsync, unarchiveTaskAsync } from '../redux/tasksSlice';
-import { Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemIcon, ListItemText, useTheme } from '@mui/material';
 import { Task } from '../models/task';
-import { format } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PendingActionsOutlined } from '@mui/icons-material';
-import theme from '../../shared/config/theme';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
 interface TaskCardProps {
@@ -33,6 +32,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
   const { deleteStatus, deleteError, archiveStatus, archiveError } = useSelector((state: RootState) => state.tasks);
   const [isDescriptionOverflow, setIsDescriptionOverflow] = useState(false);
   const descriptionRef = useRef<HTMLDivElement | null>(null);
+  const theme = useTheme();
 
   useEffect(() => {
     if (descriptionRef.current) {
@@ -93,29 +93,45 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
 
   const formattedStatus = task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase();
 
+  const formattedCreatedAt = task.createdAt
+    ? format(toZonedTime(task.createdAt, timeZone), 'dd/MM/yyyy HH:mm')
+    : '-';
+
+  const isDueToday = task.dueDate && isToday(new Date(task.dueDate!));
+
   const moreCaption = (
     <Typography
       variant="caption"
       sx={{
-        marginTop: '8px',
         display: 'flex',
         alignItems: 'center',
         textAlign: 'left',
         color: 'text.secondary',
+        mr: 2,
       }}
     >
       <UnfoldMoreIcon
         sx={{
           fontSize: '1.5em',
-          marginRight: '4px',
+          marginRight: '4px', 
         }}
       />
       More
     </Typography>
   );
 
+  const createdAtCaption = (
+    <Typography variant="caption"
+      sx={{
+        textAlign: 'right',
+        color: 'text.secondary',
+      }}>
+      Created at: {formattedCreatedAt}
+    </Typography>
+  );
+
   return (
-    <Box sx={{ width: '100%', marginBottom: 2 }}>
+    <Box sx={{ width: '100%', position: 'relative' }}>
       <Card
         variant="outlined"
         onClick={handleCardClick}
@@ -148,6 +164,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
                 <Chip
                   icon={<PendingActionsOutlined />}
                   label={formattedDueDate}
+                  color={isDueToday ? 'secondary' : 'default'} // Set secondary color if due today
                 />
               )
             }
@@ -172,7 +189,19 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
                   <ListItemText id={`checkbox-list-label-${item.id}`} primary={item.text} />
                 </ListItem>
               ))}
-              {task.checklist.length > 3 && moreCaption}
+              <Box
+                sx={{
+                  mt: 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  {task.checklist.length > 3 && moreCaption}
+                  </div>
+                {createdAtCaption}
+              </Box>
             </List>
           ) : (
             <>
@@ -192,11 +221,31 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
               >
                 {task.description ? task.description : 'No description provided'}
               </Typography>
-              {isDescriptionOverflow && moreCaption}
+              <Box
+                sx={{
+                  mt: 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  {isDescriptionOverflow && moreCaption}
+                </div>
+                {createdAtCaption}
+              </Box>
+
             </>
           )}
         </CardContent>
-        <CardActions>
+
+        <CardActions
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+        >
           <Tooltip title="Edit Task">
             <span>
               <Button
@@ -245,12 +294,20 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
           </Tooltip>
         </CardActions>
       </Card>
+
       <Dialog
         open={openConfirm}
         onClose={handleCloseConfirm}
       >
         <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>Are you sure you want to delete this task?</DialogContent>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete this task?
+          </Typography>
+          <Typography variant="body1" color="error">
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirm}>Cancel</Button>
           <Button onClick={handleDelete} color="error">Delete</Button>

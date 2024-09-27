@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState } from '../../../redux/store';
 import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { CircularProgress, Typography, Alert, Fab, Container, Snackbar, Button } from '@mui/material';
+import { Typography, Alert, Fab, Container, Snackbar, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateTaskModal from '../components/CreateTaskModal';
 import EditTaskModal from '../components/EditTaskModal';
@@ -46,14 +46,12 @@ export default function ArchivedTasksPage() {
     <Container
       sx={{
         width: '100%',
-        minHeight: { xs: 'calc(100vh - 134px)', md: 'calc(100vh - 104px)' },
-        position: 'relative'
-      }}>
-      {fetchStatus === 'loading' && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
+        minHeight: 'calc(100vh - 64px)', // full screen height minus footer
+        paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
+        position: 'relative',
+        paddingBottom: '32px',
+      }}
+    >
       {fetchStatus === 'failed' &&
         <Alert
           severity="error"
@@ -64,7 +62,7 @@ export default function ArchivedTasksPage() {
       }
       {fetchStatus === 'succeeded' && activeTasks.length > 0 && (
         <Masonry
-          columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+        columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
           spacing={2}
           data-testid="masonry"
         >

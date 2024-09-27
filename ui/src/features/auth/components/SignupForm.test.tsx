@@ -2,8 +2,8 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import SignupForm from './SignupForm';
-import { setupStore } from '../../../store';
-import { initialState } from '../../../store';
+import { setupStore } from '../../../redux/store';
+import { initialState } from '../../../redux/store';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { SignupRequest, SignupResponse } from '../services/AuthService';

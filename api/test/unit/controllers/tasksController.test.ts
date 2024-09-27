@@ -11,7 +11,7 @@ describe('TaskController', () => {
     let res: httpMocks.MockResponse<Response>;
     
     const mockUser = {
-        id: 'user123',
+        id: 'testuser23',
         username: 'testuser',
         email: 'testuser@domain.com',
         password: ''

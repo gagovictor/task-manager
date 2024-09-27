@@ -115,7 +115,7 @@ const Checklist: React.FC<ChecklistProps> = ({ items, onItemsChange }) => {
                       aria-label={`Remove item ${index + 1}`}
                       disabled={isLastItem && item.text === ''}
                     >
-                      <ClearIcon fontSize="small" />
+                      <ClearIcon fontSize="small"/>
                     </IconButton>
                   </InputAdornment>
                 ),

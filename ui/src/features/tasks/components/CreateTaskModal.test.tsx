@@ -1,17 +1,18 @@
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import userEvent from "@testing-library/user-event";
-import { initialState, setupStore } from '../../../store';
+import { initialState, setupStore } from '../../../redux/store';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { CreateTaskRequest } from '../services/TaskService';
 import CreateTaskModal from './CreateTaskModal';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 
 const mockOnClose = jest.fn();
 
 describe('CreateTaskModal component', () => {
-    
     const handlers = [
         http.all(`${process.env.REACT_APP_API_BASE_URL}/*`, () => {
             return new Response(null, {
@@ -37,11 +38,13 @@ describe('CreateTaskModal component', () => {
     });
     
     const renderWithProviders = (store: any, open: boolean) => render(
-        <Provider store={store}>
-            <Router>
-                <CreateTaskModal open={open} onClose={mockOnClose} />
-            </Router>
-        </Provider>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Provider store={store}>
+                <Router>
+                    <CreateTaskModal open={open} onClose={mockOnClose} />
+                </Router>
+            </Provider>
+        </LocalizationProvider>
     );
     
     const submitForm = async (task: CreateTaskRequest) => {
@@ -54,9 +57,6 @@ describe('CreateTaskModal component', () => {
         
         const dateInput = await screen.getByLabelText(/Date/i);
         await userEvent.type(dateInput, formattedDate);
-        
-        const timeInput = await screen.getByLabelText(/Time/i);
-        await userEvent.type(timeInput, formattedTime);
         
         const descriptionInput = await screen.getByLabelText(/Description/i);
         await userEvent.type(descriptionInput, task.description);
@@ -93,7 +93,7 @@ describe('CreateTaskModal component', () => {
             description: 'Test Description',
             checklist: null,
             dueDate: new Date().toISOString(),
-            status: 'new',
+            status: 'completed',
         };
         
         await submitForm(task);
@@ -101,8 +101,9 @@ describe('CreateTaskModal component', () => {
         await waitFor(() => {
             expect(screen.getByLabelText(/Title/i)).toHaveValue('');
             expect(screen.getByLabelText(/Date/i)).toHaveValue('');
-            expect(screen.getByLabelText(/Time/i)).toHaveValue('');
             expect(screen.getByLabelText(/Description/i)).toHaveValue('');
+            const statusSelect = screen.getByRole('combobox');
+            expect(statusSelect).toHaveTextContent('New');
         });
     });
     

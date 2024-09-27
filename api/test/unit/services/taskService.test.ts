@@ -1,6 +1,6 @@
 import TaskService from '../../../src/services/taskService';
 import ITaskRepository from '../../../src/repositories/taskRepository';
-import { CreateTaskRequestBody, Task } from '../../../src/models/task';
+import { CreateTaskDto, CreateTaskRequestBody, Task, UpdateTaskDto } from '../../../src/models/task';
 
 describe('TaskService', () => {
     let mockTaskRepository: jest.Mocked<ITaskRepository>;
@@ -15,6 +15,7 @@ describe('TaskService', () => {
             archiveTask: jest.fn<Promise<void>, [string, string]>(),
             unarchiveTask: jest.fn<Promise<void>, [string, string]>(),
             updateTaskStatus: jest.fn<Promise<Task | null>, [string, string, string]>(),
+            bulkCreateTasks: jest.fn<Promise<Task[]>, [Task[]]>(),
         };
         
         taskService = new TaskService(mockTaskRepository);
@@ -28,13 +29,13 @@ describe('TaskService', () => {
     
     describe('createTask', () => {
         it('should call the repository to create a new task', async () => {
-            const taskParams: CreateTaskRequestBody = {
+            const taskParams: CreateTaskDto = {
                 title: 'New Task',
                 description: 'Task Description',
                 checklist: [],
                 dueDate: new Date(),
                 status: 'active',
-                userId: 'user1',
+                userId: 'testuser',
             };
             
             const mockTask: Task = {
@@ -54,7 +55,7 @@ describe('TaskService', () => {
     
     describe('getTasksByUser', () => {
         it('should call the repository to get tasks by user', async () => {
-            const userId = 'user1';
+            const userId = 'testuser';
             const mockTasks: Task[] = [
                 {
                     id: 'task1',
@@ -90,7 +91,10 @@ describe('TaskService', () => {
     describe('updateTask', () => {
         it('should call the repository to update a task', async () => {
             const taskId = 'task1';
-            const updates: Partial<Task> = { title: 'Updated Task' };
+            const updates: UpdateTaskDto = {
+                userId: 'testuser',
+                title: 'Updated Task'
+            };
             const updatedTask: Task = {
                 id: taskId,
                 title: 'Updated Task',
@@ -98,8 +102,9 @@ describe('TaskService', () => {
                 checklist: [],
                 dueDate: new Date(),
                 status: 'active',
-                userId: 'user1',
+                userId: 'testuser',
                 createdAt: new Date(),
+                modifiedAt: new Date(),
             };
             
             mockTaskRepository.updateTask.mockResolvedValue(updatedTask);
@@ -114,7 +119,7 @@ describe('TaskService', () => {
     describe('deleteTask', () => {
         it('should call the repository to delete a task', async () => {
             const taskId = 'task1';
-            const userId = 'user1';
+            const userId = 'testuser';
             
             mockTaskRepository.deleteTask.mockResolvedValue();
             
@@ -127,7 +132,7 @@ describe('TaskService', () => {
     describe('archiveTask', () => {
         it('should call the repository to archive a task', async () => {
             const taskId = 'task1';
-            const userId = 'user1';
+            const userId = 'testuser';
             
             mockTaskRepository.archiveTask.mockResolvedValue();
             
@@ -140,7 +145,7 @@ describe('TaskService', () => {
     describe('unarchiveTask', () => {
         it('should call the repository to unarchive a task', async () => {
             const taskId = 'task1';
-            const userId = 'user1';
+            const userId = 'testuser';
             
             mockTaskRepository.unarchiveTask.mockResolvedValue();
             
@@ -154,7 +159,7 @@ describe('TaskService', () => {
         it('should call the repository to update the status of a task', async () => {
             const taskId = 'task1';
             const status = 'completed';
-            const userId = 'user1';
+            const userId = 'testuser';
             const updatedTask: Task = {
                 id: taskId,
                 title: 'Task 1',
