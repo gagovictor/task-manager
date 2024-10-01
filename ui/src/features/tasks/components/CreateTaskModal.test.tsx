@@ -48,15 +48,13 @@ describe('CreateTaskModal component', () => {
     );
     
     const submitForm = async (task: CreateTaskRequest) => {
-        const date = new Date(task.dueDate!);
-        const formattedDate = date.toISOString().split('T')[0];
-        const formattedTime = date.toTimeString().split(' ')[0].slice(0, 5);
-        
         const titleInput = await screen.getByLabelText(/Title/i);
         await userEvent.type(titleInput, task.title);
         
-        const dateInput = await screen.getByLabelText(/Date/i);
-        await userEvent.type(dateInput, formattedDate);
+        if(task.dueDate) {
+            const dateInput = await screen.getByLabelText(/Due Date/i);
+            await userEvent.type(dateInput, task.dueDate);
+        }
         
         const descriptionInput = await screen.getByLabelText(/Description/i);
         await userEvent.type(descriptionInput, task.description);
@@ -92,7 +90,7 @@ describe('CreateTaskModal component', () => {
             title: 'Test Title',
             description: 'Test Description',
             checklist: null,
-            dueDate: new Date().toISOString(),
+            dueDate: new Date(),
             status: 'completed',
         };
         
@@ -100,7 +98,7 @@ describe('CreateTaskModal component', () => {
         
         await waitFor(() => {
             expect(screen.getByLabelText(/Title/i)).toHaveValue('');
-            expect(screen.getByLabelText(/Date/i)).toHaveValue('');
+            expect(screen.getByLabelText(/Due Date/i)).toHaveValue('');
             expect(screen.getByLabelText(/Description/i)).toHaveValue('');
             const statusSelect = screen.getByRole('combobox');
             expect(statusSelect).toHaveTextContent('New');

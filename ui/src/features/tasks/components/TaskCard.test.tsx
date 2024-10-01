@@ -9,7 +9,7 @@ import { initialState, setupStore } from '../../../redux/store';
 import { format } from 'date-fns-tz';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
-import { addDays, addSeconds, startOfToday } from 'date-fns';
+import { addDays, addHours, addSeconds, startOfToday } from 'date-fns';
 
 const mockTask: Task = {
   id: '1',
@@ -150,8 +150,12 @@ describe('TaskCard', () => {
     });
   });
   
-  it('should show "Past Due" label when task due date is in the past', () => {
-    const pastDueTask = { ...mockTask, dueDate: new Date('2000-01-01').toISOString() };
+  it('should show "Past Due" label when task is not completed and due date is in the past', () => {
+    const pastDueTask = {
+      ...mockTask,
+      status: 'active',
+      dueDate: new Date('2000-01-01').toISOString()
+    };
     renderComponent(pastDueTask);
     
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -161,24 +165,40 @@ describe('TaskCard', () => {
     expect(chip).toBeInTheDocument();
     expect(chip.closest('.MuiChip-root')).toHaveClass('MuiChip-colorError');
   });
-  
-  it('should display the Chip with secondary color if the task due date is today', () => {
-    const taskWithTodayDueDate = {
+
+  it('should not show "Past Due" label when task is completed and due date is in the past', () => {
+    const pastDueTask = {
       ...mockTask,
-      dueDate: addSeconds(new Date(), 1).toISOString(),
+      status: 'completed',
+      dueDate: new Date('2000-01-01').toISOString()
     };
+    renderComponent(pastDueTask);
     
-    renderComponent(taskWithTodayDueDate);
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const formattedDate = format(new Date(pastDueTask.dueDate), 'dd/MM/yyyy HH:mm', { timeZone });
     
-    const chip = screen.getByText(format(new Date(taskWithTodayDueDate.dueDate), 'dd/MM/yyyy HH:mm'));
+    const chip = screen.getByText(formattedDate);
+    expect(chip).toBeInTheDocument();
+    expect(chip.closest('.MuiChip-root')).not.toHaveClass('MuiChip-colorError');
+  });
+  
+  it('should display the Chip with secondary color if the task is due within the next 24 hours', () => {
+    const taskWithDueDateInNext24Hours = {
+      ...mockTask,
+      dueDate: addHours(new Date(), 23).toISOString(),
+    };
+  
+    renderComponent(taskWithDueDateInNext24Hours);
+  
+    const chip = screen.getByText(format(new Date(taskWithDueDateInNext24Hours.dueDate), 'dd/MM/yyyy HH:mm'));
     expect(chip).toBeInTheDocument();
     expect(chip.closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary');
   });
   
-  it('should display the Chip with default color if the task is due in more than 1 day', () => {
+  it('should display the Chip with default color if the task is due in more than 24 hours', () => {
     const taskWithFutureDueDate = {
       ...mockTask,
-      dueDate: addDays(new Date(), 2).toISOString(), // Set the due date to 2 days in the future
+      dueDate: addHours(new Date(), 25).toISOString(),
     };
     
     renderComponent(taskWithFutureDueDate);
@@ -254,4 +274,23 @@ describe('TaskCard', () => {
     await act(() => userEvent.click(screen.getByText(/Cancel/i)));
     await waitFor(() => expect(screen.queryByText(/Confirm Delete/i)).toBeNull());
   });
+
+
+  // it('should change border color to primary with transition on hover', () => {
+  //   const { getByRole } = renderWithProviders(
+  //     <TaskCard task={task} showSnackbar={jest.fn()} />
+  //   );
+
+  //   const card = getByRole('button');
+
+  //   // Check initial border color
+  //   expect(card).toHaveStyle(`border-color: ${cardTheme.palette.divider}`);
+
+  //   // Simulate hover by adding the hover class
+  //   act(() => {})
+
+  //   // Since we cannot actually trigger the :hover pseudo-class in JSDOM,
+  //   // we'll manually apply the hover styles for testing purposes
+  //   expect(card).toHaveStyle(`border-color: ${cardTheme.palette.primary.main}`);
+  // });
 });

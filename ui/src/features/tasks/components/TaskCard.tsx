@@ -88,7 +88,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
   if (task.dueDate) {
     const dueDate = toZonedTime(task.dueDate, timeZone);
     formattedDueDate = format(dueDate, 'dd/MM/yyyy HH:mm');
-    isPastDue = dueDate < currentDate;
+    isPastDue = currentDate > dueDate && task.status != 'completed';
   }
 
   const formattedStatus = task.status.charAt(0).toUpperCase() + task.status.slice(1).toLowerCase();
@@ -97,7 +97,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
     ? format(toZonedTime(task.createdAt, timeZone), 'dd/MM/yyyy HH:mm')
     : '-';
 
-  const isDueToday = task.dueDate && isToday(new Date(task.dueDate!));
+  const isDueToday = task.dueDate && new Date(task.dueDate).getTime() - currentDate.getTime() < 24 * 60 * 60 * 1000;
 
   const moreCaption = (
     <Typography
@@ -138,7 +138,12 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
         sx={{
           backgroundColor: theme.palette.background.paper,
           cursor: 'pointer',
-          userSelect: 'no-select'
+          userSelect: 'no-select',
+          borderColor: theme.palette.divider,
+          transition: 'border-color .15s ease-in-out',
+          '&:hover': {
+            borderColor: theme.palette.primary.main,
+          },
         }}
       >
         <CardContent>

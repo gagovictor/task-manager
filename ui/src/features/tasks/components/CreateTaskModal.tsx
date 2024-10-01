@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Modal,
   Box,
@@ -15,6 +15,7 @@ import {
   Grid,
   useTheme,
   Paper,
+  SelectChangeEvent,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,6 +26,7 @@ import { ChecklistItem } from '../models/checklist';
 import Checklist from '../components/Checklist';
 import { v4 as uuidv4 } from 'uuid';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import ConfirmCloseDialog from './ConfirmCloseDialog';
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -44,6 +46,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
     { id: uuidv4(), text: '', completed: false },
   ]);
   const theme = useTheme();
+  const [isDirty, setIsDirty] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleCreate = async () => {
     if (title) {
@@ -83,6 +87,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
     setIsChecklistMode(false);
     setAlignment('text');
     setStatus(taskStatuses[0]);
+    setIsDirty(false);
   }
 
   const handleModeChange = (
@@ -99,157 +104,208 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
   };
   
   const handleClose = () => {
+    if (isDirty) {
+      setShowConfirm(true);
+    } else {
+      resetForm();
+      onClose();
+    }
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+    setIsDirty(true);
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDescription(e.target.value);
+    setIsDirty(true);
+  };
+
+  const handleDateTimeChange = (newValue: Date | null) => {
+    setDateTime(newValue);
+    setIsDirty(true);
+  };
+
+  const handleStatusChange = (event: SelectChangeEvent<string>) => {
+    setStatus(event.target.value);
+    setIsDirty(true);
+  };
+
+  const confirmClose = () => {
+    setShowConfirm(false);
     resetForm();
     onClose();
-  }
+  };
 
+  const cancelClose = () => {
+    setShowConfirm(false);
+  };
+
+  useEffect(() => {
+    if (!open) {
+      setIsDirty(false);
+    }
+  }, [open]);
+  
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-    >
-      <Paper
-        sx={{
-          width: '85%',
-          maxWidth: '540px',
-          margin: 'auto',
-          borderRadius: 1,
-          position: 'relative',
-          marginTop: '10vh',
-          maxHeight: '80vh',
-          overflowX: 'hidden',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: theme.palette.background.default,
-        }}
+    <>
+      <Modal
+        open={open}
+        onClose={handleClose}
       >
-        <IconButton
-          onClick={handleClose}
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-          }}
-          aria-label="Close"
-        >
-          <CloseIcon />
-        </IconButton>
-
-        {/* Scrollable content */}
-        <Box
-          sx={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: 2,
-            paddingBottom: 4,
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Create New Task
-          </Typography>
-
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Title"
-            variant="outlined"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-
-          <DateTimePicker
-            value={dateTime}
-            onChange={(newValue) => setDateTime(newValue)}
-            views={['year', 'month', 'day', 'hours', 'minutes']}
-            sx={{ width: '100%' }}
-          />
-
-          {/* Grid container for Toggle Button and Status Selector */}
-          <Grid
-            container
-            spacing={2}
-            sx={{
-              mb: isChecklistMode ? 2 : 0,
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as string)}
-                  label="Status"
-                >
-                  {taskStatuses.map((statusOption) => (
-                    <MenuItem key={statusOption} value={statusOption}>
-                      {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <ToggleButtonGroup
-                color="primary"
-                value={alignment}
-                exclusive
-                onChange={handleModeChange}
-                aria-label="Task Input Mode"
-                fullWidth sx={{ height: '56px', mt: '8px' }}
-              >
-                <ToggleButton value="text">Text</ToggleButton>
-                <ToggleButton value="checklist">Checklist</ToggleButton>
-              </ToggleButtonGroup>
-            </Grid>
-          </Grid>
-
-          {/* Description or Checklist */}
-          {isChecklistMode ? (
-            <Checklist
-              items={checklistItems}
-              onItemsChange={setChecklistItems}
-            />
-          ) : (
-            <TextField
-              fullWidth
-              multiline
-              rows={6}
-              margin="normal"
-              label="Description"
-              variant="outlined"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          )}
-        </Box>
-
-        {/* Fixed button at the bottom */}
         <Paper
           sx={{
-            position: 'sticky',
-            bottom: 0,
-            padding: 2,
-            zIndex: 2,
-            borderTop: '1px solid rgba(0, 0, 0, 0.23)',
+            width: '85%',
+            maxWidth: '540px',
+            margin: 'auto',
+            borderRadius: 1,
+            position: 'relative',
+            marginTop: '10vh',
+            maxHeight: '80vh',
+            overflowX: 'hidden',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
             backgroundColor: theme.palette.background.default,
           }}
         >
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            onClick={handleCreate}
-            disabled={createStatus === 'loading' || !title}
+          <IconButton
+            onClick={handleClose}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+            }}
+            aria-label="Close"
           >
-            Create
-          </Button>
+            <CloseIcon />
+          </IconButton>
+
+          {/* Scrollable content */}
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: 2,
+              paddingBottom: 4,
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Create New Task
+            </Typography>
+
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Title"
+              variant="outlined"
+              value={title}
+              onChange={handleTitleChange}
+              required
+            />
+
+            <DateTimePicker
+              value={dateTime}
+              label="Due Date"
+              onChange={handleDateTimeChange}
+              views={['year', 'month', 'day', 'hours', 'minutes']}
+              sx={{ width: '100%' }}
+            />
+
+            {/* Grid container for Toggle Button and Status Selector */}
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                mb: isChecklistMode ? 2 : 0,
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={status}
+                    onChange={handleStatusChange}
+                    label="Status"
+                  >
+                    {taskStatuses.map((statusOption) => (
+                      <MenuItem key={statusOption} value={statusOption}>
+                        {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <ToggleButtonGroup
+                  color="primary"
+                  value={alignment}
+                  exclusive
+                  onChange={handleModeChange}
+                  aria-label="Task Input Mode"
+                  fullWidth sx={{ height: '56px', mt: '8px' }}
+                >
+                  <ToggleButton value="text">Text</ToggleButton>
+                  <ToggleButton value="checklist">Checklist</ToggleButton>
+                </ToggleButtonGroup>
+              </Grid>
+            </Grid>
+
+            {/* Description or Checklist */}
+            {isChecklistMode ? (
+              <Checklist
+                items={checklistItems}
+                onItemsChange={setChecklistItems}
+              />
+            ) : (
+              <TextField
+                fullWidth
+                multiline
+                rows={6}
+                margin="normal"
+                label="Description"
+                variant="outlined"
+                value={description}
+                onChange={handleDescriptionChange}
+              />
+            )}
+          </Box>
+
+          {/* Fixed button at the bottom */}
+          <Paper
+            sx={{
+              position: 'sticky',
+              bottom: 0,
+              padding: 2,
+              zIndex: 2,
+              borderTop: '1px solid rgba(0, 0, 0, 0.23)',
+              backgroundColor: theme.palette.background.default,
+            }}
+          >
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              onClick={handleCreate}
+              disabled={createStatus === 'loading' || !title}
+            >
+              Create
+            </Button>
+          </Paper>
         </Paper>
-      </Paper>
-    </Modal>
+      </Modal>
+
+      <ConfirmCloseDialog
+        open={showConfirm}
+        title="Unsaved Changes"
+        description="You have unsaved changes. Are you sure you want to close?"
+        onConfirm={confirmClose}
+        onCancel={cancelClose}
+      />
+    </>
   );
 };
 
