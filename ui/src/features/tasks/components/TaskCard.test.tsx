@@ -9,7 +9,7 @@ import { initialState, setupStore } from '../../../redux/store';
 import { format } from 'date-fns-tz';
 import { http } from 'msw';
 import { setupServer } from 'msw/lib/node';
-import { addDays, addHours, addSeconds, startOfToday } from 'date-fns';
+import { addHours } from 'date-fns';
 
 const mockTask: Task = {
   id: '1',
@@ -163,7 +163,7 @@ describe('TaskCard', () => {
     
     const chip = screen.getByText(formattedDate);
     expect(chip).toBeInTheDocument();
-    expect(chip.closest('.MuiChip-root')).toHaveClass('MuiChip-colorError');
+    expect(screen.getByTestId('duedate-chip')).toHaveClass('MuiChip-colorError');
   });
 
   it('should not show "Past Due" label when task is completed and due date is in the past', () => {
@@ -179,10 +179,10 @@ describe('TaskCard', () => {
     
     const chip = screen.getByText(formattedDate);
     expect(chip).toBeInTheDocument();
-    expect(chip.closest('.MuiChip-root')).not.toHaveClass('MuiChip-colorError');
+    expect(screen.getByTestId('duedate-chip')).not.toHaveClass('MuiChip-colorError');
   });
   
-  it('should display the Chip with secondary color if the task is due within the next 24 hours', () => {
+  it('should display the Date Chip with secondary color if the task is due within the next 24 hours', () => {
     const taskWithDueDateInNext24Hours = {
       ...mockTask,
       dueDate: addHours(new Date(), 23).toISOString(),
@@ -192,10 +192,10 @@ describe('TaskCard', () => {
   
     const chip = screen.getByText(format(new Date(taskWithDueDateInNext24Hours.dueDate), 'dd/MM/yyyy HH:mm'));
     expect(chip).toBeInTheDocument();
-    expect(chip.closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary');
+    expect(screen.getByTestId('duedate-chip')).toHaveClass('MuiChip-colorSecondary');
   });
   
-  it('should display the Chip with default color if the task is due in more than 24 hours', () => {
+  it('should display the Date Chip with default color if the task is due in more than 24 hours', () => {
     const taskWithFutureDueDate = {
       ...mockTask,
       dueDate: addHours(new Date(), 25).toISOString(),
@@ -206,7 +206,22 @@ describe('TaskCard', () => {
     const chip = screen.getByText(format(new Date(taskWithFutureDueDate.dueDate), 'dd/MM/yyyy HH:mm'));
     
     expect(chip).toBeInTheDocument();
-    expect(chip.closest('.MuiChip-root')).toHaveClass('MuiChip-colorDefault');
+    expect(screen.getByTestId('duedate-chip')).toHaveClass('MuiChip-colorDefault');
+  });
+  
+  it('should display the Status Chip with success color if the task is completed, Date Chip default color regardless of due date', () => {
+    const taskWithDueDateInNext24Hours = {
+      ...mockTask,
+      dueDate: addHours(new Date(), 48).toISOString(),
+      status: 'completed'
+    };
+  
+    renderComponent(taskWithDueDateInNext24Hours);
+  
+    const chip = screen.getByText(format(new Date(taskWithDueDateInNext24Hours.dueDate), 'dd/MM/yyyy HH:mm'));
+    expect(chip).toBeInTheDocument();
+    expect(screen.getByTestId('status-chip')).toHaveClass('MuiChip-colorSuccess');
+    expect(screen.getByTestId('duedate-chip')).toHaveClass('MuiChip-colorDefault');
   });
   
   it('should disable the archive button when archiving is in progress', async () => {

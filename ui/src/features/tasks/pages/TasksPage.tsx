@@ -5,34 +5,47 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, IconButton, InputAdornment } from '@mui/material';
+import { Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, IconButton, InputAdornment, Collapse } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import CreateTaskModal from '../components/CreateTaskModal';
-import EditTaskModal from '../components/EditTaskModal';
 import { Task, taskStatuses } from '../models/task';
 import ClearIcon from '@mui/icons-material/Clear';
+import TaskModal from '../components/TaskModal';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import CloseIcon from '@mui/icons-material/Close';
 
 const TasksPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { tasks, fetchStatus, fetchError } = useSelector((state: RootState) => state.tasks);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task>();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterText, setFilterText] = useState<string>('');
+  const [filtersVisible, setFiltersVisible] = useState(false); // New state for filters visibility
   
   useEffect(() => {
     dispatch(fetchTasksAsync());
   }, [dispatch]);
 
+  const handleCreateTask = () => {
+    setEditMode(false);
+    setModalOpen(true);
+  }
+
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
-    setEditModalOpen(true);
+    setEditMode(true);
+    setModalOpen(true);
   };
+
+  const onCloseTaskModal = () => {
+    setEditMode(false);
+    setModalOpen(false);
+  }
 
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
@@ -53,7 +66,7 @@ const TasksPage = () => {
 
   const filteredTasks = tasks
     .filter((task: Task) => {
-      const matchesStatus = filterStatus ? task.status === filterStatus : task.status !== 'removed' && task.status !== 'completed'; // Removed or Completed tasks are hidden by default
+      const matchesStatus = filterStatus ? task.status === filterStatus : task.status !== 'removed' && task.status !== 'completed';
       const matchesText = filterText ? 
         task.title.toLowerCase().includes(lowerCaseFilterText) || 
         task.description.toLowerCase().includes(lowerCaseFilterText) 
@@ -69,88 +82,99 @@ const TasksPage = () => {
   const handleClearStatus = () => setFilterStatus('');
   const handleClearSearch = () => setFilterText('');
 
-  const handleEditModalClose = () => {
-    setSelectedTask(null);
-    setEditModalOpen(false);
-  }
-  
+  const toggleFilters = () => {
+    setFiltersVisible((prev) => !prev); // Toggle filters visibility
+  };
+
   return (
     <Container
       sx={{
         width: '100%',
-        minHeight: 'calc(100vh - 64px)', // full screen height minus footer
-        paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
+        minHeight: 'calc(100vh - 64px)',
+        paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' },
         position: 'relative',
         paddingBottom: '32px',
       }}
     >
-      <Box sx={{ mb: 4 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: { sm: 'stretch', md: 'center' },
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 2,
-            flexDirection: { sm: 'column', md: 'row' }
-          }}
+      <Box sx={{ mb: 2 }}>
+        <Button
+          variant="outlined"
+          startIcon={filtersVisible ? <CloseIcon /> : <FilterListIcon />}
+          onClick={toggleFilters}
+          fullWidth
+          sx={{ display: { xs: 'flex', md: 'none' } }} // Only show the button on mobile
         >
-          {/* Status Filter */}
-          <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as string)}
-                label="Status"
-                endAdornment={filterStatus && (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="clear status filter"
-                      edge="end"
-                      sx={{ marginRight: '8px' }}
-                      onClick={handleClearStatus}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                )}
-              >
-                <MenuItem value="">All</MenuItem>
-                {taskStatuses.map((statusOption) => (
-                  <MenuItem key={statusOption} value={statusOption}>
-                    {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+          {filtersVisible ? 'Hide Filters' : 'Show Filters'}
+        </Button>
 
-          {/* Search Filter */}
-          <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Search"
-              variant="outlined"
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-              InputProps={{
-                endAdornment: filterText && (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="clear search"
-                      edge="end"
-                      onClick={handleClearSearch}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
+        <Collapse in={filtersVisible || window.innerWidth >= 600}> {/* Show filters based on visibility */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: { sm: 'stretch', md: 'center' },
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 2,
+              flexDirection: { sm: 'column', md: 'row' }
+            }}
+          >
+            {/* Status Filter */}
+            <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as string)}
+                  label="Status"
+                  endAdornment={filterStatus && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="clear status filter"
+                        edge="end"
+                        sx={{ marginRight: '8px' }}
+                        onClick={handleClearStatus}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  )}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {taskStatuses.map((statusOption) => (
+                    <MenuItem key={statusOption} value={statusOption}>
+                      {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Search Filter */}
+            <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
+              <TextField
+                fullWidth
+                margin="normal"
+                label="Search"
+                variant="outlined"
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                InputProps={{
+                  endAdornment: filterText && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="clear search"
+                        edge="end"
+                        onClick={handleClearSearch}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Box>
           </Box>
-        </Box>
+        </Collapse>
       </Box>
 
       {fetchStatus === 'failed' && (
@@ -161,17 +185,17 @@ const TasksPage = () => {
         >
           {fetchError}
           { filteredTasks.length > 0 && (
-            <>Tasks shown may not represent their current state. {/*Changes will be saved once connectivity is restored. (TODO)*/} </>
+            <>Tasks shown may not represent their current state. </>
           )}
         </Alert>
       )}
 
-      {(fetchStatus === 'succeeded' && filteredTasks.length == 0) && (
+      {(fetchStatus === 'succeeded' && filteredTasks.length === 0) && (
         <Alert severity="info" sx={{ mb: 4, flex: 1 }}>
           No tasks match the filter criteria.
         </Alert>
       )}
-      
+
       {(fetchStatus === 'succeeded' || filteredTasks.length > 0) && (
         <Masonry
           columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
@@ -199,23 +223,17 @@ const TasksPage = () => {
         color="primary"
         aria-label="add"
         sx={{ position: 'fixed', bottom: 16, right: 16 }}
-        onClick={() => setCreateModalOpen(true)}
+        onClick={handleCreateTask}
       >
         <AddIcon />
       </Fab>
 
-      <CreateTaskModal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
+      <TaskModal
+        open={modalOpen}
+        onClose={onCloseTaskModal}
+        task={selectedTask}
+        mode={editMode ? 'edit' : 'create'}
       />
-
-      {selectedTask && (
-        <EditTaskModal
-          open={editModalOpen}
-          onClose={() => handleEditModalClose()}
-          task={selectedTask}
-        />
-      )}
 
       <Snackbar
         open={snackbarOpen}

@@ -16,66 +16,122 @@ import {
   useTheme,
   Paper,
   SelectChangeEvent,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../redux/store';
-import { createTaskAsync } from '../redux/tasksSlice';
-import { taskStatuses } from '../models/task';
+import { createTaskAsync, updateTaskAsync } from '../redux/tasksSlice';
+import { taskStatuses, Task } from '../models/task';
 import { ChecklistItem } from '../models/checklist';
 import Checklist from '../components/Checklist';
 import { v4 as uuidv4 } from 'uuid';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import ConfirmCloseDialog from './ConfirmCloseDialog';
 
-interface CreateTaskModalProps {
+export type TaskModalMode = 'create' | 'edit';
+
+export interface TaskModalProps {
   open: boolean;
   onClose: () => void;
+  mode: TaskModalMode;
+  task?: Task;
 }
 
-const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
+const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { createStatus, updateStatus } = useSelector((state: RootState) => state.tasks);
+  const theme = useTheme();
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dateTime, setDateTime] = useState<Date | null>(null);
   const [status, setStatus] = useState(taskStatuses[0]);
-  const dispatch = useDispatch<AppDispatch>();
-  const { createStatus } = useSelector((state: RootState) => state.tasks);
-  const [alignment, setAlignment] = useState('text');
+  const [alignment, setAlignment] = useState<'text' | 'checklist'>('text');
   const [isChecklistMode, setIsChecklistMode] = useState(false);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([
     { id: uuidv4(), text: '', completed: false },
   ]);
-  const theme = useTheme();
   const [isDirty, setIsDirty] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
-  const handleCreate = async () => {
-    if (title) {
-      let dueDate: string | null = null;
-      if (dateTime) {
-        dueDate = dateTime.toISOString();
+  const isLoading = mode === 'create' ? createStatus === 'loading' : updateStatus === 'loading';
+  const buttonLabel = mode === 'create' ? 'Create' : 'Update';
+  const modalTitle = mode === 'create' ? 'New Task' : 'Edit Task';
+
+  useEffect(() => {
+    resetForm();
+    if (mode === 'edit' && task) {
+      setTitle(task.title);
+      setDescription(task.description);
+      setDateTime(task.dueDate ? new Date(task.dueDate) : null);
+      setStatus(task.status);
+      if (task.checklist && task.checklist.length > 0) {
+        setIsChecklistMode(true);
+        setAlignment('checklist');
+        setChecklistItems(task.checklist);
       }
-      try {
-        let checklist: ChecklistItem[] | null = null;
-        let descriptionToSend = description;
+      setTimeout(() => {
+        setIsDirty(false);
+      }, 100); // Required because checklist onItemsChange marks as dirty
+    }
+  }, [mode, task, open]);
 
-        const filteredChecklist = checklistItems.filter(
-          (item) => item.text.trim() !== ''
-        );
-        checklist = filteredChecklist;
+  const handleSubmit = async () => {
+    if (!title) {
+      return;
+    }
+    
+    handleSnackbarClose();
+    
+    let dueDate: string | null = null;
+    if (dateTime) {
+      dueDate = dateTime.toISOString();
+    }
 
-        if (isChecklistMode) {
-          descriptionToSend = '';
-        } else {
-          checklist = null;
-        }
+    let checklist: ChecklistItem[] | null = null;
+    let descriptionToSend = description;
 
-        await dispatch(createTaskAsync({ title, description: descriptionToSend, checklist, dueDate, status })).unwrap();
-        resetForm();
-        onClose();
-      } catch (error: any) {
-        console.error(`An error ocurred during matter creation: ${error?.message}`);
+    const filteredChecklist = checklistItems.filter(
+      (item) => item.text.trim() !== ''
+    );
+    checklist = filteredChecklist;
+
+    if (isChecklistMode) {
+      descriptionToSend = '';
+    } else {
+      checklist = null;
+    }
+
+    try {
+      if (mode === 'create') {
+        await dispatch(
+          createTaskAsync({ title, description: descriptionToSend, checklist, dueDate, status })
+        ).unwrap();
+        showSnackbar('Task created successfully', 'success');
+      } else if (mode === 'edit' && task) {
+        await dispatch(
+          updateTaskAsync({
+            id: task.id,
+            title,
+            description: descriptionToSend,
+            checklist,
+            dueDate,
+            status: status as string,
+          })
+        ).unwrap();
+        showSnackbar('Task updated successfully', 'success');
       }
+
+      resetForm();
+      onClose();
+    } catch (error: any) {
+      console.error(`An error occurred: ${error?.message}`);
+      showSnackbar(`Failed to ${mode} task`, 'error');
     }
   };
 
@@ -88,27 +144,43 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
     setAlignment('text');
     setStatus(taskStatuses[0]);
     setIsDirty(false);
-  }
-
-  const handleModeChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newAlignment: string
-  ) => {
-    if (newAlignment !== null) {
-      setAlignment(newAlignment);
-      setIsChecklistMode(newAlignment === 'checklist');
-      if (!checklistItems.length) {
-        setChecklistItems([{ id: uuidv4(), text: '', completed: false }]);
-      }
-    }
   };
-  
+
   const handleClose = () => {
     if (isDirty) {
       setShowConfirm(true);
     } else {
-      resetForm();
       onClose();
+    }
+  };
+
+  const confirmClose = () => {
+    setShowConfirm(false);
+    onClose();
+  };
+
+  const cancelClose = () => {
+    setShowConfirm(false);
+  };
+
+  const handleModeChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newAlignment: 'text' | 'checklist' | null
+  ) => {
+    if (newAlignment !== null) {
+      setAlignment(newAlignment);
+      const switchingToChecklist = newAlignment === 'checklist';
+      setIsChecklistMode(switchingToChecklist);
+
+      if (switchingToChecklist && checklistItems.length === 0) {
+        setChecklistItems([{ id: uuidv4(), text: '', completed: false }]);
+      } else if (!switchingToChecklist) {
+        const filteredChecklist = checklistItems.filter(
+          (item) => item.text.trim() !== ''
+        );
+        setChecklistItems(filteredChecklist);
+      }
+      setIsDirty(true);
     }
   };
 
@@ -132,28 +204,18 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
     setIsDirty(true);
   };
 
-  const confirmClose = () => {
-    setShowConfirm(false);
-    resetForm();
-    onClose();
-  };
 
-  const cancelClose = () => {
-    setShowConfirm(false);
-  };
+  const handleSnackbarClose = () => setSnackbarOpen(false);
 
-  useEffect(() => {
-    if (!open) {
-      setIsDirty(false);
-    }
-  }, [open]);
+  const showSnackbar = (message: string, severity: 'success' | 'error', undoAction?: () => void) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
   
   return (
     <>
-      <Modal
-        open={open}
-        onClose={handleClose}
-      >
+      <Modal open={open} onClose={handleClose}>
         <Paper
           sx={{
             width: '85%',
@@ -192,7 +254,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             }}
           >
             <Typography variant="h6" gutterBottom>
-              Create New Task
+              {modalTitle}
             </Typography>
 
             <TextField
@@ -220,8 +282,9 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
               sx={{
                 mb: isChecklistMode ? 2 : 0,
                 alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+                justifyContent: 'center',
+              }}
+            >
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth margin="normal">
                   <InputLabel>Status</InputLabel>
@@ -246,7 +309,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
                   exclusive
                   onChange={handleModeChange}
                   aria-label="Task Input Mode"
-                  fullWidth sx={{ height: '56px', mt: '8px' }}
+                  fullWidth
+                  sx={{ height: '56px', mt: '8px' }}
                 >
                   <ToggleButton value="text">Text</ToggleButton>
                   <ToggleButton value="checklist">Checklist</ToggleButton>
@@ -258,7 +322,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
             {isChecklistMode ? (
               <Checklist
                 items={checklistItems}
-                onItemsChange={setChecklistItems}
+                onItemsChange={(items) => {
+                  setChecklistItems(items);
+                  setIsDirty(true);
+                }}
               />
             ) : (
               <TextField
@@ -289,15 +356,16 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
               fullWidth
               variant="contained"
               color="primary"
-              onClick={handleCreate}
-              disabled={createStatus === 'loading' || !title}
+              onClick={handleSubmit}
+              disabled={isLoading || !title}
             >
-              Create
+              {buttonLabel}
             </Button>
           </Paper>
         </Paper>
       </Modal>
 
+      {/* Confirmation Dialog for Unsaved Changes */}
       <ConfirmCloseDialog
         open={showConfirm}
         title="Unsaved Changes"
@@ -305,8 +373,23 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ open, onClose }) => {
         onConfirm={confirmClose}
         onCancel={cancelClose}
       />
+      
+      {/* Snackbar for action feedback */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
 
-export default CreateTaskModal;
+export default TaskModal;

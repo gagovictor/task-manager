@@ -15,7 +15,7 @@ import { AppDispatch, RootState } from '../../../redux/store';
 import { archiveTaskAsync, deleteTaskAsync, unarchiveTaskAsync } from '../redux/tasksSlice';
 import { Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemIcon, ListItemText, useTheme } from '@mui/material';
 import { Task } from '../models/task';
-import { format, isToday } from 'date-fns';
+import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PendingActionsOutlined } from '@mui/icons-material';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
@@ -97,7 +97,13 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
     ? format(toZonedTime(task.createdAt, timeZone), 'dd/MM/yyyy HH:mm')
     : '-';
 
-  const isDueToday = task.dueDate && new Date(task.dueDate).getTime() - currentDate.getTime() < 24 * 60 * 60 * 1000;
+  const isDueIn24hrs = () => {
+    if(!task.dueDate) {
+      return false;
+    }
+    const timeRemaining = new Date(task.dueDate).getTime() - currentDate.getTime();
+    return timeRemaining > 0 && timeRemaining < 24 * 60 * 60 * 1000;
+  }
 
   const moreCaption = (
     <Typography
@@ -164,18 +170,22 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
                   label={formattedDueDate}
                   color="error"
                   sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}
+                  data-testid="duedate-chip"
                 />
               ) : (
                 <Chip
                   icon={<PendingActionsOutlined />}
                   label={formattedDueDate}
-                  color={isDueToday ? 'secondary' : 'default'} // Set secondary color if due today
+                  color={isDueIn24hrs() ? 'secondary' : 'default'}
+                  data-testid="duedate-chip"
                 />
               )
             }
             <Chip
-              color={task.status == 'active' ? 'primary' : 'default'}
-              label={formattedStatus} />
+              color={task.status == 'completed' ? 'success' : task.status == 'active' ? 'primary' : 'default'}
+              label={formattedStatus}
+              data-testid="status-chip"
+            />
           </Box>
 
           {task.checklist && task.checklist.length > 0 ? (

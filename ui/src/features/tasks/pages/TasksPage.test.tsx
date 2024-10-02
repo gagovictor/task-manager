@@ -240,10 +240,10 @@ describe('TasksPage component', () => {
         await waitFor(() => {
             const createTaskButton = screen.getByLabelText('add');
             userEvent.click(createTaskButton);
-            expect(screen.getByText('Create New Task')).toBeInTheDocument();
+            expect(screen.getByText('New Task')).toBeInTheDocument();
             
             userEvent.click(screen.getByRole('button', { name: /Close/i }));
-            expect(screen.queryByText('Create New Task')).not.toBeInTheDocument();
+            expect(screen.queryByText('New Task')).not.toBeInTheDocument();
         })
     });
 });

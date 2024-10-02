@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Fab from '@mui/material/Fab';
 import Container from '@mui/material/Container';
-import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
@@ -14,19 +13,18 @@ import AddIcon from '@mui/icons-material/Add';
 import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCenter, useDroppable, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import CreateTaskModal from '../components/CreateTaskModal';
-import EditTaskModal from '../components/EditTaskModal';
 import TaskCard from '../components/TaskCard';
 import { Task } from '../models/task';
-import { Paper, useMediaQuery, useTheme } from '@mui/material';
+import { Paper, useTheme } from '@mui/material';
+import TaskModal from '../components/TaskModal';
 
 const TaskBoardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { tasks, fetchStatus, fetchError } = useSelector((state: RootState) => state.tasks);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task>();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
@@ -51,10 +49,21 @@ const TaskBoardPage = () => {
     dispatch(fetchTasksAsync());
   }, [dispatch]);
 
+  const handleCreateTask = () => {
+    setEditMode(false);
+    setModalOpen(true);
+  }
+
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
-    setEditModalOpen(true);
+    setEditMode(true);
+    setModalOpen(true);
   };
+
+  const onCloseTaskModal = () => {
+    setEditMode(false);
+    setModalOpen(false);
+  }
 
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
@@ -281,23 +290,17 @@ const TaskBoardPage = () => {
         color="primary"
         aria-label="add"
         sx={{ position: 'fixed', bottom: 16, right: 16 }}
-        onClick={() => setCreateModalOpen(true)}
+        onClick={handleCreateTask}
       >
         <AddIcon />
       </Fab>
 
-      <CreateTaskModal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
+      <TaskModal
+        open={modalOpen}
+        onClose={onCloseTaskModal}
+        task={selectedTask}
+        mode={editMode ? 'edit' : 'create'}
       />
-
-      {selectedTask && (
-        <EditTaskModal
-          open={editModalOpen}
-          onClose={() => setEditModalOpen(false)}
-          task={selectedTask}
-        />
-      )}
 
       <Snackbar
         open={snackbarOpen}

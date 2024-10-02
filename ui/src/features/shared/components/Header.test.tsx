@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -91,10 +91,12 @@ describe('Header component', () => {
     );
 
     act(() => {
-      fireEvent.click(screen.getByText('Login'));
+      userEvent.click(screen.getByText('Login'));
     });
 
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
+    waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/login');
+    });
   });
 
   it('should dispatch logout and navigate to /logout when Logout menu item is clicked', async () => {
