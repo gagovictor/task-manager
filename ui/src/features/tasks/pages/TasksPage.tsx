@@ -103,6 +103,7 @@ const TasksPage = () => {
           onClick={toggleFilters}
           fullWidth
           sx={{ display: { xs: 'flex', md: 'none' } }} // Only show the button on mobile
+          aria-label={filtersVisible ? 'Hide Filters' : 'Show Filters'}
         >
           {filtersVisible ? 'Hide Filters' : 'Show Filters'}
         </Button>

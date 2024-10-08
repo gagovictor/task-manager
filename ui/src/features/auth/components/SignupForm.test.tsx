@@ -17,6 +17,13 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('SignupForm', () => {
+    beforeAll(() => {
+    });
+    
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     const renderWithProviders = (store: any) => render(
         <Provider store={store}>
             <MemoryRouter>
@@ -128,6 +135,7 @@ describe('SignupForm', () => {
         await waitFor(() => {
             expect(mockNavigate).toHaveBeenCalledWith('/tasks');
         });
+
         server.dispose();
     });
     
@@ -179,6 +187,7 @@ describe('SignupForm', () => {
             expect(screen.queryByTestId('alert')).toBeNull();
             expect(screen.queryByText(/Signup failed. Please check your details./i)).toBeNull();
         });
+
         server.dispose();
     });
 

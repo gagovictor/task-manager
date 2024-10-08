@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import Container from '../config/container';
+import Container from '@src/config/container';
 
 const createTaskRouter = (): Router => {
   const router = Router();

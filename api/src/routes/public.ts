@@ -1,5 +1,5 @@
 import express from 'express';
-import createAuthRouter from './auth';
+import createAuthRouter from '@src/routes/auth';
 
 const getPublicRouter = () => {
     const publicRouter = express.Router();

@@ -5,7 +5,8 @@ module.exports = {
     collectCoverageFrom: [
       "src/**/*.{ts,js}",
       "!src/**/*.d.ts",  // Exclude type definition files
-      "!src/**/node_modules/**",  // Exclude node_modules
+      "src/**/*.{ts,js}",
+      "!src/**/swagger.{ts,js}",  // Exclude swagger config file
     ],
     coverageThreshold: {
       global: {
@@ -22,5 +23,8 @@ module.exports = {
       '^.+\\.ts?$': 'ts-jest',
     },
     testMatch: ['**/*.test.ts'],
+    moduleNameMapper: {
+      '^@src/(.*)$': '<rootDir>/src/$1',
+    },
   };
   

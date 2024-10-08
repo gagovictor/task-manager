@@ -1,7 +1,7 @@
 import express from 'express';
-import authMiddleware from '../middlewares/auth';
+import authMiddleware from '@src/middlewares/auth';
 import createTaskRouter from './tasks';
-import Container from '../config/container';
+import Container from '@src/config/container';
 
 const getProtectedRouter = async () => {
     const protectedRouter = express.Router();

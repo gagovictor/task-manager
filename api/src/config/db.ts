@@ -6,17 +6,16 @@ import mongoose from 'mongoose';
 
 class DatabaseConnection {
   private static instance: DatabaseConnection;
-  private dbType: string;
   private sequelize!: Sequelize;
   private cosmosClient!: CosmosClient;
   private cosmosContainerId!: string;
   private cosmosDatabaseId!: string;
   private isConnected: boolean = false;
-  
-  constructor() {
-    this.dbType = process.env.DB_TYPE || '';
+
+  public getDbType(): string {
+    return process.env.DB_TYPE || '';
   }
-  
+
   public static getInstance(): DatabaseConnection {
     if (!DatabaseConnection.instance) {
       DatabaseConnection.instance = new DatabaseConnection();
@@ -29,7 +28,7 @@ class DatabaseConnection {
       return;
     }
     
-    switch (this.dbType) {
+    switch (this.getDbType()) {
       case 'sequelize':
         await this.connectSequelize();
         break;
@@ -40,14 +39,10 @@ class DatabaseConnection {
         await this.connectMongoDB();
         break;
       default:
-        throw new Error(`Unsupported database type ${this.dbType}`);
+        throw new Error(`Unsupported database type ${this.getDbType()}`);
     }
 
     this.isConnected = true;
-  }
-  
-  public getDbType(): string {
-    return this.dbType;
   }
   
   public getCosmosClient(): CosmosClient {
@@ -87,7 +82,7 @@ class DatabaseConnection {
       password = process.env.SQL_PASSWORD;
       break;
       default:
-      throw new Error(`Unsupported dialect for ${this.dbType}: ${dialect}.`);
+      throw new Error(`Unsupported dialect for ${this.getDbType()}: ${dialect}.`);
     }
     
     if (!host || !port || !database || !user || !password) {

@@ -151,15 +151,16 @@ describe('TaskCard', () => {
   });
   
   it('should show "Past Due" label when task is not completed and due date is in the past', () => {
+    const dueDate = new Date('2000-01-01T12:00:00Z');
     const pastDueTask = {
       ...mockTask,
       status: 'active',
-      dueDate: new Date('2000-01-01').toISOString()
+      dueDate: dueDate.toISOString()
     };
     renderComponent(pastDueTask);
     
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const formattedDate = format(new Date(pastDueTask.dueDate), 'dd/MM/yyyy HH:mm', { timeZone });
+    const formattedDate = format(dueDate, 'dd/MM/yyyy HH:mm', { timeZone });
     
     const chip = screen.getByText(formattedDate);
     expect(chip).toBeInTheDocument();
@@ -167,58 +168,62 @@ describe('TaskCard', () => {
   });
 
   it('should not show "Past Due" label when task is completed and due date is in the past', () => {
+    const dueDate = '2000-01-01T12:00:00Z';
     const pastDueTask = {
       ...mockTask,
       status: 'completed',
-      dueDate: new Date('2000-01-01').toISOString()
+      dueDate
     };
     renderComponent(pastDueTask);
     
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const formattedDate = format(new Date(pastDueTask.dueDate), 'dd/MM/yyyy HH:mm', { timeZone });
+    const formattedDate = format(new Date(dueDate), 'dd/MM/yyyy HH:mm', { timeZone });
     
     const chip = screen.getByText(formattedDate);
     expect(chip).toBeInTheDocument();
     expect(screen.getByTestId('duedate-chip')).not.toHaveClass('MuiChip-colorError');
   });
   
-  it('should display the Date Chip with secondary color if the task is due within the next 24 hours', () => {
+  it('should display the Date Chip with Warning color if the task is due within the next 24 hours', () => {
+    const dueDate = addHours(new Date(), 23);
     const taskWithDueDateInNext24Hours = {
       ...mockTask,
-      dueDate: addHours(new Date(), 23).toISOString(),
+      dueDate: dueDate.toISOString(),
     };
   
     renderComponent(taskWithDueDateInNext24Hours);
   
-    const chip = screen.getByText(format(new Date(taskWithDueDateInNext24Hours.dueDate), 'dd/MM/yyyy HH:mm'));
+    const chip = screen.getByText(format(dueDate, 'dd/MM/yyyy HH:mm'));
     expect(chip).toBeInTheDocument();
-    expect(screen.getByTestId('duedate-chip')).toHaveClass('MuiChip-colorSecondary');
+    expect(screen.getByTestId('duedate-chip')).toHaveClass('MuiChip-colorWarning');
   });
   
   it('should display the Date Chip with default color if the task is due in more than 24 hours', () => {
+    const dueDate = addHours(new Date(), 25);
     const taskWithFutureDueDate = {
       ...mockTask,
-      dueDate: addHours(new Date(), 25).toISOString(),
+      dueDate: dueDate.toISOString(),
     };
     
     renderComponent(taskWithFutureDueDate);
     
-    const chip = screen.getByText(format(new Date(taskWithFutureDueDate.dueDate), 'dd/MM/yyyy HH:mm'));
+    const chip = screen.getByText(format(dueDate.toISOString(), 'dd/MM/yyyy HH:mm'));
     
     expect(chip).toBeInTheDocument();
     expect(screen.getByTestId('duedate-chip')).toHaveClass('MuiChip-colorDefault');
   });
   
   it('should display the Status Chip with success color if the task is completed, Date Chip default color regardless of due date', () => {
+    const dueDate = addHours(new Date(), 48);
     const taskWithDueDateInNext24Hours = {
       ...mockTask,
-      dueDate: addHours(new Date(), 48).toISOString(),
+      dueDate: dueDate.toISOString(),
       status: 'completed'
     };
   
     renderComponent(taskWithDueDateInNext24Hours);
   
-    const chip = screen.getByText(format(new Date(taskWithDueDateInNext24Hours.dueDate), 'dd/MM/yyyy HH:mm'));
+    const chip = screen.getByText(format(dueDate, 'dd/MM/yyyy HH:mm'));
     expect(chip).toBeInTheDocument();
     expect(screen.getByTestId('status-chip')).toHaveClass('MuiChip-colorSuccess');
     expect(screen.getByTestId('duedate-chip')).toHaveClass('MuiChip-colorDefault');
@@ -276,6 +281,16 @@ describe('TaskCard', () => {
     
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const formattedDate = format(new Date(taskWithDueDate.dueDate), 'dd/MM/yyyy HH:mm', { timeZone });
+    
+    expect(screen.getByText(formattedDate)).toBeInTheDocument();
+  });
+  
+  it('should omit hour value if set to midnight', () => {
+    const taskWithDueDate = { ...mockTask, dueDate: '2024-09-04T00:00:00Z' };
+    renderComponent(taskWithDueDate);
+    
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const formattedDate = format(new Date(taskWithDueDate.dueDate), 'dd/MM/yyyy', { timeZone });
     
     expect(screen.getByText(formattedDate)).toBeInTheDocument();
   });

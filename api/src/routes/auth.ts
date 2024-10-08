@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from 'express';
-import Container from '../config/container';
+import Container from '@src/config/container';
 
 // Create Auth Router (now returning the router synchronously)
 const createAuthRouter = (): Router => {

@@ -1,147 +1,342 @@
-// import DatabaseConnection from "../../../src/config/db";
+// container.test.ts
 
-// jest.mock('./db', () => {
-//   const mockDbConnection = {
-//     connectToDatabase: jest.fn().mockResolvedValue(void 0),
-//     getDbType: jest.fn(),
-//     getCosmosClient: jest.fn(),
-//     getCosmosDatabaseId: jest.fn(),
-//     getCosmosContainerId: jest.fn(),
-//   };
-  
-//   return {
-//     getInstance: jest.fn(() => mockDbConnection),
-//   };
-// });
+import Container from '@src/config/container';
+import DatabaseConnection from '@src/config/db';
+import SequelizeTaskRepository from '@src/repositories/sequelize/taskRepository';
+import CosmosTaskRepository from '@src/repositories/cosmos/taskRepository';
+import MongooseTaskRepository from '@src/repositories/mongoose/taskRepository';
+import SequelizeUserRepository from '@src/repositories/sequelize/userRepository';
+import CosmosUserRepository from '@src/repositories/cosmos/userRepository';
+import MongooseUserRepository from '@src/repositories/mongoose/userRepository';
+import TaskService from '@src/services/taskService';
+import AuthService from '@src/services/authService';
+import TaskController from '@src/controllers/taskController';
+import AuthController from '@src/controllers/authController';
+import { CosmosClient } from '@azure/cosmos'; // Import CosmosClient
 
-// describe('Container', () => {
-//   let mockDbConnection: DatabaseConnection;
+beforeAll(() => {
+  process.env.ENCRYPTION_KEY = 'test_encryption_key';
+  process.env.JWT_SECRET = 'test_jwt_secret';
+});
 
-//   beforeEach(() => {
-//     mockDbConnection = DatabaseConnection.getInstance();
-//   });
+afterAll(() => {
+  delete process.env.ENCRYPTION_KEY;
+  delete process.env.JWT_SECRET;
+});
 
-//   it('should return SequelizeUserRepository for dbType "sequelize"', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('sequelize');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     const userRepository = await Container.getUserRepository();
-//     const ActualSequelizeUserRepository = jest.requireActual('../../../src/repositories/sequelize/userRepository').default;
-    
-//     expect(userRepository).toBeInstanceOf(ActualSequelizeUserRepository);
-//   });
+describe('Container', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-//   it('should return CosmosUserRepository for dbType "cosmos"', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('cosmos');
-//     mockDbConnection.getCosmosClient.mockReturnValue({});
-//     mockDbConnection.getCosmosDatabaseId.mockReturnValue('test-database-id');
-//     mockDbConnection.getCosmosContainerId.mockReturnValue('test-container-id');
-    
-//     const Container = require('../../../src/config/container').default;
+    // Reset singleton instances in Container
+    (Container as any).taskRepository = undefined;
+    (Container as any).userRepository = undefined;
+    (Container as any).taskService = undefined;
+    (Container as any).authService = undefined;
+    (Container as any).taskController = undefined;
+    (Container as any).authController = undefined;
 
-//     const userRepository = await Container.getUserRepository();
-//     const ActualCosmosUserRepository = jest.requireActual('../../../src/repositories/cosmos/userRepository').default;
+    // Reset environment variables
+    delete process.env.DB_TYPE;
+    delete process.env.DB_DIALECT;
+    delete process.env.POSTGRESQL_HOST;
+    delete process.env.POSTGRESQL_PORT;
+    delete process.env.POSTGRESQL_DATABASE;
+    delete process.env.POSTGRESQL_USER;
+    delete process.env.POSTGRESQL_PASSWORD;
+    delete process.env.SQL_HOST;
+    delete process.env.SQL_PORT;
+    delete process.env.SQL_DATABASE;
+    delete process.env.SQL_USER;
+    delete process.env.SQL_PASSWORD;
+    delete process.env.COSMOS_CONNECTION_STRING;
+    delete process.env.COSMOS_DATABASE_ID;
+    delete process.env.COSMOS_CONTAINER_ID;
+    delete process.env.MONGO_URI;
+  });
 
-//     expect(userRepository).toBeInstanceOf(ActualCosmosUserRepository);
-//   });
+  describe('getTaskRepository', () => {
+    it('should return SequelizeTaskRepository when dbType is sequelize', async () => {
+      // Arrange
+      setupSequelize();
 
-//   it('should return MongooseUserRepository for dbType "mongodb"', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('mongodb');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     const userRepository = await Container.getUserRepository();
-//     const ActualMongooseUserRepository = jest.requireActual('../../../src/repositories/mongoose/userRepository').default;
-    
-//     expect(userRepository).toBeInstanceOf(ActualMongooseUserRepository);
-//   });
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('sequelize');
 
-//   it('should return SequelizeTaskRepository for dbType "sequelize"', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('sequelize');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     const taskRepository = await Container.getTaskRepository();
-//     const ActualSequelizeTaskRepository = jest.requireActual('../../../src/repositories/sequelize/taskRepository').default;
-    
-//     expect(taskRepository).toBeInstanceOf(ActualSequelizeTaskRepository);
-//   });
+      // Act
+      const taskRepository = await Container.getTaskRepository();
 
-//   it('should return CosmosTaskRepository for dbType "cosmos"', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('cosmos');
-//     mockDbConnection.getCosmosClient.mockReturnValue({});
-//     mockDbConnection.getCosmosDatabaseId.mockReturnValue('test-database-id');
-//     mockDbConnection.getCosmosContainerId.mockReturnValue('test-container-id');
-    
-//     const Container = require('../../../src/config/container').default;
+      // Assert
+      expect(taskRepository).toBeInstanceOf(SequelizeTaskRepository);
+    });
 
-//     const taskRepository = await Container.getTaskRepository();
-//     const ActualCosmosTaskRepository = jest.requireActual('../../../src/repositories/cosmos/taskRepository').default;
+    it('should return CosmosTaskRepository when dbType is cosmos', async () => {
+      // Arrange
+      setupCosmos();
 
-//     expect(taskRepository).toBeInstanceOf(ActualCosmosTaskRepository);
-//   });
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('cosmos');
 
-//   it('should return MongooseTaskRepository for dbType "mongodb"', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('mongodb');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     const taskRepository = await Container.getTaskRepository();
-//     const ActualMongooseTaskRepository = jest.requireActual('../../../src/repositories/mongoose/taskRepository').default;
-    
-//     expect(taskRepository).toBeInstanceOf(ActualMongooseTaskRepository);
-//   });
+      // Create a mock CosmosClient with the required methods
+      const mockCosmosClient = {
+        database: jest.fn().mockReturnValue({
+          container: jest.fn().mockReturnValue({
+            // Include any methods used by your repository code, if necessary
+          }),
+        }),
+        // Include other properties/methods if necessary
+      } as unknown as CosmosClient;
 
-//   it('should throw an error for unsupported dbType', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('unsupported');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     await expect(Container.getTaskRepository()).rejects.toThrowError('Unsupported database type unsupported');
-//   });
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosClient').mockReturnValue(mockCosmosClient);
 
-//   it('should return AuthService', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('mongodb');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     const authService = await Container.getAuthService();
-//     const ActualAuthService = jest.requireActual('../../../src/services/authService').default;
-    
-//     expect(authService).toBeInstanceOf(ActualAuthService);
-//   });
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosDatabaseId').mockReturnValue('test_database_id');
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosContainerId').mockReturnValue('test_container_id');
 
-//   it('should return TaskService', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('mongodb');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     const taskService = await Container.getTaskService();
-//     const ActualTaskService = jest.requireActual('../../../src/services/taskService').default;
-    
-//     expect(taskService).toBeInstanceOf(ActualTaskService);
-//   });
+      // Act
+      const taskRepository = await Container.getTaskRepository();
 
-//   it('should return AuthController', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('mongodb');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     const authController = await Container.getAuthController();
-//     const ActualAuthController = jest.requireActual('../../../src/controllers/authController').default;
-    
-//     expect(authController).toBeInstanceOf(ActualAuthController);
-//   });
+      // Assert
+      expect(taskRepository).toBeInstanceOf(CosmosTaskRepository);
+    });
 
-//   it('should return TaskController', async () => {
-//     mockDbConnection.getDbType.mockReturnValue('mongodb');
-    
-//     const Container = require('../../../src/config/container').default;
-    
-//     const taskController = await Container.getTaskController();
-//     const ActualTaskController = jest.requireActual('../../../src/controllers/taskController').default;
-    
-//     expect(taskController).toBeInstanceOf(ActualTaskController);
-//   });
-// });
+    it('should return MongooseTaskRepository when dbType is mongodb', async () => {
+      // Arrange
+      setupMongo();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('mongodb');
+
+      // Act
+      const taskRepository = await Container.getTaskRepository();
+
+      // Assert
+      expect(taskRepository).toBeInstanceOf(MongooseTaskRepository);
+    });
+
+    it('should throw an error for unsupported dbType', async () => {
+      // Arrange
+      process.env.DB_TYPE = 'unsupported_db';
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('unsupported_db');
+
+      // Act & Assert
+      await expect(Container.getTaskRepository()).rejects.toThrow('Unsupported database type unsupported_db');
+    });
+  });
+
+  describe('getUserRepository', () => {
+    it('should return SequelizeUserRepository when dbType is sequelize', async () => {
+      // Arrange
+      setupSequelize();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('sequelize');
+
+      // Act
+      const userRepository = await Container.getUserRepository();
+
+      // Assert
+      expect(userRepository).toBeInstanceOf(SequelizeUserRepository);
+    });
+
+    it('should return CosmosUserRepository when dbType is cosmos', async () => {
+      // Arrange
+      setupCosmos();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('cosmos');
+
+      // Create a mock CosmosClient with the required methods
+      const mockCosmosClient = {
+        database: jest.fn().mockReturnValue({
+          container: jest.fn().mockReturnValue({
+            // Include any methods used by your repository code, if necessary
+          }),
+        }),
+        // Include other properties/methods if necessary
+      } as unknown as CosmosClient;
+
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosClient').mockReturnValue(mockCosmosClient);
+
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosDatabaseId').mockReturnValue('test_database_id');
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosContainerId').mockReturnValue('test_container_id');
+
+      // Act
+      const userRepository = await Container.getUserRepository();
+
+      // Assert
+      expect(userRepository).toBeInstanceOf(CosmosUserRepository);
+    });
+
+    it('should return MongooseUserRepository when dbType is mongodb', async () => {
+      // Arrange
+      setupMongo();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('mongodb');
+
+      // Act
+      const userRepository = await Container.getUserRepository();
+
+      // Assert
+      expect(userRepository).toBeInstanceOf(MongooseUserRepository);
+    });
+
+    it('should throw an error for unsupported dbType', async () => {
+      // Arrange
+      process.env.DB_TYPE = 'unsupported_db';
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('unsupported_db');
+
+      // Act & Assert
+      await expect(Container.getUserRepository()).rejects.toThrow('Unsupported database type unsupported_db');
+    });
+  });
+
+  describe('Singleton Pattern', () => {
+    it('should return the same instance of TaskRepository', async () => {
+      // Arrange
+      setupSequelize();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('sequelize');
+
+      // Act
+      const taskRepo1 = await Container.getTaskRepository();
+      const taskRepo2 = await Container.getTaskRepository();
+
+      // Assert
+      expect(taskRepo1).toBe(taskRepo2);
+    });
+
+    it('should return the same instance of UserRepository', async () => {
+      // Arrange
+      setupCosmos();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('cosmos');
+
+      // Create a mock CosmosClient with the required methods
+      const mockCosmosClient = {
+        database: jest.fn().mockReturnValue({
+          container: jest.fn().mockReturnValue({
+            // Include any methods used by your repository code, if necessary
+          }),
+        }),
+        // Include other properties/methods if necessary
+      } as unknown as CosmosClient;
+
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosClient').mockReturnValue(mockCosmosClient);
+
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosDatabaseId').mockReturnValue('test_database_id');
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosContainerId').mockReturnValue('test_container_id');
+
+      // Act
+      const userRepo1 = await Container.getUserRepository();
+      const userRepo2 = await Container.getUserRepository();
+
+      // Assert
+      expect(userRepo1).toBe(userRepo2);
+    });
+
+    it('should return the same instance of TaskService', async () => {
+      // Arrange
+      setupMongo();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('mongodb');
+
+      // Act
+      const taskService1 = await Container.getTaskService();
+      const taskService2 = await Container.getTaskService();
+
+      // Assert
+      expect(taskService1).toBe(taskService2);
+    });
+
+    it('should return the same instance of AuthService', async () => {
+      // Arrange
+      setupSequelize();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('sequelize');
+
+      // Act
+      const authService1 = await Container.getAuthService();
+      const authService2 = await Container.getAuthService();
+
+      // Assert
+      expect(authService1).toBe(authService2);
+    });
+
+    it('should return the same instance of TaskController', async () => {
+      // Arrange
+      setupCosmos();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('cosmos');
+
+      // Create a mock CosmosClient with the required methods
+      const mockCosmosClient = {
+        database: jest.fn().mockReturnValue({
+          container: jest.fn().mockReturnValue({
+            // Include any methods used by your repository code, if necessary
+          }),
+        }),
+        // Include other properties/methods if necessary
+      } as unknown as CosmosClient;
+
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosClient').mockReturnValue(mockCosmosClient);
+
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosDatabaseId').mockReturnValue('test_database_id');
+      jest.spyOn(DatabaseConnection.prototype, 'getCosmosContainerId').mockReturnValue('test_container_id');
+
+      // Act
+      const taskController1 = await Container.getTaskController();
+      const taskController2 = await Container.getTaskController();
+
+      // Assert
+      expect(taskController1).toBe(taskController2);
+    });
+
+    it('should return the same instance of AuthController', async () => {
+      // Arrange
+      setupMongo();
+
+      jest.spyOn(DatabaseConnection.prototype, 'connectToDatabase').mockResolvedValue(undefined);
+      jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('mongodb');
+
+      // Act
+      const authController1 = await Container.getAuthController();
+      const authController2 = await Container.getAuthController();
+
+      // Assert
+      expect(authController1).toBe(authController2);
+    });
+  });
+});
+
+// Helper functions
+function setupCosmos() {
+  process.env.DB_TYPE = 'cosmos';
+  process.env.COSMOS_CONNECTION_STRING = 'test_connection_string';
+  process.env.COSMOS_DATABASE_ID = 'test_database_id';
+  process.env.COSMOS_CONTAINER_ID = 'test_container_id';
+}
+
+function setupSequelize() {
+  process.env.DB_TYPE = 'sequelize';
+  process.env.DB_DIALECT = 'postgres';
+  process.env.POSTGRESQL_HOST = 'localhost';
+  process.env.POSTGRESQL_PORT = '5432';
+  process.env.POSTGRESQL_DATABASE = 'test_db';
+  process.env.POSTGRESQL_USER = 'test_user';
+  process.env.POSTGRESQL_PASSWORD = 'test_password';
+}
+
+function setupMongo() {
+  process.env.DB_TYPE = 'mongodb';
+  process.env.MONGO_URI = 'mongodb://localhost:27017/test_db';
+}

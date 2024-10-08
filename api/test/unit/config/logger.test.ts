@@ -1,83 +1,112 @@
-// import logger from '../../../src/config/logger';
-// import winston from 'winston';
+// logger.test.ts
+
+import winston from 'winston';
+import logger from '@src/config/logger';
 
 
-// jest.mock('winston', () => {
-//     const originalWinston = jest.requireActual('winston');
+describe('Logger Module', () => {
+    let consoleTransport: winston.transports.ConsoleTransportInstance;
+    let fileTransport: winston.transports.FileTransportInstance;
   
-//     // Mock the transports
-//     return {
-//       ...originalWinston,
-//       format: {
-//         combine: jest.fn().mockImplementation(() => {}),
-//         timestamp: jest.fn().mockImplementation(() => {}),
-//         json: jest.fn().mockImplementation(() => {}),
-//         simple: jest.fn().mockImplementation(() => {}),
-//       },
-//       createLogger: jest.fn().mockReturnValue({
-//         level: 'info',
-//         transports: [
-//           new originalWinston.transports.Console(),
-//           new originalWinston.transports.File({ filename: 'combined.log' }),
-//         ],
-//       }),
-//       transports: {
-//         Console: jest.fn().mockImplementation(() => ({
-//           log: jest.fn(),
-//         })),
-//         File: jest.fn().mockImplementation(() => ({
-//           log: jest.fn(),
-//         })),
-//       },
-//     };
-//   });
+    beforeAll(() => {
+      // Find the transports once and ensure they are defined
+      const transports = logger.transports;
   
-//   describe('Logger Configuration', () => {
-//     let consoleTransportMock: jest.Mock;
-//     let fileTransportMock: jest.Mock;
+      const foundConsoleTransport = transports.find(
+        (transport): transport is winston.transports.ConsoleTransportInstance =>
+          transport instanceof winston.transports.Console
+      );
+      const foundFileTransport = transports.find(
+        (transport): transport is winston.transports.FileTransportInstance =>
+          transport instanceof winston.transports.File
+      );
   
-//     beforeAll(() => {
-//       // Mock the Winston transport constructors
-//       consoleTransportMock = winston.transports.Console as unknown as jest.Mock;
-//       fileTransportMock = winston.transports.File as unknown as jest.Mock;
-//     });
+      if (!foundConsoleTransport || !foundFileTransport) {
+        throw new Error('Required transports not found');
+      }
   
-//     afterEach(() => {
-//       jest.clearAllMocks();
-//     });
+      consoleTransport = foundConsoleTransport;
+      fileTransport = foundFileTransport;
+    });
   
-//     it('should be configured with "info" log level', () => {
-//       expect(logger.level).toBe('info');
-//     });
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
   
-//     it('should use Console transport with "simple" format', () => {
-//       logger; // Ensure logger is instantiated to trigger the transport setup
-//       expect(consoleTransportMock).toHaveBeenCalledWith(
-//         expect.objectContaining({
-//           format: expect.any(Object), // Ensure format is an object
-//         })
-//       );
-//     });
+    it('should have the correct logging level', () => {
+      expect(logger.level).toBe('info');
+    });
   
-//     it('should use File transport for combined.log', () => {
-//       logger; // Ensure logger is instantiated to trigger the transport setup
-//       expect(fileTransportMock).toHaveBeenCalledWith(
-//         expect.objectContaining({
-//           filename: 'combined.log',
-//         })
-//       );
-//     });
+    it('should have the correct format combining timestamp and json', () => {
+      const infoMessage = { level: 'info', message: 'Test message' };
+      const formattedMessage = logger.format.transform(infoMessage);
   
-//     it('should have timestamp and JSON formats', () => {
-//       const formatCombineSpy = jest.spyOn(winston.format, 'combine');
-//       const formatTimestampSpy = jest.spyOn(winston.format, 'timestamp');
-//       const formatJsonSpy = jest.spyOn(winston.format, 'json');
+      expect(formattedMessage).toHaveProperty('timestamp');
+      expect(formattedMessage).toHaveProperty('level', 'info');
+      expect(formattedMessage).toHaveProperty('message', 'Test message');
+    });
   
-//       // Recreate logger to ensure formats are applied
-//       logger;
+    it('should have console and file transports', () => {
+      expect(consoleTransport).toBeDefined();
+      expect(fileTransport).toBeDefined();
+    });
   
-//       expect(formatCombineSpy).toHaveBeenCalled();
-//       expect(formatTimestampSpy).toHaveBeenCalled();
-//       expect(formatJsonSpy).toHaveBeenCalled();
-//     });
-//   });
+    it('should configure console transport with simple format', () => {
+      expect(consoleTransport.format).toEqual(winston.format.simple());
+    });
+  
+    it('should configure file transport with filename "combined.log"', () => {
+      expect(fileTransport.filename).toBe('combined.log');
+    });
+  
+    it('should log messages at info level to both transports', () => {
+      jest.spyOn(consoleTransport, 'log').mockImplementation((info, next) => next());
+      jest.spyOn(fileTransport, 'log').mockImplementation((info, next) => next());
+  
+      logger.info('Test info message');
+  
+      expect(consoleTransport.log).toHaveBeenCalledTimes(1);
+      expect(fileTransport.log).toHaveBeenCalledTimes(1);
+  
+      jest.restoreAllMocks();
+    });
+  
+    it('should not log debug messages (since level is info)', () => {
+      jest.spyOn(consoleTransport, 'log').mockImplementation((info, next) => next());
+      jest.spyOn(fileTransport, 'log').mockImplementation((info, next) => next());
+  
+      logger.debug('Test debug message');
+  
+      expect(consoleTransport.log).not.toHaveBeenCalled();
+      expect(fileTransport.log).not.toHaveBeenCalled();
+  
+      jest.restoreAllMocks();
+    });
+  
+    it('should log error messages to both transports', () => {
+      jest.spyOn(consoleTransport, 'log').mockImplementation((info, next) => next());
+      jest.spyOn(fileTransport, 'log').mockImplementation((info, next) => next());
+  
+      const error = new Error('Test error');
+      logger.error('An error occurred', { error });
+  
+      expect(consoleTransport.log).toHaveBeenCalledTimes(1);
+      expect(fileTransport.log).toHaveBeenCalledTimes(1);
+  
+      jest.restoreAllMocks();
+    });
+  
+    it('should format messages correctly with timestamp and json', () => {
+        const infoMessage = { level: 'info', message: 'Test message' };
+        const formattedMessage = logger.format.transform(infoMessage);
+      
+        if (formattedMessage === false) {
+          throw new Error('Formatted message is false');
+        }
+      
+        expect(formattedMessage).toHaveProperty('level', 'info');
+        expect(formattedMessage).toHaveProperty('message', 'Test message');
+        expect(formattedMessage).toHaveProperty('timestamp');
+      });
+      
+  });

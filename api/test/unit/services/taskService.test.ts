@@ -1,12 +1,23 @@
-import TaskService from '../../../src/services/taskService';
-import ITaskRepository from '../../../src/repositories/taskRepository';
-import { CreateTaskDto, CreateTaskRequestBody, Task, UpdateTaskDto } from '../../../src/models/task';
+
+import TaskService from '@src/services/taskService';
+import ITaskRepository from '@src/repositories/taskRepository';
+import { CreateTaskDto, Task, TaskStatus, UpdateTaskDto } from '@src/models/task';
+import { v4 as uuidv4 } from 'uuid';
+
+jest.mock('uuid');
 
 describe('TaskService', () => {
     let mockTaskRepository: jest.Mocked<ITaskRepository>;
     let taskService: TaskService;
     
     beforeEach(() => {
+        // Mock the UUID to return a fixed value
+        (uuidv4 as jest.Mock).mockReturnValue('0315021b-d135-4403-8929-8b1471365eb2');
+
+        // Use fake timers and set a fixed date
+        jest.useFakeTimers({ legacyFakeTimers: false });
+        jest.setSystemTime(new Date('2024-10-03T21:33:57.345Z'));
+
         mockTaskRepository = {
             createTask: jest.fn<Promise<Task>, [Task]>(),
             getTasksByUser: jest.fn<Promise<Task[]>, [string]>(),
@@ -24,6 +35,8 @@ describe('TaskService', () => {
     });
     
     afterEach(() => {
+        // Restore real timers and mocks
+        jest.useRealTimers();
         jest.restoreAllMocks();
     });
     
@@ -33,22 +46,26 @@ describe('TaskService', () => {
                 title: 'New Task',
                 description: 'Task Description',
                 checklist: [],
-                dueDate: new Date(),
+                dueDate: new Date('2024-10-03T21:33:57.344Z'),
                 status: 'active',
                 userId: 'testuser',
             };
             
             const mockTask: Task = {
                 ...taskParams,
-                id: 'task1', 
-                createdAt: new Date()
+                id: '0315021b-d135-4403-8929-8b1471365eb2', 
+                createdAt: new Date('2024-10-03T21:33:57.345Z'),
+                modifiedAt: null,
+                archivedAt: null,
+                deletedAt: null,
             };
 
             mockTaskRepository.createTask.mockResolvedValue(mockTask);
             
             const result = await taskService.createTask(taskParams);
             
-            expect(mockTaskRepository.createTask).toHaveBeenCalledWith(taskParams);
+            // Expect the repository to be called with taskParams plus id and createdAt
+            expect(mockTaskRepository.createTask).toHaveBeenCalledWith(mockTask);
             expect(result).toEqual(mockTask);
         });
     });
@@ -58,24 +75,30 @@ describe('TaskService', () => {
             const userId = 'testuser';
             const mockTasks: Task[] = [
                 {
+                    userId,
                     id: 'task1',
                     title: 'Task 1',
                     description: 'Description 1',
                     checklist: [],
-                    dueDate: new Date(),
+                    dueDate: new Date('2024-10-03T21:33:57.344Z'),
                     status: 'active',
-                    userId,
-                    createdAt: new Date(),
+                    createdAt: new Date('2024-10-03T21:33:57.345Z'),
+                    modifiedAt: new Date('2024-10-03T21:33:57.346Z'),
+                    archivedAt: new Date('2024-10-03T21:33:57.347Z'),
+                    deletedAt: new Date('2024-10-03T21:33:57.348Z'),
                 },
                 {
+                    userId,
                     id: 'task2',
                     title: 'Task 2',
                     description: 'Description 2',
                     checklist: [],
-                    dueDate: new Date(),
+                    dueDate: new Date('2024-10-03T21:33:57.344Z'),
                     status: 'completed',
-                    userId,
-                    createdAt: new Date(),
+                    createdAt: new Date('2024-10-03T21:33:57.345Z'),
+                    modifiedAt: new Date('2024-10-03T21:33:57.346Z'),
+                    archivedAt: new Date('2024-10-03T21:33:57.347Z'),
+                    deletedAt: new Date('2024-10-03T21:33:57.348Z'),
                 },
             ];
             
@@ -100,18 +123,24 @@ describe('TaskService', () => {
                 title: 'Updated Task',
                 description: 'Description 1',
                 checklist: [],
-                dueDate: new Date(),
+                dueDate: new Date('2024-10-03T21:33:57.344Z'),
                 status: 'active',
                 userId: 'testuser',
-                createdAt: new Date(),
-                modifiedAt: new Date(),
+                createdAt: new Date('2024-10-03T21:33:57.345Z'),
+                modifiedAt: new Date('2024-10-03T21:33:57.345Z'),
+                archivedAt: null,
+                deletedAt: null,
             };
             
             mockTaskRepository.updateTask.mockResolvedValue(updatedTask);
             
             const result = await taskService.updateTask(taskId, updates);
             
-            expect(mockTaskRepository.updateTask).toHaveBeenCalledWith(taskId, updates);
+            // Expect the repository to be called with taskId and updates plus modifiedAt
+            expect(mockTaskRepository.updateTask).toHaveBeenCalledWith(taskId, {
+                ...updates,
+                modifiedAt: new Date('2024-10-03T21:33:57.345Z'),
+            });
             expect(result).toEqual(updatedTask);
         });
     });
@@ -165,10 +194,13 @@ describe('TaskService', () => {
                 title: 'Task 1',
                 description: 'Description 1',
                 checklist: [],
-                dueDate: new Date(),
+                dueDate: new Date('2024-10-03T21:33:57.344Z'),
                 status,
                 userId,
-                createdAt: new Date(),
+                createdAt: new Date('2024-10-03T21:33:57.345Z'),
+                modifiedAt: new Date('2024-10-03T21:33:57.346Z'),
+                archivedAt: null,
+                deletedAt: null,
             };
             
             mockTaskRepository.updateTaskStatus.mockResolvedValue(updatedTask);
@@ -177,6 +209,48 @@ describe('TaskService', () => {
             
             expect(mockTaskRepository.updateTaskStatus).toHaveBeenCalledWith(taskId, status, userId);
             expect(result).toEqual(updatedTask);
+        });
+    });
+
+    describe('bulkImportTasks', () => {
+        it('should throw an error if tasks array is invalid', async () => {
+            // Arrange
+            const invalidTasks: any = null; // Invalid input
+
+            // Act & Assert
+            await expect(taskService.bulkImportTasks(invalidTasks, 'userId'))
+                .rejects.toThrow('Invalid tasks data provided.');
+        });
+
+        it('should import tasks and return the imported tasks', async () => {
+            // Arrange
+            const tasks = [
+                { title: 'Task 1', description: 'Description 1', status: 'active' },
+                { title: 'Task 2', description: 'Description 2', status: 'completed' }
+            ];
+
+            const preparedTasks: Task[] = tasks.map(task => ({
+                id: '0315021b-d135-4403-8929-8b1471365eb2',
+                userId: 'userId',
+                title: task.title!,
+                description: task.description!,
+                checklist: null,
+                dueDate: null,
+                status: task.status || TaskStatus.New,
+                createdAt: new Date(),
+                modifiedAt: new Date(),
+                archivedAt: null,
+                deletedAt: null,
+            }));
+
+            mockTaskRepository.bulkCreateTasks.mockResolvedValue(preparedTasks);
+
+            // Act
+            const result = await taskService.bulkImportTasks(tasks, 'userId');
+
+            // Assert
+            expect(mockTaskRepository.bulkCreateTasks).toHaveBeenCalledWith(preparedTasks);
+            expect(result).toEqual(preparedTasks);
         });
     });
 });

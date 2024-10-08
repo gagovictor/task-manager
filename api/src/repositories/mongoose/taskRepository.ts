@@ -43,22 +43,16 @@ export default class MongooseTaskRepository implements ITaskRepository {
         return result.map(taskDoc => this.parseTask(taskDoc));
     }
 
-    async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
+    async updateTask(id: string, updates: Task): Promise<Task> {
         const encryptedUpdates: Partial<IMongooseTask> = {
             status: updates.status,
             dueDate: updates.dueDate,
             modifiedAt: new Date(),
         };
 
-        if (updates.title) {
-            encryptedUpdates.title = this.encryptionService.encrypt(updates.title);
-        }
-        if (updates.description) {
-            encryptedUpdates.description = this.encryptionService.encrypt(updates.description);
-        }
-        if (updates.checklist) {
-            encryptedUpdates.checklist = this.encryptionService.encrypt(JSON.stringify(updates.checklist));
-        }
+        encryptedUpdates.title = updates.title ? this.encryptionService.encrypt(updates.title) : '';
+        encryptedUpdates.description = updates.description ? this.encryptionService.encrypt(updates.description) : null;
+        encryptedUpdates.checklist = updates.checklist ? this.encryptionService.encrypt(JSON.stringify(updates.checklist)) : null;
 
         const result = await MongooseTask.findByIdAndUpdate(
             id,
@@ -94,7 +88,10 @@ export default class MongooseTaskRepository implements ITaskRepository {
     async updateTaskStatus(taskId: string, status: string, userId: string): Promise<Task | null> {
         const result = await MongooseTask.findOneAndUpdate(
             { _id: taskId, userId },
-            { status },
+            {
+                status,
+                modifiedAt: new Date(),
+            },
             { new: true }
         ).exec();
 

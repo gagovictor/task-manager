@@ -87,7 +87,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
 
   if (task.dueDate) {
     const dueDate = toZonedTime(task.dueDate, timeZone);
-    formattedDueDate = format(dueDate, 'dd/MM/yyyy HH:mm');
+    formattedDueDate = format(dueDate, 'dd/MM/yyyy HH:mm').replace(' 00:00', '');
     isPastDue = currentDate > dueDate && task.status != 'completed';
   }
 
@@ -112,7 +112,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
         display: 'flex',
         alignItems: 'center',
         textAlign: 'left',
-        color: 'text.secondary',
+        color: 'text.warning',
         mr: 2,
       }}
     >
@@ -130,7 +130,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
     <Typography variant="caption"
       sx={{
         textAlign: 'right',
-        color: 'text.secondary',
+        color: 'text.warning',
       }}>
       Created at: {formattedCreatedAt}
     </Typography>
@@ -162,11 +162,12 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
               justifyContent: 'flex-start',
               my: 1,
               gap: 1,
-              color: 'text.secondary'
+              color: 'text.warning'
             }}
           >
             {isPastDue ? (
                 <Chip
+                  icon={<PendingActionsOutlined />}
                   label={formattedDueDate}
                   color="error"
                   sx={{ backgroundColor: theme.palette.error.light, color: theme.palette.error.contrastText }}
@@ -176,7 +177,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
                 <Chip
                   icon={<PendingActionsOutlined />}
                   label={formattedDueDate}
-                  color={isDueIn24hrs() ? 'secondary' : 'default'}
+                  color={isDueIn24hrs() ? 'warning' : 'default'}
                   data-testid="duedate-chip"
                 />
               )
@@ -232,7 +233,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: 'vertical'
                 }}
-                color="text.secondary"
+                color="text.warning"
               >
                 {task.description ? task.description : 'No description provided'}
               </Typography>

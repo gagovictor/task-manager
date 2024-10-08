@@ -51,8 +51,8 @@ export default class CosmosTaskRepository implements ITaskRepository {
             const encryptedTask = {
                 ...task,
                 title: task.title ? this.encryptionService.encrypt(task.title) : '',
-                description: task.description ? this.encryptionService.encrypt(task.description) : '',
-                checklist: task.checklist ? this.encryptionService.encrypt(JSON.stringify(task.checklist)) : '',
+                description: task.description ? this.encryptionService.encrypt(task.description) : null,
+                checklist: task.checklist ? this.encryptionService.encrypt(JSON.stringify(task.checklist)) : null,
             };
 
             const { resource: newTask } = await this.container.items.create<ICosmosTask>(encryptedTask);
@@ -81,19 +81,15 @@ export default class CosmosTaskRepository implements ITaskRepository {
             const { resource: task } = await this.container.item(id).read<ICosmosTask>();
             if (!task) throw new Error('Task not found');
 
-            const encryptedUpdates: Partial<ICosmosTask> = { modifiedAt: new Date() };
+            const encryptedUpdates: Partial<ICosmosTask> = {
+                modifiedAt: new Date(),
+                dueDate: updates.dueDate,
+                status: updates.status,
+            };
 
-            if (updates.title) {
-                encryptedUpdates.title = this.encryptionService.encrypt(updates.title);
-            }
-
-            if (updates.description) {
-                encryptedUpdates.description = this.encryptionService.encrypt(updates.description);
-            }
-
-            if (updates.checklist) {
-                encryptedUpdates.checklist = this.encryptionService.encrypt(JSON.stringify(updates.checklist));
-            }
+            encryptedUpdates.title = updates.title ? this.encryptionService.encrypt(updates.title) : '';
+            encryptedUpdates.description = updates.description ? this.encryptionService.encrypt(updates.description) : null;
+            encryptedUpdates.checklist = updates.checklist ? this.encryptionService.encrypt(JSON.stringify(updates.checklist)) : null;
 
             const { resource: updatedTask } = await this.container.item(id).replace(encryptedUpdates);
             return this.parseTask(updatedTask as ICosmosTask);
@@ -146,7 +142,11 @@ export default class CosmosTaskRepository implements ITaskRepository {
             const { resource: task } = await this.container.item(taskId).read<ICosmosTask>();
             if (!task || task.userId !== userId) return null;
 
-            const updatedTask = { ...task, status };
+            const updatedTask = {
+                ...task,
+                status,
+                modifiedAt: new Date(),
+            };
             await this.container.item(taskId).replace(updatedTask);
             return this.parseTask(updatedTask as ICosmosTask);
         } catch (error: any) {

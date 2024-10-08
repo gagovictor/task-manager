@@ -8,6 +8,7 @@ import { initialState, setupStore } from '../../../redux/store';
 import userEvent from '@testing-library/user-event';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { LocalizationProvider } from '@mui/x-date-pickers';
+import { act } from 'react';
 
 describe('TasksPage component', () => {
     const store = setupStore(initialState);
@@ -72,6 +73,16 @@ describe('TasksPage component', () => {
             dueDate: null,
             archivedAt: null,
             deletedAt: null,
+        },
+        {
+            id: '6',
+            userId: 'userId',
+            title: 'Task 6',
+            description: 'Mock Task',
+            status: 'completed',
+            dueDate: null,
+            archivedAt: null,
+            deletedAt: null,
         }
     ];
     
@@ -126,7 +137,7 @@ describe('TasksPage component', () => {
         })
     });
     
-    it('renders non-archived, non-deleted tasks after successful fetching', async () => {
+    it('renders non-archived, non-deleted, non-completed tasks after successful fetching', async () => {
         renderWithProviders(store);
         
         await waitFor(() => {
@@ -135,6 +146,7 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 3')).toBeNull(); // Archived
             expect(screen.queryByText('Task 4')).toBeNull(); // Deleted
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
+            expect(screen.queryByText('Task 6')).toBeNull(); // Completed
         });
     });
     
@@ -147,17 +159,17 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 3')).toBeNull(); // Archived
             expect(screen.queryByText('Task 4')).toBeNull(); // Deleted
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
+            expect(screen.queryByText('Task 6')).toBeNull(); // Completed
         });
         
-        waitFor(() => {
-            const statusSelect = screen.getByRole('combobox');
-            expect(statusSelect).toBeInTheDocument();
-            userEvent.click(statusSelect);
+        const statusSelect = screen.getByRole('combobox');
+        waitFor(() => expect(statusSelect).toBeInTheDocument());
+        
+        act(() => userEvent.click(statusSelect));
             
-            const optionsPopupEl = screen.getByRole('listbox');
-            userEvent.click(within(optionsPopupEl).getByText('Completed'));
-        });
-        
+        const optionsPopupEl = screen.getByRole('listbox');
+        act(() => userEvent.click(within(optionsPopupEl).getByText('Active')));
+
         await waitFor(() => {
             expect(screen.getByText('No tasks match the filter criteria.')).toBeInTheDocument();
             expect(screen.queryByText('Task 1')).toBeNull(); // New
@@ -165,6 +177,7 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 3')).toBeNull(); // Archived
             expect(screen.queryByText('Task 4')).toBeNull(); // Deleted
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
+            expect(screen.queryByText('Task 6')).toBeNull(); // Completed
         });
     });
     
@@ -177,11 +190,12 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 3')).toBeNull(); // Archived
             expect(screen.queryByText('Task 4')).toBeNull(); // Deleted
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
+            expect(screen.queryByText('Task 6')).toBeNull(); // Completed
         });
         
         waitFor(() => {
             const searchInput = screen.getByLabelText(/Search/i);
-            userEvent.type(searchInput, '2');
+            act(() => userEvent.type(searchInput, '2'));
         })
         
         await waitFor(() => {
@@ -191,6 +205,7 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 3')).toBeNull(); // Archived
             expect(screen.queryByText('Task 4')).toBeNull(); // Deleted
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
+            expect(screen.queryByText('Task 6')).toBeNull(); // Completed
         });
     });
 
@@ -205,21 +220,17 @@ describe('TasksPage component', () => {
             expect(screen.queryByText('Task 5')).toBeNull(); // Removed
         });
         
-        await waitFor(() => {
-            const searchInput = screen.getByLabelText(/Search/i);
-            userEvent.type(searchInput, '1');
-        });
-        
+        const searchInput = screen.getByLabelText(/Search/i);
+        act(() => userEvent.type(searchInput, '1'));
+
         await waitFor(() => {
             expect(screen.queryByText('No tasks match the filter criteria.')).toBeNull();
             expect(screen.getByText('Task 1')).toBeInTheDocument();
             expect(screen.queryByText('Task 2')).toBeNull(); // No text match
         });
         
-        await waitFor(() => {
-            const clearSearchButton = screen.getByLabelText('clear search');
-            userEvent.click(clearSearchButton);
-        });
+        const clearSearchButton = screen.getByLabelText('clear search');
+        act(() => userEvent.click(clearSearchButton));
         
         await waitFor(() => {
             expect(screen.queryByText('No tasks match the filter criteria.')).toBeNull();
@@ -239,11 +250,117 @@ describe('TasksPage component', () => {
         
         await waitFor(() => {
             const createTaskButton = screen.getByLabelText('add');
-            userEvent.click(createTaskButton);
+            act(() => userEvent.click(createTaskButton));
             expect(screen.getByText('New Task')).toBeInTheDocument();
             
-            userEvent.click(screen.getByRole('button', { name: /Close/i }));
+            act(() => userEvent.click(screen.getByRole('button', { name: /Close/i })));
             expect(screen.queryByText('New Task')).not.toBeInTheDocument();
         })
+    });
+
+    it('renders an alert when fetch fails', async () => {
+        server.use(
+            http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
+                return new Response(null, {
+                    status: 400,
+                });
+            })
+        );
+        
+        renderWithProviders(store);
+        
+        await waitFor(() => {
+            expect(screen.getByTestId('fetch-error-alert')).toBeInTheDocument();
+        });
+    });
+
+    it('renders tasks correctly after fetch', async () => {
+        renderWithProviders(store);
+
+        await waitFor(() => {
+            expect(screen.getByText('Task 1')).toBeInTheDocument();
+        });
+    });
+
+    it('toggles the visibility of filters', async () => {
+        renderWithProviders(store);
+    
+        const toggleButton = screen.getByRole('button', { name: /Show Filters/i });
+        act(() => userEvent.click(toggleButton));
+    
+        waitFor(() => expect(screen.getByLabelText('Search')).toBeInTheDocument());
+    
+        act(() => userEvent.click(screen.getByRole('button', { name: /Hide Filters/i })));
+    
+        waitFor(() => expect(screen.queryByLabelText('Search')).toBeNull());
+    });
+
+    it('renders no tasks when there are no tasks', async () => {
+        server.use(
+            http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
+                return HttpResponse.json([]);
+            })
+        );
+
+        renderWithProviders(store);
+
+        await waitFor(() => {
+            expect(screen.getByText(/No tasks match the filter criteria/)).toBeInTheDocument();
+        });
+    });
+
+    it('opens and closes the TaskModal when creating a task', async () => {
+        renderWithProviders(store);
+        
+        const createTaskButton = screen.getByLabelText('add');
+        act(() => userEvent.click(createTaskButton));
+
+        await waitFor(() => {
+            expect(screen.getByText('New Task')).toBeInTheDocument();
+        });
+
+        act(() => userEvent.click(screen.getByRole('button', { name: /Close/i })));
+        await waitFor(() => {
+            expect(screen.queryByText('New Task')).not.toBeInTheDocument();
+        });
+    });
+
+    it('filters tasks by status', async () => {
+        renderWithProviders(store);
+
+        const statusSelect = await screen.findByRole('combobox');
+        act(() => userEvent.click(statusSelect));
+
+        const optionsPopupEl = screen.getByRole('listbox');
+        act(() => userEvent.click(within(optionsPopupEl).getByText('Completed')));
+
+        await waitFor(() => {
+            expect(screen.queryByText('Task 1')).toBeNull(); // Only 'Completed' tasks should appear
+            expect(screen.queryByText('Task 2')).toBeNull();
+            expect(screen.getByText('Task 6')).toBeInTheDocument();
+        });
+    });
+
+    it('clears filters and shows all tasks again', async () => {
+        renderWithProviders(store);
+
+        await waitFor(() => {
+            expect(screen.getByText('Task 1')).toBeInTheDocument();
+        });
+
+        const searchInput = screen.getByLabelText(/Search/i);
+        act(() => userEvent.type(searchInput, 'Task 1'));
+        
+        await waitFor(() => {
+            expect(screen.getByText('Task 1')).toBeInTheDocument();
+        });
+
+        const clearSearchButton = screen.getByLabelText('clear search');
+        act(() => userEvent.click(clearSearchButton));
+
+        await waitFor(() => {
+            expect(screen.getByText('Task 1')).toBeInTheDocument();
+            expect(screen.getByText('Task 2')).toBeInTheDocument();
+        });
     });
 });

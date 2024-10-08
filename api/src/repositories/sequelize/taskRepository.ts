@@ -73,7 +73,7 @@ export default class SequelizeTaskRepository implements ITaskRepository {
         }
     }
 
-    async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
+    async updateTask(id: string, updates: Task): Promise<Task> {
         try {
             const task = await SequelizeTask.findOne({
                 where: {
@@ -85,22 +85,18 @@ export default class SequelizeTaskRepository implements ITaskRepository {
                 throw new Error('Task not found');
             }
 
-            const encryptedUpdates: Partial<SequelizeTask> = { modifiedAt: new Date() };
+            const encryptedUpdates: Partial<SequelizeTask> = {
+                modifiedAt: new Date(),
+                dueDate: updates.dueDate,
+                status: updates.status,
+            };
 
-            if (updates.title) {
-                encryptedUpdates.title = this.encryptionService.encrypt(updates.title);
-            }
-
-            if (updates.description) {
-                encryptedUpdates.description = this.encryptionService.encrypt(updates.description);
-            }
-
-            if (updates.checklist) {
-                encryptedUpdates.checklist = this.encryptionService.encrypt(JSON.stringify(updates.checklist));
-            }
+            encryptedUpdates.title = updates.title ? this.encryptionService.encrypt(updates.title) : '';
+            encryptedUpdates.description = updates.description ? this.encryptionService.encrypt(updates.description) : null;
+            encryptedUpdates.checklist = updates.checklist ? this.encryptionService.encrypt(JSON.stringify(updates.checklist)) : null;
 
             await task.update(encryptedUpdates);
-            return this.parseTask(task);
+            return this.parseTask(Object.assign(task, encryptedUpdates));
         } catch (error: any) {
             console.error('Task update error:', error);
             throw new Error('Task update failed');
@@ -175,9 +171,13 @@ export default class SequelizeTaskRepository implements ITaskRepository {
             if (!task) {
                 return null;
             }
+            
             task.status = status;
+            task.modifiedAt = new Date();
+
             await task.save();
-            return this.parseTask(task);
+            const result = this.parseTask(task);
+            return result;
         } catch (error: any) {
             console.error('Update task status error:', error);
             throw new Error('Could not update task status');

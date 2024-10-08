@@ -1,5 +1,5 @@
-import { CreateTaskDto, CreateTaskRequestBody, Task, TaskStatus, UpdateTaskDto } from '../models/task';
-import ITaskRepository from '../repositories/taskRepository';
+import { CreateTaskDto, Task, TaskStatus, UpdateTaskDto } from '@src/models/task';
+import ITaskRepository from '@src/repositories/taskRepository';
 import { v4 as uuidv4 } from 'uuid';
 
 class TaskService {
@@ -9,11 +9,19 @@ class TaskService {
         this.repository = repository;
     }
 
-    async createTask(taskParams: CreateTaskDto): Promise<Task> {
+    async createTask(params: CreateTaskDto): Promise<Task> {
         const task: Task = {
             id: uuidv4(),
-            ...taskParams,
-            createdAt: new Date()
+            userId: params.userId,
+            title: params.title,
+            description: params.description || null,
+            checklist: params.checklist || null,
+            status: params.status,
+            dueDate: params.dueDate || null,
+            createdAt: new Date(),
+            archivedAt: null,
+            modifiedAt: null,
+            deletedAt: null,
         };
         return this.repository.createTask(task);
     }
@@ -60,13 +68,15 @@ class TaskService {
         const preparedTasks: Task[] = tasks.map(task => ({
             id: uuidv4(), // Overwrite with new ID
             userId, // Overwrite with authenticated user's ID
-            title: task.title || '',
-            description: task.description || '',
-            checklist: task.checklist || [],
-            dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+            title: task.title!,
+            description: task.description || null,
+            checklist: task.checklist || null,
+            dueDate: task.dueDate ? new Date(task.dueDate) : null,
             status: task.status || TaskStatus.New,
             createdAt: new Date(),
             modifiedAt: new Date(),
+            archivedAt: task.archivedAt || null,
+            deletedAt: task.deletedAt || null,
         }));
 
         return this.repository.bulkCreateTasks(preparedTasks);
