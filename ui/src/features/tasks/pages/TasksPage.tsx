@@ -12,6 +12,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import TaskModal from '../components/TaskModal';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
+import { FetchTasksParams } from '../models/api';
 
 const TasksPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -25,10 +26,17 @@ const TasksPage = () => {
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterText, setFilterText] = useState<string>('');
-  const [filtersVisible, setFiltersVisible] = useState(false); // New state for filters visibility
-  
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [fetchParams, setFetchParams] = useState<FetchTasksParams>({
+    start: 0,
+    limit: 100,
+    filters: {
+      archived: false
+    }
+  });
+
   useEffect(() => {
-    dispatch(fetchTasksAsync());
+    dispatch(fetchTasksAsync(fetchParams));
   }, [dispatch]);
 
   const handleCreateTask = () => {

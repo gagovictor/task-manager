@@ -1,9 +1,28 @@
 import apiClient from '../../shared/services/ApiService';
 import { ChecklistItem } from '../models/checklist';
+import { FetchTasksParams, PaginatedResponse } from '../models/api';
 import { Task } from '../models/task';
 
-export const fetchTasks = async (token: string) => {
-    const response = await apiClient.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, {
+export const fetchTasks = async (
+    token: string,
+    params: FetchTasksParams
+): Promise<PaginatedResponse<Task>> => {
+    const {
+        start = 0,
+        limit = 10,
+        filters = {
+            archived: false
+        }
+    } = params;
+    
+    const query = new URLSearchParams({
+        start: start.toString(),
+        limit: limit.toString(),
+        archived: filters.archived!.toString(),
+    });
+    
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    const response = await apiClient.get(`${process.env.REACT_APP_API_BASE_URL}/tasks${queryString}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;

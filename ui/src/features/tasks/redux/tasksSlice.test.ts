@@ -62,7 +62,15 @@ describe('tasksSlice', () => {
     });
     
     it('should handle fetchTasksAsync.fulfilled', () => {
-        const action = { type: fetchTasksAsync.fulfilled.type, payload: mockTasks };
+        const action = {
+            type: fetchTasksAsync.fulfilled.type,
+            payload: {
+                totalItems: 1,
+                totalPages: 1,
+                currentPage: 1,
+                items: mockTasks
+            }
+        };
         const state = tasksReducer(initialState, action);
         expect(state.fetchStatus).toBe('succeeded');
         expect(state.tasks).toEqual(mockTasks);

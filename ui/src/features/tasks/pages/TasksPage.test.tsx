@@ -88,7 +88,12 @@ describe('TasksPage component', () => {
     
     const handlers = [
         http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
-            return HttpResponse.json(mockTasks)
+            return HttpResponse.json({
+                currentPage: 1,
+                totalPages: 1,
+                items: mockTasks,
+                totalItems: mockTasks
+            })
         }),
     ];
     const server = setupServer(...handlers);
@@ -298,7 +303,12 @@ describe('TasksPage component', () => {
     it('renders no tasks when there are no tasks', async () => {
         server.use(
             http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
-                return HttpResponse.json([]);
+                return HttpResponse.json({
+                    currentPage: 1,
+                    totalPages: 1,
+                    items: 0,
+                    totalItems: []
+                });
             })
         );
 

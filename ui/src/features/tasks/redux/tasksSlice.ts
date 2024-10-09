@@ -3,6 +3,7 @@ import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, una
 import { RootState } from '../../../redux/store';
 import { Task } from '../models/task';
 import { loadTasksFromLocalStorage, saveTasksToLocalStorage } from './persistTasks';
+import { FetchTasksParams, PaginatedResponse } from '../models/api';
 
 export interface TasksState {
   tasks: Task[];
@@ -49,9 +50,9 @@ const tasksSlice = createSlice({
         state.fetchStatus = 'loading';
         state.fetchError = null;
       })
-      .addCase(fetchTasksAsync.fulfilled, (state, action: PayloadAction<Task[]>) => {
+      .addCase(fetchTasksAsync.fulfilled, (state, action: PayloadAction<PaginatedResponse<Task>>) => {
         state.fetchStatus = 'succeeded';
-        state.tasks = action.payload;
+        state.tasks = action.payload.items || [];
         saveTasksToLocalStorage(state.tasks);
       })
       .addCase(fetchTasksAsync.rejected, (state, action) => {
@@ -162,17 +163,22 @@ const tasksSlice = createSlice({
   },
 });
 
-export const fetchTasksAsync = createAsyncThunk(
+
+export const fetchTasksAsync = createAsyncThunk<
+  PaginatedResponse<Task>,
+  FetchTasksParams,
+  { state: RootState; rejectValue: any }
+>(
   'tasks/fetchTasks',
-  async (_, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
+  async (params, { getState, rejectWithValue }) => {
+    const state = getState();
     const token = state.auth.token;
 
     try {
-      const response = await fetchTasks(token);
+      const response = await fetchTasks(token, params);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data || null);
+      return rejectWithValue(error.response?.data || 'Failed to fetch tasks.');
     }
   }
 );
