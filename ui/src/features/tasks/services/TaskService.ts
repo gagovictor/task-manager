@@ -8,7 +8,7 @@ export const fetchTasks = async (
     params: FetchTasksParams
 ): Promise<PaginatedResponse<Task>> => {
     const {
-        start = 0,
+        page = 0,
         limit = 10,
         filters = {
             archived: false
@@ -16,7 +16,7 @@ export const fetchTasks = async (
     } = params;
     
     const query = new URLSearchParams({
-        start: start.toString(),
+        page: page.toString(),
         limit: limit.toString(),
         archived: filters.archived!.toString(),
     });

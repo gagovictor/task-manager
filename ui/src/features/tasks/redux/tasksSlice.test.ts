@@ -12,8 +12,6 @@ import {
 } from './tasksSlice';
 import { AnyAction } from 'redux';
 import { Task } from '../models/task';
-import { setupStore, initialState as initialRootState } from '../../../redux/store';
-import { createTask } from '../services/TaskService';
 
 const mockTask: Task = {
     id: '1',
@@ -64,6 +62,11 @@ describe('tasksSlice', () => {
     it('should handle fetchTasksAsync.fulfilled', () => {
         const action = {
             type: fetchTasksAsync.fulfilled.type,
+            meta: {
+                arg: {
+                    page: 1
+                }
+            },
             payload: {
                 totalItems: 1,
                 totalPages: 1,
@@ -242,7 +245,15 @@ describe('tasksSlice', () => {
     });
     
     it('should handle fetchTasksAsync.fulfilled with an empty payload', () => {
-        const action = { type: fetchTasksAsync.fulfilled.type, payload: [] };
+        const action = {
+            type: fetchTasksAsync.fulfilled.type,
+            meta: {
+                arg: {
+                    page: 1
+                }
+            },
+            payload: []
+        };
         const state = tasksReducer(initialState, action);
         expect(state.fetchStatus).toBe('succeeded');
         expect(state.tasks).toEqual([]);

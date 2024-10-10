@@ -6,8 +6,8 @@ export interface PaginatedResponse<T> {
 }
 
 export interface FetchTasksParams {
-    start?: number;
-    limit?: number;
+    page: number;
+    limit: number;
     filters?: TaskFilter;
 }
 

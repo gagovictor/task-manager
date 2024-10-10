@@ -23,8 +23,8 @@ export default function ArchivedTasksPage() {
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
   const [fetchParams, setFetchParams] = useState<FetchTasksParams>({
-    start: 0,
-    limit: 100,
+    page: 1,
+    limit: 20,
     filters: {
       archived: true
     }

@@ -56,7 +56,8 @@
     },
     "transformIgnorePatterns": [
       "/node_modules/(?!(axios)/)",
-      "node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)"
+      "node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)",
+      "/node_modules/(?!(msw|@bundled-es-modules)/)"
     ],
     "modulePaths": [],
     "moduleNameMapper": {

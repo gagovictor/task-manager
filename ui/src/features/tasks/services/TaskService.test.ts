@@ -13,7 +13,7 @@ describe('TaskService', () => {
 
     describe('fetchTasks', () => {
         const fetchParams: FetchTasksParams = {
-            start: 0,
+            page: 1,
             limit: 10,
             filters: {
                 archived: false
@@ -28,7 +28,7 @@ describe('TaskService', () => {
                 title: 'Test Task',
                 description: 'Test Description',
                 dueDate: new Date().toISOString(),
-                status: 'pending',
+                status: 'new',
                 createdAt: new Date().toISOString(),
                 archivedAt: null,
                 deletedAt: null
@@ -38,7 +38,7 @@ describe('TaskService', () => {
             const result = await fetchTasks(token, fetchParams);
 
             expect(result).toEqual(response);
-            expect(mockedApiClient.get).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks?start=0&limit=10&archived=false`, {
+            expect(mockedApiClient.get).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks?page=1&limit=10&archived=false`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.get).toHaveBeenCalledTimes(1);

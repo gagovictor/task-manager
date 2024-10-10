@@ -34,8 +34,8 @@ const TaskBoardPage = () => {
   const statusColumns = ['new', 'active', 'completed'];
   const theme = useTheme();
   const [fetchParams, setFetchParams] = useState<FetchTasksParams>({
-    start: 0,
-    limit: 100,
+    page: 1,
+    limit: 20,
     filters: {
       archived: false
     }
