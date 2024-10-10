@@ -1,8 +1,10 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import httpMocks from 'node-mocks-http';
-import TaskController from '../../../src/controllers/taskController';
-import { AuthenticatedRequest } from '../../../src/middlewares/auth';
-import TaskService from '../../../src/services/taskService';
+import TaskController from '@src/controllers/taskController';
+import { AuthenticatedRequest } from '@src/middlewares/auth';
+import TaskService from '@src/services/taskService';
+import { Task } from '@src/models/task';
+import { PaginatedResponse } from '@src/models/pagination';
 
 describe('TaskController', () => {
     let mockTaskService: Partial<TaskService>;
@@ -74,15 +76,32 @@ describe('TaskController', () => {
     
     describe('getTasks', () => {
         it('should respond with 200 and a list of tasks', async () => {
-            const mockTasks = [{ id: '1', title: 'Test Task', userId: mockUser.id }];
+            const getTasksResponse: PaginatedResponse<any> = {
+                totalItems: 2,
+                totalPages: 1,
+                currentPage: 1,
+                items: [{
+                    id: '1',
+                    title: 'Test Task',
+                    userId: mockUser.id,
+                    description: null,
+                    checklist: null,
+                    status: 'active',
+                    dueDate: null,
+                    createdAt: new Date().toISOString(),
+                    archivedAt: null,
+                    modifiedAt: null,
+                    deletedAt: null
+                }]
+            };
             
-            (mockTaskService.getTasksByUser as jest.Mock).mockResolvedValue(mockTasks);
+            (mockTaskService.getTasksByUser as jest.Mock).mockResolvedValue(getTasksResponse);
             
             await taskController.getTasks(req, res);
             
             expect(res.statusCode).toBe(200);
-            expect(res._getJSONData()).toEqual(mockTasks);
-            expect(mockTaskService.getTasksByUser).toHaveBeenCalledWith(mockUser.id);
+            expect(res._getJSONData()).toEqual(getTasksResponse);
+            expect(mockTaskService.getTasksByUser).toHaveBeenCalledWith(mockUser.id, 1, 10, {});
         });
         
         it('should respond with 500 when service throws an error', async () => {

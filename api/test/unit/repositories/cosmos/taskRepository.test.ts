@@ -1,5 +1,6 @@
 import { Container, CosmosClient, SqlQuerySpec } from '@azure/cosmos';
 import { ICosmosTask } from '@src/models/cosmos/task';
+import { PaginatedResponse } from '@src/models/pagination';
 import { Task } from '@src/models/task';
 import CosmosTaskRepository from '@src/repositories/cosmos/taskRepository';
 import TaskEncryptionService from '@src/services/taskEncryptionService';
@@ -18,7 +19,6 @@ describe('CosmosTaskRepository', () => {
     beforeEach(() => {
         jest.clearAllMocks();
             
-        // Create mocks for CosmosClient and Container
         cosmosClientMock = new CosmosClient('AccountEndpoint=https://localhost:8081/;AccountKey=your_account_key;') as jest.Mocked<CosmosClient>;
         containerMock = {
         items: {
@@ -28,19 +28,16 @@ describe('CosmosTaskRepository', () => {
         item: jest.fn(),
         } as unknown as jest.Mocked<Container>;
         
-        // Mock the methods to return the container mock
         const databaseMock = {
             container: jest.fn().mockReturnValue(containerMock),
         };
         cosmosClientMock.database = jest.fn().mockReturnValue(databaseMock as any);
         
-        // Mock the TaskEncryptionService
         encryptionServiceMock = {
             encrypt: jest.fn((value: string) => `encrypted(${value})`),
             decrypt: jest.fn((value: string) => value.replace('encrypted(', '').replace(')', '')),
         } as unknown as jest.Mocked<TaskEncryptionService>;
         
-        // Instantiate the repository with the mocked client and encryption service
         taskRepository = new CosmosTaskRepository(cosmosClientMock, databaseId, containerId, encryptionServiceMock);
     });
     
@@ -55,9 +52,9 @@ describe('CosmosTaskRepository', () => {
                 checklist: [{ id: 'item-1', text: 'Task item 1', completed: false }],
                 status: 'new',
                 dueDate: null,
-                createdAt: new Date(),
-                modifiedAt: new Date(),
-                archivedAt: new Date(),
+                createdAt: expect.any(Date),
+                modifiedAt: expect.any(Date),
+                archivedAt: expect.any(Date),
                 deletedAt: null,
             };
             const encryptedTaskData: ICosmosTask = {
@@ -65,9 +62,9 @@ describe('CosmosTaskRepository', () => {
                 title: `encrypted(${taskData.title})`,
                 description: `encrypted(${taskData.description})`,
                 checklist: `encrypted(${JSON.stringify(taskData.checklist)})`,
-                createdAt: new Date(),
-                modifiedAt: new Date(),
-                archivedAt: new Date(),
+                createdAt: expect.any(Date),
+                modifiedAt: expect.any(Date),
+                archivedAt: expect.any(Date),
                 deletedAt: null,
             };
             
@@ -123,6 +120,9 @@ describe('CosmosTaskRepository', () => {
         it('should retrieve tasks for a user', async () => {
             // Arrange
             const userId = 'user123';
+            const page = 1;
+            const limit = 10;
+        
             const encryptedTasks: ICosmosTask[] = [
                 {
                     id: '1',
@@ -151,32 +151,44 @@ describe('CosmosTaskRepository', () => {
                     deletedAt: null,
                 },
             ];
+        
             const decryptedTasks: Task[] = encryptedTasks.map(task => ({
                 ...task,
                 title: task.title.replace('encrypted(', '').replace(')', ''),
                 description: task.description!.replace('encrypted(', '').replace(')', ''),
                 checklist: [],
             }));
-            
-            const queryResult = { resources: encryptedTasks };
-            const querySpec: SqlQuerySpec = {
-                query: expect.any(String),
-                parameters: expect.any(Array),
-            };
-            
-            (containerMock.items.query as jest.Mock).mockReturnValue({
-                fetchAll: jest.fn().mockResolvedValue(queryResult),
-            } as any);
-            
-            // Act
-            const result = await taskRepository.getTasksByUser(userId);
-            
-            // Assert
-            expect(containerMock.items.query).toHaveBeenCalledWith(querySpec);
-            expect(encryptionServiceMock.decrypt).toHaveBeenCalledTimes(6); // 2 tasks x 3 fields
-            expect(result).toEqual(decryptedTasks);
-        });
         
+            const totalItems = encryptedTasks.length;
+        
+            const paginatedResponse: PaginatedResponse<Task> = {
+                totalItems: totalItems,
+                totalPages: Math.ceil(totalItems / limit),
+                currentPage: page,
+                items: decryptedTasks,
+            };
+        
+            // Mock count query result
+            const countQueryResult = { resources: [totalItems] };
+            (containerMock.items.query as jest.Mock).mockReturnValueOnce({
+                fetchAll: jest.fn().mockResolvedValue(countQueryResult),
+            } as any);
+        
+            // Mock tasks query result
+            const tasksQueryResult = { resources: encryptedTasks };
+            (containerMock.items.query as jest.Mock).mockReturnValueOnce({
+                fetchAll: jest.fn().mockResolvedValue(tasksQueryResult),
+            } as any);
+        
+            // Act
+            const result = await taskRepository.getTasksByUser(userId, page, limit, { archived: false });
+        
+            // Assert
+            expect(containerMock.items.query).toHaveBeenCalledWith(expect.any(Object));
+            expect(encryptionServiceMock.decrypt).toHaveBeenCalledTimes(6); // 2 tasks x 3 fields
+            expect(result).toEqual(paginatedResponse);
+        });
+    
         it('should handle exceptions during task retrieval', async () => {
             // Arrange
             const userId = 'user123';
@@ -186,7 +198,7 @@ describe('CosmosTaskRepository', () => {
             } as any);
             
             // Act & Assert
-            await expect(taskRepository.getTasksByUser(userId)).rejects.toThrow('Failed to fetch tasks');
+            await expect(taskRepository.getTasksByUser(userId, 0, 10, { archived: false })).rejects.toThrow('Failed to fetch tasks');
         });
     });
     

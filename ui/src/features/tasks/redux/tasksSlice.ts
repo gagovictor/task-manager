@@ -3,11 +3,13 @@ import { archiveTask, createTask, CreateTaskRequest, deleteTask, fetchTasks, una
 import { RootState } from '../../../redux/store';
 import { Task } from '../models/task';
 import { loadTasksFromLocalStorage, saveTasksToLocalStorage } from './persistTasks';
+import { FetchTasksParams, PaginatedResponse } from '../models/api';
 
 export interface TasksState {
   tasks: Task[];
   fetchStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   fetchError: string | null;
+  hasMore: boolean;
   createStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   createError: string | null;
   updateStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -22,6 +24,7 @@ export const initialState: TasksState = {
   tasks: loadTasksFromLocalStorage() || [],
   fetchStatus: 'idle',
   fetchError: null,
+  hasMore: true,
   createStatus: 'idle',
   createError: null,
   updateStatus: 'idle',
@@ -49,9 +52,18 @@ const tasksSlice = createSlice({
         state.fetchStatus = 'loading';
         state.fetchError = null;
       })
-      .addCase(fetchTasksAsync.fulfilled, (state, action: PayloadAction<Task[]>) => {
+      .addCase(fetchTasksAsync.fulfilled, (state, action) => {
         state.fetchStatus = 'succeeded';
-        state.tasks = action.payload;
+        // TODO store archived tasks in a separate property so that the tasks list is not reset between views.
+        if (action.meta.arg.page === 1) {
+          // If fetching from page, replace the tasks
+          state.tasks = action.payload.items || [];
+        } else {
+          // Append new tasks
+          state.tasks = [...state.tasks, ...(action.payload.items || [])];
+        }
+        // Determine if more tasks are available
+        state.hasMore = (action.payload.items?.length || 0) >= (action.meta.arg.limit || 20);
         saveTasksToLocalStorage(state.tasks);
       })
       .addCase(fetchTasksAsync.rejected, (state, action) => {
@@ -162,17 +174,22 @@ const tasksSlice = createSlice({
   },
 });
 
-export const fetchTasksAsync = createAsyncThunk(
+
+export const fetchTasksAsync = createAsyncThunk<
+  PaginatedResponse<Task>,
+  FetchTasksParams,
+  { state: RootState; rejectValue: any }
+>(
   'tasks/fetchTasks',
-  async (_, { getState, rejectWithValue }) => {
-    const state = getState() as RootState;
+  async (params, { getState, rejectWithValue }) => {
+    const state = getState();
     const token = state.auth.token;
 
     try {
-      const response = await fetchTasks(token);
+      const response = await fetchTasks(token, params);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data || null);
+      return rejectWithValue(error.response?.data || 'Failed to fetch tasks.');
     }
   }
 );

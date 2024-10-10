@@ -44,17 +44,37 @@ const createTaskRouter = (): Router => {
    * @swagger
    * /tasks:
    *   get:
-   *     summary: Returns a list of tasks
+   *     summary: Returns a paginated list of tasks
    *     tags: [Tasks]
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *         description: The page number (defaults to 1)
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *         description: The number of tasks per page (defaults to 10)
    *     responses:
    *       200:
-   *         description: A list of tasks
+   *         description: A paginated list of tasks
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: '#/components/schemas/Task'
+   *               type: object
+   *               properties:
+   *                 items:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Task'
+   *                 totalItems:
+   *                   type: integer
+   *                 totalPages:
+   *                   type: integer
+   *                 currentPage:
+   *                   type: integer
    */
   router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {

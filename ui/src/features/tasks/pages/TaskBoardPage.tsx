@@ -17,6 +17,7 @@ import TaskCard from '../components/TaskCard';
 import { Task } from '../models/task';
 import { Paper, useTheme } from '@mui/material';
 import TaskModal from '../components/TaskModal';
+import { FetchTasksParams } from '../models/api';
 
 const TaskBoardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -32,6 +33,13 @@ const TaskBoardPage = () => {
   const [draggingTask, setDraggingTask] = useState<Task | null>(null);
   const statusColumns = ['new', 'active', 'completed'];
   const theme = useTheme();
+  const [fetchParams, setFetchParams] = useState<FetchTasksParams>({
+    page: 1,
+    limit: 20,
+    filters: {
+      archived: false
+    }
+  });
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -46,7 +54,7 @@ const TaskBoardPage = () => {
   }, [tasks]);
 
   useEffect(() => {
-    dispatch(fetchTasksAsync());
+    dispatch(fetchTasksAsync(fetchParams));
   }, [dispatch]);
 
   const handleCreateTask = () => {

@@ -2,6 +2,7 @@ import { Response } from 'express';
 import TaskService from '../services/taskService';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import { CreateTaskRequestBody, Task, UpdateTaskRequestBody, UpdateTaskStatusRequestBody } from '../models/task';
+import { TaskFilter } from '@src/models/pagination';
 
 export default class TaskController {
   private taskService: TaskService;
@@ -25,14 +26,37 @@ export default class TaskController {
 
   public getTasks = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const tasks = await this.taskService.getTasksByUser(req.user!.id);
-      res.status(200).json(tasks);
+      const page = Number(req.query.page) > 0 ? Number(req.query.page) : 1;
+      const limit = Number(req.query.limit) > 0 ? Number(req.query.limit) : 10;
+      
+      const archivedParam = req.query.archived as string | undefined;
+      const statusParam = req.query.status as string | undefined;
+  
+      let filter: TaskFilter = {};
+  
+      if (archivedParam !== undefined) {
+        if (archivedParam.toLowerCase() === 'true') {
+          filter.archived = true;
+        } else if (archivedParam.toLowerCase() === 'false') {
+          filter.archived = false;
+        } else {
+          res.status(400).json({ error: "'archived' query parameter must be 'true' or 'false'." });
+          return;
+        }
+      }
+  
+      if (statusParam) {
+        filter.status = statusParam;
+      }
+  
+      const paginatedTasks = await this.taskService.getTasksByUser(req.user!.id, page, limit, filter);
+      res.status(200).json(paginatedTasks);
     } catch (error) {
       console.error('Fetching tasks error:', error);
       res.status(500).json({ error: (error as Error).message });
     }
   };
-
+  
   public updateTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { id } = req.params;
     const { title, description, checklist, dueDate, status } = req.body as UpdateTaskRequestBody;

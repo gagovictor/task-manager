@@ -1,6 +1,7 @@
 import apiClient from '../../shared/services/ApiService';
 import { fetchTasks, createTask, updateTask, deleteTask, archiveTask, unarchiveTask, updateTaskStatus } from './TaskService'; // Adjust path as needed
 import { Task } from '../models/task';
+import { FetchTasksParams } from '../models/api';
 
 jest.mock('../../shared/services/ApiService');
 const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;
@@ -11,6 +12,14 @@ describe('TaskService', () => {
     });
 
     describe('fetchTasks', () => {
+        const fetchParams: FetchTasksParams = {
+            page: 1,
+            limit: 10,
+            filters: {
+                archived: false
+            }
+        };
+
         it('should return tasks data when API call is successful', async () => {
             const token = 'fake-token';
             const response: Task[] = [{
@@ -19,17 +28,17 @@ describe('TaskService', () => {
                 title: 'Test Task',
                 description: 'Test Description',
                 dueDate: new Date().toISOString(),
-                status: 'pending',
+                status: 'new',
                 createdAt: new Date().toISOString(),
                 archivedAt: null,
                 deletedAt: null
             }];
             mockedApiClient.get.mockResolvedValue({ data: response });
 
-            const result = await fetchTasks(token);
+            const result = await fetchTasks(token, fetchParams);
 
             expect(result).toEqual(response);
-            expect(mockedApiClient.get).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks`, {
+            expect(mockedApiClient.get).toHaveBeenCalledWith(`${process.env.REACT_APP_API_BASE_URL}/tasks?page=1&limit=10&archived=false`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             expect(mockedApiClient.get).toHaveBeenCalledTimes(1);
@@ -37,9 +46,10 @@ describe('TaskService', () => {
 
         it('should throw an error if the API call fails', async () => {
             const token = 'fake-token';
+
             mockedApiClient.get.mockRejectedValue(new Error('Network Error'));
 
-            await expect(fetchTasks(token)).rejects.toThrow('Network Error');
+            await expect(fetchTasks(token, fetchParams)).rejects.toThrow('Network Error');
         });
     });
 

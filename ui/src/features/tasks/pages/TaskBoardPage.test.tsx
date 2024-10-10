@@ -35,7 +35,12 @@ describe('TaskBoardPage', () => {
 
     const handlers = [
         http.get(`${process.env.REACT_APP_API_BASE_URL}/tasks`, () => {
-            return HttpResponse.json(mockTasks);
+            return HttpResponse.json({
+                currentPage: 1,
+                totalPages: 1,
+                items: mockTasks,
+                totalItems: mockTasks.length
+            });
         }),
     ];
     const server = setupServer(...handlers);

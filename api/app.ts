@@ -1,12 +1,12 @@
 
 import express, { Application } from 'express';
 import cors, { CorsOptions } from 'cors';
-import { swaggerUi, swaggerSpec } from './src/config/swagger';
+import { swaggerUi, swaggerSpec } from '@src/config/swagger';
 import morgan from 'morgan';
-import logger from './src/config/logger';
-import DatabaseConnection from './src/config/db';
-import getPublicRouter from './src/routes/public';
-import getProtectedRouter from './src/routes/protected';
+import logger from '@src/config/logger';
+import DatabaseConnection from '@src/config/db';
+import getPublicRouter from '@src/routes/public';
+import getProtectedRouter from '@src/routes/protected';
 const app: Application = express();
 
 // CORS configuration

@@ -2,6 +2,7 @@
 import TaskService from '@src/services/taskService';
 import ITaskRepository from '@src/repositories/taskRepository';
 import { CreateTaskDto, Task, TaskStatus, UpdateTaskDto } from '@src/models/task';
+import { PaginatedResponse, TaskFilter } from '@src/models/pagination';
 import { v4 as uuidv4 } from 'uuid';
 
 jest.mock('uuid');
@@ -20,7 +21,7 @@ describe('TaskService', () => {
 
         mockTaskRepository = {
             createTask: jest.fn<Promise<Task>, [Task]>(),
-            getTasksByUser: jest.fn<Promise<Task[]>, [string]>(),
+            getTasksByUser: jest.fn<Promise<PaginatedResponse<Task>>, [string, number, number, TaskFilter | undefined]>(),
             updateTask: jest.fn<Promise<Task>, [string, Partial<Task>]>(),
             deleteTask: jest.fn<Promise<void>, [string, string]>(),
             archiveTask: jest.fn<Promise<void>, [string, string]>(),
@@ -73,40 +74,45 @@ describe('TaskService', () => {
     describe('getTasksByUser', () => {
         it('should call the repository to get tasks by user', async () => {
             const userId = 'testuser';
-            const mockTasks: Task[] = [
-                {
-                    userId,
-                    id: 'task1',
-                    title: 'Task 1',
-                    description: 'Description 1',
-                    checklist: [],
-                    dueDate: new Date('2024-10-03T21:33:57.344Z'),
-                    status: 'active',
-                    createdAt: new Date('2024-10-03T21:33:57.345Z'),
-                    modifiedAt: new Date('2024-10-03T21:33:57.346Z'),
-                    archivedAt: new Date('2024-10-03T21:33:57.347Z'),
-                    deletedAt: new Date('2024-10-03T21:33:57.348Z'),
-                },
-                {
-                    userId,
-                    id: 'task2',
-                    title: 'Task 2',
-                    description: 'Description 2',
-                    checklist: [],
-                    dueDate: new Date('2024-10-03T21:33:57.344Z'),
-                    status: 'completed',
-                    createdAt: new Date('2024-10-03T21:33:57.345Z'),
-                    modifiedAt: new Date('2024-10-03T21:33:57.346Z'),
-                    archivedAt: new Date('2024-10-03T21:33:57.347Z'),
-                    deletedAt: new Date('2024-10-03T21:33:57.348Z'),
-                },
-            ];
+            const mockTasks: PaginatedResponse<Task> = {
+                totalItems: 2,
+                totalPages: 1,
+                currentPage: 1,
+                items: [
+                    {
+                        userId,
+                        id: 'task1',
+                        title: 'Task 1',
+                        description: 'Description 1',
+                        checklist: [],
+                        dueDate: new Date('2024-10-03T21:33:57.344Z'),
+                        status: 'active',
+                        createdAt: new Date('2024-10-03T21:33:57.345Z'),
+                        modifiedAt: new Date('2024-10-03T21:33:57.346Z'),
+                        archivedAt: new Date('2024-10-03T21:33:57.347Z'),
+                        deletedAt: new Date('2024-10-03T21:33:57.348Z'),
+                    },
+                    {
+                        userId,
+                        id: 'task2',
+                        title: 'Task 2',
+                        description: 'Description 2',
+                        checklist: [],
+                        dueDate: new Date('2024-10-03T21:33:57.344Z'),
+                        status: 'completed',
+                        createdAt: new Date('2024-10-03T21:33:57.345Z'),
+                        modifiedAt: new Date('2024-10-03T21:33:57.346Z'),
+                        archivedAt: new Date('2024-10-03T21:33:57.347Z'),
+                        deletedAt: new Date('2024-10-03T21:33:57.348Z'),
+                    },
+                ],
+            };
             
             mockTaskRepository.getTasksByUser.mockResolvedValue(mockTasks);
             
-            const result = await taskService.getTasksByUser(userId);
+            const result = await taskService.getTasksByUser(userId, 0, 10, { archived: false });
             
-            expect(mockTaskRepository.getTasksByUser).toHaveBeenCalledWith(userId);
+            expect(mockTaskRepository.getTasksByUser).toHaveBeenCalledWith(userId, 0, 10, { archived: false });
             expect(result).toEqual(mockTasks);
         });
     });

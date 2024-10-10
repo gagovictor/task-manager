@@ -10,6 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Task } from '../models/task';
 import { useNavigate } from 'react-router-dom';
 import TaskModal from '../components/TaskModal';
+import { FetchTasksParams } from '../models/api';
 
 export default function ArchivedTasksPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,9 +22,16 @@ export default function ArchivedTasksPage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [fetchParams, setFetchParams] = useState<FetchTasksParams>({
+    page: 1,
+    limit: 20,
+    filters: {
+      archived: true
+    }
+  });
 
   useEffect(() => {
-    dispatch(fetchTasksAsync());
+    dispatch(fetchTasksAsync(fetchParams));
   }, [dispatch]);
 
   const handleCreateTask = () => {

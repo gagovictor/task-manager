@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../redux/store';
 import { fetchTasksAsync } from '../redux/tasksSlice';
@@ -12,10 +12,12 @@ import ClearIcon from '@mui/icons-material/Clear';
 import TaskModal from '../components/TaskModal';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
+import { FetchTasksParams } from '../models/api';
+import useInfiniteScroll from '../../shared/hooks/useInfiniteScroll';
 
 const TasksPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { tasks, fetchStatus, fetchError } = useSelector((state: RootState) => state.tasks);
+  const { tasks, fetchStatus, fetchError, hasMore } = useSelector((state: RootState) => state.tasks);
   const [modalOpen, setModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task>();
@@ -25,11 +27,33 @@ const TasksPage = () => {
   const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterText, setFilterText] = useState<string>('');
-  const [filtersVisible, setFiltersVisible] = useState(false); // New state for filters visibility
-  
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [fetchParams, setFetchParams] = useState<FetchTasksParams>({
+    page: 1,
+    limit: 50,
+    filters: {
+      archived: false
+    }
+  });
+
+  const loadMore = useCallback(() => {
+    if (fetchStatus !== 'loading' && hasMore) {
+      setFetchParams((prev) => ({
+        ...prev,
+        page: prev.page + 1,
+      }));
+    }
+  }, [fetchStatus, hasMore]);
+
+  const sentinelRef = useInfiniteScroll({
+    loading: fetchStatus === 'loading',
+    hasMore,
+    onLoadMore: loadMore,
+  });
+
   useEffect(() => {
-    dispatch(fetchTasksAsync());
-  }, [dispatch]);
+    dispatch(fetchTasksAsync(fetchParams));
+  }, [fetchParams]);
 
   const handleCreateTask = () => {
     setEditMode(false);
@@ -219,6 +243,9 @@ const TasksPage = () => {
           )}
         </Masonry>
       )}
+
+      {/* Sentinel Element for Infinite Scroll */}
+      <div ref={sentinelRef} />
 
       <Fab
         color="primary"

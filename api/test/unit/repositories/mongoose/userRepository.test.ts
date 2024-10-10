@@ -132,14 +132,14 @@ describe('MongooseUserRepository', () => {
         it('should handle exceptions during user retrieval', async () => {
             // Arrange
             const username = 'testuser';
-            const error = new Error('Fetch failed');
+            const error = new Error('Failed to fetch tasks');
             
             (MongooseUser.findOne as jest.Mock).mockReturnValue({
                 exec: jest.fn().mockRejectedValue(error),
             });
             
             // Act & Assert
-            await expect(userRepository.findByUsername(username)).rejects.toThrow('Fetch failed');
+            await expect(userRepository.findByUsername(username)).rejects.toThrow('Failed to fetch tasks');
         });
     });
     
@@ -179,14 +179,14 @@ describe('MongooseUserRepository', () => {
         it('should handle exceptions during user retrieval by ID', async () => {
             // Arrange
             const userId = '1';
-            const error = new Error('Fetch failed');
+            const error = new Error('Failed to fetch tasks');
             
             (MongooseUser.findById as jest.Mock).mockReturnValue({
                 exec: jest.fn().mockRejectedValue(error),
             });
             
             // Act & Assert
-            await expect(userRepository.findById(userId)).rejects.toThrow('Fetch failed');
+            await expect(userRepository.findById(userId)).rejects.toThrow('Failed to fetch tasks');
         });
     });
     

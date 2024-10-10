@@ -4,3 +4,12 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 import '@testing-library/jest-dom/extend-expect';
+        
+const mockIntersectionObserver = function () {
+    return {
+        observe: () => jest.fn(),
+        unobserve: () => jest.fn(),
+        disconnect: () => jest.fn()
+    }
+};
+window.IntersectionObserver = mockIntersectionObserver as any;

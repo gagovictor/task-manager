@@ -120,12 +120,12 @@ describe('SequelizeUserRepository', () => {
         it('should handle exceptions during user retrieval', async () => {
             // Arrange
             const username = 'testuser';
-            const error = new Error('Fetch failed');
+            const error = new Error('Failed to fetch tasks');
             
             (User.findOne as jest.Mock).mockRejectedValue(error);
             
             // Act & Assert
-            await expect(userRepository.findByUsername(username)).rejects.toThrow('Fetch failed');
+            await expect(userRepository.findByUsername(username)).rejects.toThrow('Failed to fetch tasks');
         });
     });
     
@@ -161,12 +161,12 @@ describe('SequelizeUserRepository', () => {
         it('should handle exceptions during user retrieval by ID', async () => {
             // Arrange
             const userId = '1';
-            const error = new Error('Fetch failed');
+            const error = new Error('Failed to fetch tasks');
             
             (User.findByPk as jest.Mock).mockRejectedValue(error);
             
             // Act & Assert
-            await expect(userRepository.findById(userId)).rejects.toThrow('Fetch failed');
+            await expect(userRepository.findById(userId)).rejects.toThrow('Failed to fetch tasks');
         });
     });
     
