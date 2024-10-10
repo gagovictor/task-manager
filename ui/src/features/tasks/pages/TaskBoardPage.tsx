@@ -18,6 +18,7 @@ import { Task } from '../models/task';
 import { Paper, useTheme } from '@mui/material';
 import TaskModal from '../components/TaskModal';
 import { FetchTasksParams } from '../models/api';
+import PullToRefresh from '../../shared/components/PullToRefresh';
 
 const TaskBoardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -55,7 +56,11 @@ const TaskBoardPage = () => {
 
   useEffect(() => {
     dispatch(fetchTasksAsync(fetchParams));
-  }, [dispatch]);
+  }, [fetchParams]);
+
+  const fetchTasks = async () => {
+    await dispatch(fetchTasksAsync(fetchParams));
+  }
 
   const handleCreateTask = () => {
     setEditMode(false);
@@ -92,6 +97,7 @@ const TaskBoardPage = () => {
     const task = filteredTasks.find(task => task.id == event.active.id);
     setDraggingTask(task || null);
   }
+
   const handleDragEnd = async (event: DragEndEvent) => {
     setDraggingTask(null);
     const { active, over } = event;
@@ -247,89 +253,91 @@ const TaskBoardPage = () => {
   };
   
   return (
-    <Container
-      sx={{
-        width: '100%',
-        minHeight: 'calc(100vh - 64px)', // full screen height minus footer
-        paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
-        position: 'relative',
-        paddingBottom: '32px',
-      }}
-    >
-      {fetchStatus === 'failed' &&
-        <Alert
-          severity="error"
-          data-testid="fetch-error-alert"
-        >
-          {fetchError}
-        </Alert>
-      }
-      {fetchStatus === 'succeeded' && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <Box
-            key={'dnd-container'}
-            sx={{
-              width: '100%',
-              display: 'flex',
-              height: 'calc(100vh - 64px)',
-              overflowY: 'hidden',
-              overflowX: 'auto'
-            }}
+    <PullToRefresh onRefresh={fetchTasks}>
+      <Container
+        sx={{
+          width: '100%',
+          minHeight: 'calc(100vh - 64px)', // full screen height minus footer
+          paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
+          position: 'relative',
+          paddingBottom: '32px',
+        }}
+      >
+        {fetchStatus === 'failed' &&
+          <Alert
+            severity="error"
+            data-testid="fetch-error-alert"
           >
-            {statusColumns.map(status => renderTaskColumns(status))}
-          </Box>
-          <DragOverlay>
-            {draggingTask && (
-              <TaskCard
-                task={draggingTask}
-                showSnackbar={showSnackbar}
-              />
-            )}
-          </DragOverlay>
-        </DndContext>
-      )}
+            {fetchError}
+          </Alert>
+        }
+        {fetchStatus === 'succeeded' && (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <Box
+              key={'dnd-container'}
+              sx={{
+                width: '100%',
+                display: 'flex',
+                height: 'calc(100vh - 64px)',
+                overflowY: 'hidden',
+                overflowX: 'auto'
+              }}
+            >
+              {statusColumns.map(status => renderTaskColumns(status))}
+            </Box>
+            <DragOverlay>
+              {draggingTask && (
+                <TaskCard
+                  task={draggingTask}
+                  showSnackbar={showSnackbar}
+                />
+              )}
+            </DragOverlay>
+          </DndContext>
+        )}
 
-      <Fab
-        color="primary"
-        aria-label="add"
-        sx={{ position: 'fixed', bottom: 16, right: 16 }}
-        onClick={handleCreateTask}
-      >
-        <AddIcon />
-      </Fab>
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{ position: 'fixed', bottom: 16, right: 16 }}
+          onClick={handleCreateTask}
+        >
+          <AddIcon />
+        </Fab>
 
-      <TaskModal
-        open={modalOpen}
-        onClose={onCloseTaskModal}
-        task={selectedTask}
-        mode={editMode ? 'edit' : 'create'}
-      />
+        <TaskModal
+          open={modalOpen}
+          onClose={onCloseTaskModal}
+          task={selectedTask}
+          mode={editMode ? 'edit' : 'create'}
+        />
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
           onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          action={
-            snackbarUndoAction && (
-              <Button color="inherit" onClick={handleSnackbarAction}>
-                Undo
-              </Button>
-            )
-          }>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Container>
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbarSeverity}
+            action={
+              snackbarUndoAction && (
+                <Button color="inherit" onClick={handleSnackbarAction}>
+                  Undo
+                </Button>
+              )
+            }>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </PullToRefresh>
   );
 };
 

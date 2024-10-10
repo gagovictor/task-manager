@@ -11,6 +11,7 @@ import { Task } from '../models/task';
 import { useNavigate } from 'react-router-dom';
 import TaskModal from '../components/TaskModal';
 import { FetchTasksParams } from '../models/api';
+import PullToRefresh from '../../shared/components/PullToRefresh';
 
 export default function ArchivedTasksPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -32,7 +33,11 @@ export default function ArchivedTasksPage() {
 
   useEffect(() => {
     dispatch(fetchTasksAsync(fetchParams));
-  }, [dispatch]);
+  }, [fetchParams]);
+
+  const fetchTasks = async () => {
+    await dispatch(fetchTasksAsync(fetchParams));
+  }
 
   const handleCreateTask = () => {
     setEditMode(false);
@@ -58,90 +63,92 @@ export default function ArchivedTasksPage() {
     setSnackbarOpen(true);
   };
 
-  const activeTasks = tasks.filter((task: Task) => task.archivedAt && !task.deletedAt);
+  const filteredTasks = tasks.filter((task: Task) => task.archivedAt && !task.deletedAt);
 
   return (
-    <Container
-      sx={{
-        width: '100%',
-        minHeight: 'calc(100vh - 64px)', // full screen height minus footer
-        paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
-        position: 'relative',
-        paddingBottom: '32px',
-      }}
-    >
-      {fetchStatus === 'failed' &&
-        <Alert
-          severity="error"
-          data-testid="fetch-error-alert"
-        >
-          {fetchError}
-        </Alert>
-      }
-      {fetchStatus === 'succeeded' && activeTasks.length > 0 && (
-        <Masonry
-        columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
-          spacing={2}
-          data-testid="masonry"
-        >
-          {activeTasks.map((task: Task) => (
-            <Box
-              key={task.id}
-              data-testid="task-card"
-            >
-              <TaskCard
-                task={task}
-                onEdit={() => handleEditTask(task)}
-                showSnackbar={showSnackbar}
-              />
-            </Box>
-          ))}
-        </Masonry>
-      )}
-      {fetchStatus === 'succeeded' && activeTasks.length === 0 && (
-        <Box
-          sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-          }}
-        >
-          <Typography variant="h6" gutterBottom>No tasks archived</Typography>
-          <Button variant="contained" color="primary" onClick={() => navigate('/tasks')}>
-            Back to tasks
-          </Button>
-        </Box>
-      )}
-
-      <Fab
-        color="primary"
-        aria-label="add"
-        sx={{ position: 'fixed', bottom: 16, right: 16 }}
-        onClick={handleCreateTask}
+    <PullToRefresh onRefresh={fetchTasks}>
+      <Container
+        sx={{
+          width: '100%',
+          minHeight: 'calc(100vh - 64px)', // full screen height minus footer
+          paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
+          position: 'relative',
+          paddingBottom: '32px',
+        }}
       >
-        <AddIcon />
-      </Fab>
+        {fetchStatus === 'failed' &&
+          <Alert
+            severity="error"
+            data-testid="fetch-error-alert"
+          >
+            {fetchError}
+          </Alert>
+        }
+        {(fetchStatus === 'succeeded' || filteredTasks.length > 0) && (
+          <Masonry
+          columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
+            spacing={2}
+            data-testid="masonry"
+          >
+            {filteredTasks.map((task: Task) => (
+              <Box
+                key={task.id}
+                data-testid="task-card"
+              >
+                <TaskCard
+                  task={task}
+                  onEdit={() => handleEditTask(task)}
+                  showSnackbar={showSnackbar}
+                />
+              </Box>
+            ))}
+          </Masonry>
+        )}
+        {fetchStatus === 'succeeded' && filteredTasks.length === 0 && (
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+            }}
+          >
+            <Typography variant="h6" gutterBottom>No tasks archived</Typography>
+            <Button variant="contained" color="primary" onClick={() => navigate('/tasks')}>
+              Back to tasks
+            </Button>
+          </Box>
+        )}
 
-      <TaskModal
-        open={modalOpen}
-        onClose={onCloseTaskModal}
-        task={selectedTask}
-        mode={editMode ? 'edit' : 'create'}
-      />
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{ position: 'fixed', bottom: 16, right: 16 }}
+          onClick={handleCreateTask}
+        >
+          <AddIcon />
+        </Fab>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Container>
+        <TaskModal
+          open={modalOpen}
+          onClose={onCloseTaskModal}
+          task={selectedTask}
+          mode={editMode ? 'edit' : 'create'}
+        />
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </PullToRefresh>
   );
 }
