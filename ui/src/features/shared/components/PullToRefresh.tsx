@@ -43,6 +43,7 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
                 overflow: 'auto',
                 height: '100vh',
             }}
+            data-testid="pull-to-refresh-container"
         >
             {/* Pull to Refresh Indicator */}
             <Box
