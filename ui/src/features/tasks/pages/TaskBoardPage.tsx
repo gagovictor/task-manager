@@ -19,6 +19,7 @@ import { Paper, useTheme } from '@mui/material';
 import TaskModal from '../components/TaskModal';
 import { FetchTasksParams } from '../models/api';
 import PullToRefresh from '../../shared/components/PullToRefresh';
+import { useAutoRefresh } from '../../shared/hooks/useAutoRefresh';
 
 const TaskBoardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -62,6 +63,13 @@ const TaskBoardPage = () => {
     await dispatch(fetchTasksAsync(fetchParams));
   }
 
+  useAutoRefresh({
+    onRefresh: fetchTasks,
+    interval: 60000,
+    immediate: false,
+    onlyWhenFocused: true
+  });
+  
   const handleCreateTask = () => {
     setEditMode(false);
     setModalOpen(true);
