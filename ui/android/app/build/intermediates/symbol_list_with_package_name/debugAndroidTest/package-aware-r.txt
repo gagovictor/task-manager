@@ -1,3 +1,0 @@
-works.gago.tasks.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme
