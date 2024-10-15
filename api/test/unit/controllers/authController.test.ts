@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import httpMocks from 'node-mocks-http';
 import AuthController from '../../../src/controllers/authController';
 import { SignupRequestBody, LoginRequestBody, AuthResponse } from '../../../src/models/user';
-import AuthService from '../../../src/services/authService';
+import AuthService from '../../../src/services/AuthService';
 
 describe('AuthController', () => {
   let mockAuthService: Partial<AuthService>;

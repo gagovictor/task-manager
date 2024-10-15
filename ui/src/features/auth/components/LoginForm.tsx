@@ -86,6 +86,13 @@ const LoginForm: React.FC = () => {
                 </Link>
               </Typography>
             </Box>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" color="textSecondary" align="center">
+                <Link variant="body2" onClick={() => navigate('/recover-password')}>
+                  Forgot Password?
+                </Link>
+              </Typography>
+            </Box>
           </form>
         </Box>
       </Paper>

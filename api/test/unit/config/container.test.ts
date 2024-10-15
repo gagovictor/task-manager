@@ -8,8 +8,8 @@ import MongooseTaskRepository from '@src/repositories/mongoose/taskRepository';
 import SequelizeUserRepository from '@src/repositories/sequelize/userRepository';
 import CosmosUserRepository from '@src/repositories/cosmos/userRepository';
 import MongooseUserRepository from '@src/repositories/mongoose/userRepository';
-import TaskService from '@src/services/taskService';
-import AuthService from '@src/services/authService';
+import TaskService from '@src/services/TaskService';
+import AuthService from '@src/services/AuthService';
 import TaskController from '@src/controllers/taskController';
 import AuthController from '@src/controllers/authController';
 import { CosmosClient } from '@azure/cosmos'; // Import CosmosClient
@@ -31,8 +31,8 @@ describe('Container', () => {
     // Reset singleton instances in Container
     (Container as any).taskRepository = undefined;
     (Container as any).userRepository = undefined;
-    (Container as any).taskService = undefined;
-    (Container as any).authService = undefined;
+    (Container as any).TaskService = undefined;
+    (Container as any).AuthService = undefined;
     (Container as any).taskController = undefined;
     (Container as any).authController = undefined;
 
@@ -249,11 +249,11 @@ describe('Container', () => {
       jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('mongodb');
 
       // Act
-      const taskService1 = await Container.getTaskService();
-      const taskService2 = await Container.getTaskService();
+      const TaskService1 = await Container.getTaskService();
+      const TaskService2 = await Container.getTaskService();
 
       // Assert
-      expect(taskService1).toBe(taskService2);
+      expect(TaskService1).toBe(TaskService2);
     });
 
     it('should return the same instance of AuthService', async () => {
@@ -264,11 +264,11 @@ describe('Container', () => {
       jest.spyOn(DatabaseConnection.prototype, 'getDbType').mockReturnValue('sequelize');
 
       // Act
-      const authService1 = await Container.getAuthService();
-      const authService2 = await Container.getAuthService();
+      const AuthService1 = await Container.getAuthService();
+      const AuthService2 = await Container.getAuthService();
 
       // Assert
-      expect(authService1).toBe(authService2);
+      expect(AuthService1).toBe(AuthService2);
     });
 
     it('should return the same instance of TaskController', async () => {

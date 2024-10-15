@@ -1,12 +1,14 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { SignupRequest, LoginRequest, User } from '../../../src/models/user';
-import IUserRepository from '../../../src/repositories/userRepository';
-import AuthService from '../../../src/services/authService';
+import { SignupRequest, LoginRequest, User } from '@src/models/user';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
+import { IEmailNotificationService } from '@src/abstractions/services/IEmailNotificationService';
+import AuthService from '@src/services/AuthService';
 
 describe('AuthService', () => {
     let mockUserRepository: jest.Mocked<IUserRepository>;
-    let authService: AuthService;
+    let mockEmailNotificationService: jest.Mocked<IEmailNotificationService>;
+    let AuthService: AuthService;
     const jwtSecret = 'test-secret';
     
     beforeEach(() => {
@@ -19,8 +21,12 @@ describe('AuthService', () => {
             createUser: jest.fn<Promise<User>, [Partial<User>]>(),
             updateUser: jest.fn<Promise<User>, [string, Partial<User>]>(),
         };
+        mockEmailNotificationService = {
+            sendPasswordResetEmail: jest.fn<Promise<void>, [string, string]>(),
+            sendWelcomeEmail: jest.fn<Promise<void>, [string, string]>(),
+        };
         
-        authService = new AuthService(mockUserRepository, jwtSecret);
+        AuthService = new AuthService(mockUserRepository, mockEmailNotificationService, jwtSecret);
             
         jest.spyOn(bcrypt, 'hash').mockImplementation((password: string, salt: string | number): Promise<string> => {
             return Promise.resolve('hashedPassword');
@@ -57,7 +63,7 @@ describe('AuthService', () => {
             mockUserRepository.findByUsernameOrEmail.mockResolvedValue(null);
             mockUserRepository.createUser.mockResolvedValue(mockUser);
 
-            const result = await authService.signup(signupRequest);
+            const result = await AuthService.signup(signupRequest);
 
             expect(result).toEqual({
                 token: 'mockToken',
@@ -93,7 +99,7 @@ describe('AuthService', () => {
             };
             mockUserRepository.findByUsernameOrEmail.mockResolvedValue(existingUser);
 
-            await expect(authService.signup(signupRequest)).rejects.toThrow('Username already exists');
+            await expect(AuthService.signup(signupRequest)).rejects.toThrow('Username already exists');
             expect(mockUserRepository.createUser).not.toHaveBeenCalled();
         });
         
@@ -114,7 +120,7 @@ describe('AuthService', () => {
             };
             mockUserRepository.findByUsernameOrEmail.mockResolvedValue(existingUser);
 
-            await expect(authService.signup(signupRequest)).rejects.toThrow('Email already in use');
+            await expect(AuthService.signup(signupRequest)).rejects.toThrow('Email already in use');
             expect(mockUserRepository.createUser).not.toHaveBeenCalled();
         });
         
@@ -128,7 +134,7 @@ describe('AuthService', () => {
             mockUserRepository.findByUsernameOrEmail.mockResolvedValue(null);
             mockUserRepository.createUser.mockRejectedValue(new Error('Database error'));
             
-            await expect(authService.signup(signupRequest)).rejects.toThrow('Registration failed');
+            await expect(AuthService.signup(signupRequest)).rejects.toThrow('Registration failed');
             expect(console.error).toHaveBeenCalledWith('Registration error:', new Error('Database error'));
         });
     });
@@ -151,7 +157,7 @@ describe('AuthService', () => {
             mockUserRepository.findByUsername.mockResolvedValue(mockUser);
             (bcrypt.compare as jest.Mock).mockResolvedValue(true);
             
-            const result = await authService.login(loginRequest);
+            const result = await AuthService.login(loginRequest);
             
             expect(result).toEqual({
                 token: 'mockToken',
@@ -173,7 +179,7 @@ describe('AuthService', () => {
             
             mockUserRepository.findByUsername.mockResolvedValue(null);
             
-            await expect(authService.login(loginRequest)).rejects.toThrow('No user found with this username');
+            await expect(AuthService.login(loginRequest)).rejects.toThrow('No user found with this username');
             expect(bcrypt.compare).not.toHaveBeenCalled();
         });
         
@@ -194,7 +200,7 @@ describe('AuthService', () => {
             mockUserRepository.findByUsername.mockResolvedValue(mockUser);
             (bcrypt.compare as jest.Mock).mockResolvedValue(false);
             
-            await expect(authService.login(loginRequest)).rejects.toThrow('Incorrect password');
+            await expect(AuthService.login(loginRequest)).rejects.toThrow('Incorrect password');
             expect(jwt.sign).not.toHaveBeenCalled();
         });
         
@@ -206,7 +212,7 @@ describe('AuthService', () => {
             
             mockUserRepository.findByUsername.mockRejectedValue(new Error('Database error'));
             
-            await expect(authService.login(loginRequest)).rejects.toThrow('Login failed');
+            await expect(AuthService.login(loginRequest)).rejects.toThrow('Login failed');
             expect(console.error).toHaveBeenCalledWith('Login error:', new Error('Database error'));
         });
     });

@@ -1,5 +1,5 @@
-import { SequelizeUser as User } from '../../models/sequelize/user';
-import IUserRepository from '../userRepository';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
+import { SequelizeUser as User } from '@src/models/sequelize/user';
 import { Op } from 'sequelize';
 
 export default class SequelizeUserRepository implements IUserRepository {

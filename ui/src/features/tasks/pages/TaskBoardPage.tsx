@@ -257,7 +257,7 @@ const TaskBoardPage = () => {
       <Container
         sx={{
           width: '100%',
-          minHeight: 'calc(100vh - 64px)', // full screen height minus footer
+          minHeight: '100vh', // full screen height minus footer
           paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
           position: 'relative',
           paddingBottom: '32px',
@@ -283,7 +283,7 @@ const TaskBoardPage = () => {
               sx={{
                 width: '100%',
                 display: 'flex',
-                height: 'calc(100vh - 64px)',
+                height: '100vh',
                 overflowY: 'hidden',
                 overflowX: 'auto'
               }}

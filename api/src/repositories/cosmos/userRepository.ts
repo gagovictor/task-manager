@@ -1,6 +1,6 @@
 import { Container, CosmosClient } from '@azure/cosmos';
-import IUserRepository from './userRepository';
-import { User } from '../../models/user';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
+import { User } from '@src/models/user';
 
 export default class CosmosUserRepository implements IUserRepository {
     private container: Container;

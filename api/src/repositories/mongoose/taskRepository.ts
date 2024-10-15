@@ -1,8 +1,8 @@
 import { PaginatedResponse, TaskFilter } from "@src/models/pagination";
-import { IMongooseTask, MongooseTask } from "../../models/mongoose/task";
-import { Task } from "../../models/task";
-import TaskEncryptionService from "../../services/taskEncryptionService";
-import ITaskRepository from "../taskRepository";
+import { IMongooseTask, MongooseTask } from "@src/models/mongoose/task";
+import { Task } from "@src/models/task";
+import TaskEncryptionService from "@src/services/TaskEncryptionService";
+import ITaskRepository from "@src/abstractions/repositories/ITaskRepository";
 
 export default class MongooseTaskRepository implements ITaskRepository {
     private encryptionService: TaskEncryptionService;

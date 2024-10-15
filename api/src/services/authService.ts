@@ -1,16 +1,19 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import IUserRepository from '../repositories/userRepository';
-import { SignupRequest, AuthResponse, LoginRequest } from '../models/user';
+import { SignupRequest, AuthResponse, LoginRequest } from '@src/models/user';
 import { randomBytes, createHash } from 'crypto';
+import { IEmailNotificationService } from '@src/abstractions/services/IEmailNotificationService';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
 
 class AuthService {
   private userRepository: IUserRepository;
+  private emailNotificationService: IEmailNotificationService;
   private jwtSecret: string;
   private jwtExpirationTime: string = process.env.JWT_EXPIRATION_TIME || '1d';
   
-  constructor(userRepository: IUserRepository, jwtSecret: string) {
+  constructor(userRepository: IUserRepository, emailNotificationService: IEmailNotificationService, jwtSecret: string) {
     this.userRepository = userRepository;
+    this.emailNotificationService = emailNotificationService;
     this.jwtSecret = jwtSecret;
   }
   
@@ -87,36 +90,33 @@ class AuthService {
   
   public async recoverPassword(email: string): Promise<void> {
     try {
-        const user = await this.userRepository.findByEmail(email);
+      const user = await this.userRepository.findByEmail(email);
 
-        if (user) {
-            const resetToken = randomBytes(32).toString('hex');
-            const hashedToken = createHash('sha256').update(resetToken).digest('hex');
-            const tokenExpiration = Date.now() + 3600000; // Token valid for 1 hour
+      if (user) {
+        const resetToken = randomBytes(32).toString('hex');
+        const hashedToken = createHash('sha256').update(resetToken).digest('hex');
+        const tokenExpiration = Date.now() + (parseInt(process.env.RESET_PASSWORD_TOKEN_EXPIRATION || '') || 3600000);
 
-            await this.userRepository.updateUser(user.id, {
-                passwordResetToken: hashedToken,
-                passwordResetExpires: tokenExpiration,
-            });
+        await this.userRepository.updateUser(user.id, {
+          passwordResetToken: hashedToken,
+          passwordResetExpires: tokenExpiration,
+        });
 
-            const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+        console.log(`Password reset link: ${resetUrl}`);
 
-            const emailSubject = 'Password Reset Request';
-            const emailBody = `You requested a password reset. Please use the following link to reset your password: ${resetUrl}`;
-            // await sendEmail(user.email, emailSubject, emailBody);
-        }
+        await this.emailNotificationService.sendPasswordResetEmail(user.email, resetUrl);
+      }
 
-        // Regardless of whether the user exists, return success
+      // Regardless of whether the user exists, do not reveal this information
     } catch (error) {
-        console.error('Forgot Password error:', error);
-        // Do not throw an error to prevent revealing information
+      console.error('Recover Password error:', error);
+      throw error;
     }
-    return;
-}
+  }
   
   public async resetPassword(token: string, newPassword: string): Promise<void> {
     const hashedToken = createHash('sha256').update(token).digest('hex');
-    console.log(`token`, token, `hashedToken`, hashedToken);
     const user = await this.userRepository.findByResetToken(hashedToken, Date.now());
     if (!user) {
       throw new Error('Invalid or expired password reset token');

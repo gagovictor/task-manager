@@ -11,7 +11,7 @@ export default function SignupPage() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: 'calc(100vh - 64px)',
+                minHeight: '100vh',
                 paddingTop: 8,
                 paddingBottom: 8,
             }}

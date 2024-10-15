@@ -85,6 +85,7 @@ describe('tasksSlice', () => {
         const state = tasksReducer(initialState, action);
         expect(state.fetchStatus).toBe('failed');
         expect(state.fetchError).toBe('Failed to load tasks.');
+        expect(state.hasMore).toBe(false);
         expect(saveTasksSpy).toHaveBeenCalledTimes(0);
     });
     
@@ -318,5 +319,338 @@ describe('tasksSlice', () => {
         const newState = tasksReducer(initialStateCopy, action);
         expect(newState).not.toBe(initialStateCopy);
         expect(newState.tasks).not.toBe(initialStateCopy.tasks);
+    });
+
+
+    describe('fetchTasksAsync.fulfilled merge logic', () => {
+        let saveTasksSpy: jest.SpyInstance;
+    
+        beforeEach(() => {
+            saveTasksSpy = jest.spyOn(require('./persistTasks'), 'saveTasksToLocalStorage');
+        });
+    
+        afterEach(() => {
+            jest.clearAllMocks();
+        });
+    
+        const existingTask1: Task = {
+            id: '1',
+            userId: 'userId',
+            title: 'Existing Task 1',
+            description: '',
+            dueDate: null,
+            status: 'new',
+            createdAt: new Date().toISOString(),
+            archivedAt: null,
+            deletedAt: null,
+        };
+    
+        const existingTask2: Task = {
+            id: '2',
+            userId: 'userId',
+            title: 'Existing Task 2',
+            description: '',
+            dueDate: null,
+            status: 'in-progress',
+            createdAt: new Date().toISOString(),
+            archivedAt: null,
+            deletedAt: null,
+        };
+    
+        const updatedTask1: Task = {
+            ...existingTask1,
+            title: 'Updated Task 1',
+            status: 'completed',
+        };
+    
+        const newTask3: Task = {
+            id: '3',
+            userId: 'userId',
+            title: 'New Task 3',
+            description: '',
+            dueDate: null,
+            status: 'new',
+            createdAt: new Date().toISOString(),
+            archivedAt: null,
+            deletedAt: null,
+        };
+    
+        it('should replace tasks when page is 1', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [existingTask1, existingTask2],
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 1,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [newTask3],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([newTask3]);
+            expect(state.hasMore).toBe(false);
+            expect(saveTasksSpy).toHaveBeenCalledWith([newTask3]);
+        });
+    
+        it('should update existing tasks and append new tasks when page > 1', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [existingTask1, existingTask2],
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 2,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [updatedTask1, newTask3],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([updatedTask1, existingTask2, newTask3]);
+            expect(state.hasMore).toBe(false);
+            expect(saveTasksSpy).toHaveBeenCalledWith([updatedTask1, existingTask2, newTask3]);
+        });
+    
+        it('should append new tasks without updating when no IDs match', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [existingTask1],
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 2,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [newTask3],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([existingTask1, newTask3]);
+            expect(state.hasMore).toBe(false);
+            expect(saveTasksSpy).toHaveBeenCalledWith([existingTask1, newTask3]);
+        });
+    
+        it('should not duplicate tasks when merging', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [existingTask1],
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 2,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [existingTask1, newTask3],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([existingTask1, newTask3]);
+            expect(state.tasks.length).toBe(2);
+            expect(saveTasksSpy).toHaveBeenCalledWith([existingTask1, newTask3]);
+        });
+    
+        it('should handle empty incomingTasks gracefully', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [existingTask1],
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 2,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([existingTask1]);
+            expect(state.hasMore).toBe(false);
+            expect(saveTasksSpy).toHaveBeenCalledWith([existingTask1]);
+        });
+    
+        it('should correctly set hasMore based on the payload', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [],
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 1,
+                    limit: 1,
+                },
+                },
+                payload: {
+                items: [existingTask1],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([existingTask1]);
+            expect(state.hasMore).toBe(true); // Because items length equals limit
+            });
+        
+            it('should handle incoming tasks that are all updates to existing tasks', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [existingTask1, existingTask2],
+            };
+        
+            const updatedTask2 = {
+                ...existingTask2,
+                title: 'Updated Task 2',
+                status: 'completed',
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 2,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [updatedTask1, updatedTask2],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([updatedTask1, updatedTask2]);
+            expect(state.tasks.length).toBe(2);
+            expect(saveTasksSpy).toHaveBeenCalledWith([updatedTask1, updatedTask2]);
+        });
+    
+        it('should not mutate the original state', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [existingTask1],
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 2,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [updatedTask1],
+                },
+            };
+        
+            const prevState = { ...initialTasksState };
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state).not.toBe(initialTasksState);
+            expect(state.tasks).not.toBe(initialTasksState.tasks);
+            expect(state.tasks).toEqual([updatedTask1]);
+            expect(saveTasksSpy).toHaveBeenCalledWith([updatedTask1]);
+        });
+    
+        it('should correctly handle tasks with identical IDs but different content', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [existingTask1],
+            };
+        
+            const conflictingTask = {
+                id: '1',
+                userId: 'userId',
+                title: 'Conflicting Task',
+                description: 'Different content',
+                dueDate: null,
+                status: 'in-progress',
+                createdAt: new Date().toISOString(),
+                archivedAt: null,
+                deletedAt: null,
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 2,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [conflictingTask],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([conflictingTask]);
+            expect(saveTasksSpy).toHaveBeenCalledWith([conflictingTask]);
+        });
+    
+        it('should correctly merge when initial state is empty', () => {
+            const initialTasksState = {
+                ...initialState,
+                tasks: [],
+            };
+        
+            const action = {
+                type: fetchTasksAsync.fulfilled.type,
+                meta: {
+                arg: {
+                    page: 1,
+                    limit: 20,
+                },
+                },
+                payload: {
+                items: [existingTask1, existingTask2],
+                },
+            };
+        
+            const state = tasksReducer(initialTasksState, action);
+        
+            expect(state.tasks).toEqual([existingTask1, existingTask2]);
+            expect(state.tasks.length).toBe(2);
+            expect(saveTasksSpy).toHaveBeenCalledWith([existingTask1, existingTask2]);
+        });
     });
 });

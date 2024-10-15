@@ -1,19 +1,19 @@
 import { Request, Response } from 'express';
-import AuthService from '../services/authService';
+import AuthService from '../services/AuthService';
 import { LoginRequestBody, SignupRequestBody } from '../models/user';
 
 
 export default class AuthController {
-  private authService: AuthService;
+  private AuthService: AuthService;
   
-  constructor(authService: AuthService) {
-    this.authService = authService;
+  constructor(AuthService: AuthService) {
+    this.AuthService = AuthService;
   }
   
   public signup = async (req: Request<{}, {}, SignupRequestBody>, res: Response): Promise<void> => {
     try {
       // Call the signup service with the request body
-      const result = await this.authService.signup(req.body);
+      const result = await this.AuthService.signup(req.body);
       // Send a 201 response with the result
       res.status(201).json(result);
     } catch (error) {
@@ -26,7 +26,7 @@ export default class AuthController {
   public login = async (req: Request<{}, {}, LoginRequestBody>, res: Response): Promise<void> => {
     try {
       // Call the login service with the request body
-      const result = await this.authService.login(req.body);
+      const result = await this.AuthService.login(req.body);
       // Send a 200 response with the result
       res.json(result);
     } catch (error) {
@@ -39,7 +39,7 @@ export default class AuthController {
   public recoverPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
-      await this.authService.recoverPassword(email);
+      await this.AuthService.recoverPassword(email);
       res.status(200).json({ message: 'Password reset email sent' });
     } catch (error: any) {
       console.error('Forgot Password error:', error);
@@ -50,7 +50,7 @@ export default class AuthController {
   public resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { token, password } = req.body;
-      await this.authService.resetPassword(token, password);
+      await this.AuthService.resetPassword(token, password);
       res.status(200).json({ message: 'Password reset successfully' });
     } catch (error: any) {
       console.error('Reset Password error:', error);

@@ -1,9 +1,9 @@
 import { Container, CosmosClient, SqlQuerySpec } from '@azure/cosmos';
-import ITaskRepository from '../taskRepository';
 import { Task } from '../../models/task';
-import TaskEncryptionService from '../../services/taskEncryptionService';
-import { ICosmosTask } from '../../models/cosmos/task';
 import { PaginatedResponse, TaskFilter } from '@src/models/pagination';
+import ITaskRepository from '@src/abstractions/repositories/ITaskRepository';
+import { ICosmosTask } from '@src/models/cosmos/task';
+import TaskEncryptionService from '@src/services/TaskEncryptionService';
 
 export default class CosmosTaskRepository implements ITaskRepository {
     private container: Container;

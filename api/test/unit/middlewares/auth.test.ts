@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import authMiddleware, { AuthenticatedRequest } from '../../../src/middlewares/auth';
-import IUserRepository from '../../../src/repositories/userRepository';
-import { User } from '../../../src/models/user';
+import authMiddleware, { AuthenticatedRequest } from '@src/middlewares/auth';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
+import { User } from '@src/models/user';
 
 describe('authMiddleware', () => {
     let mockUserRepository: jest.Mocked<IUserRepository>;

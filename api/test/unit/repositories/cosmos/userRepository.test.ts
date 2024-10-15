@@ -1,6 +1,6 @@
 import { Container, CosmosClient, SqlQuerySpec } from '@azure/cosmos';
 import { User } from '@src/models/user';
-import CosmosUserRepository from '@src/repositories/cosmos/userRepository';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
 
 jest.mock('@azure/cosmos');
 

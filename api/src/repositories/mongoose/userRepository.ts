@@ -1,6 +1,6 @@
-import IUserRepository from '../userRepository';
-import { MongooseUser } from '../../models/mongoose/user';
-import { User } from '../../models/user';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
+import { MongooseUser } from '@src/models/mongoose/user';
+import { User } from '@src/models/user';
 import { v4 as uuidv4 } from 'uuid';
 
 export default class MongooseUserRepository implements IUserRepository {

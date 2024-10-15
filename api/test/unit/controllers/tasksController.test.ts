@@ -2,7 +2,7 @@ import { Response } from 'express';
 import httpMocks from 'node-mocks-http';
 import TaskController from '@src/controllers/taskController';
 import { AuthenticatedRequest } from '@src/middlewares/auth';
-import TaskService from '@src/services/taskService';
+import TaskService from '@src/services/TaskService';
 import { Task } from '@src/models/task';
 import { PaginatedResponse } from '@src/models/pagination';
 

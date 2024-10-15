@@ -4,7 +4,7 @@ import LoginForm from './LoginForm';
 import userEvent from "@testing-library/user-event";
 import { initialState, setupStore } from '../../../redux/store';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { LoginRequest, LoginResponse, SignupRequest } from '../services/AuthService';
+import { LoginRequest, LoginResponse } from '../services/AuthService';
 import { User } from '../models/user';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/lib/node';
