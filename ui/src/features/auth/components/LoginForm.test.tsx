@@ -16,6 +16,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('LoginForm component', () => {
+    const server = setupServer();
+
+    beforeAll(() => server.listen());
+    afterEach(() => server.resetHandlers());
+    afterAll(() => server.close());
+
     const renderWithProviders = (store: any) => render(
         <Provider store={store}>
             <Router>
@@ -31,11 +37,11 @@ describe('LoginForm component', () => {
     };
     
     const submitForm = async (request: LoginRequest) => {
-        const username = await screen.getByTestId('input-username');
+        const username = await screen.findByTestId('input-username');
         await userEvent.type(username, request.username);
-        const password = await screen.getByTestId('input-password');
+        const password = await screen.findByTestId('input-password');
         await userEvent.type(password, request.password);
-        await userEvent.click(await screen.getByTestId('submit'));
+        await userEvent.click(await screen.findByTestId('submit'));
     };
     
     it('should render the login form', async () => {
@@ -50,7 +56,7 @@ describe('LoginForm component', () => {
         });
     });
 
-    it('should show loading state when login is in progress', async() => {
+    it('should show loading state when login is in progress', async () => {
         const store = setupStore({
             ...initialState,
             auth: {
@@ -61,7 +67,7 @@ describe('LoginForm component', () => {
         
         renderWithProviders(store);
         
-        expect(await screen.getByText('Logging in...')).toBeInTheDocument();
+        expect(await screen.findByText('Logging in...')).toBeInTheDocument();
     });
     
     it('should redirect the user to /tasks on successful login', async () => {
@@ -69,9 +75,11 @@ describe('LoginForm component', () => {
             token: 'jwt',
             user: mockUser
         };
-        const handlers = [
+
+        // Define handlers for this test
+        server.use(
             http.post(`${process.env.REACT_APP_API_BASE_URL}/login`, () => {
-                return HttpResponse.json(response)
+                return HttpResponse.json(response);
             }),
             http.options(`${process.env.REACT_APP_API_BASE_URL}/login`, () => {
                 return new Response(null, {
@@ -79,11 +87,9 @@ describe('LoginForm component', () => {
                     headers: {
                         Allow: 'GET,HEAD,POST',
                     },
-                })
+                });
             })
-        ];
-        const server = setupServer(...handlers);
-        server.listen();
+        );
         
         const store = setupStore({
             ...initialState,
@@ -104,16 +110,16 @@ describe('LoginForm component', () => {
         await waitFor(() => {
             expect(mockNavigate).toHaveBeenCalledWith('/tasks');
         });
-        server.dispose();
     });
     
     it('should display error message on login failure', async () => {
-        const handlers = [
+        // Define handlers for this test
+        server.use(
             http.post(`${process.env.REACT_APP_API_BASE_URL}/login`, () => {
                 return HttpResponse.json(
                     { message: 'Login failed.' },
                     { status: 400 }
-                )
+                );
             }),
             http.options(`${process.env.REACT_APP_API_BASE_URL}/login`, () => {
                 return new Response(null, {
@@ -121,11 +127,10 @@ describe('LoginForm component', () => {
                     headers: {
                         Allow: 'GET,HEAD,POST',
                     },
-                })
+                });
             })
-        ];
-        const server = setupServer(...handlers);
-        server.listen();
+        );
+
         const store = setupStore({
             ...initialState,
             auth: {
@@ -146,13 +151,15 @@ describe('LoginForm component', () => {
             expect(screen.getByText(/Login failed. Please check your username and password./i)).toBeInTheDocument();
         });
         
-        await act(() => userEvent.click(screen.getByLabelText('Close')));
+        await act(async () => {
+            const closeButton = screen.getByLabelText('Close');
+            userEvent.click(closeButton);
+        });
         
         await waitFor(() => {
             expect(screen.queryByTestId('snackbar')).toBeNull();
             expect(screen.queryByTestId('alert')).toBeNull();
             expect(screen.queryByText(/Login failed. Please check your username and password./i)).toBeNull();
         });
-        server.dispose();
     });
 });
