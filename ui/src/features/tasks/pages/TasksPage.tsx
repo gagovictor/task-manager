@@ -5,7 +5,7 @@
   import Box from '@mui/material/Box';
   import Masonry from '@mui/lab/Masonry';
   import TaskCard from '../components/TaskCard';
-  import { Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, IconButton, InputAdornment, Collapse } from '@mui/material';
+  import { Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, IconButton, InputAdornment, Collapse, Grow } from '@mui/material';
   import AddIcon from '@mui/icons-material/Add';
   import { Task, taskStatuses } from '../models/task';
   import ClearIcon from '@mui/icons-material/Clear';
@@ -244,16 +244,20 @@ import { useAutoRefresh } from '../../shared/hooks/useAutoRefresh';
               sx={{ mb: 4 }}
             >
               {filteredTasks.length > 0 && (
-                filteredTasks.map((task: Task) => (
-                  <Box
-                    data-testid="task-card"
-                    key={task.id}>
-                    <TaskCard
-                      task={task}
-                      onEdit={() => handleEditTask(task)}
-                      showSnackbar={showSnackbar}
-                    />
-                  </Box>
+                filteredTasks.map((task: Task, index: number) => (
+                  <Grow
+                    key={task.id}
+                    in={true}
+                    timeout={(index + 1) * 300} // Staggered delay for animation
+                  >
+                    <Box data-testid="task-card">
+                      <TaskCard
+                        task={task}
+                        onEdit={() => handleEditTask(task)}
+                        showSnackbar={showSnackbar}
+                      />
+                    </Box>
+                  </Grow>
                 ))
               )}
             </Masonry>
