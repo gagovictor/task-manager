@@ -15,6 +15,7 @@
   import { FetchTasksParams } from '../models/api';
   import useInfiniteScroll from '../../shared/hooks/useInfiniteScroll';
   import PullToRefresh from '../../shared/components/PullToRefresh';
+import { useAutoRefresh } from '../../shared/hooks/useAutoRefresh';
 
   const TasksPage = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -56,10 +57,18 @@
       dispatch(fetchTasksAsync(fetchParams));
     }, [fetchParams]);
 
+
     const fetchTasks = async () => {
       await dispatch(fetchTasksAsync(fetchParams));
     }
 
+    useAutoRefresh({
+      onRefresh: fetchTasks,
+      interval: 60000,
+      immediate: false,
+      onlyWhenFocused: true
+    });
+    
     const handleCreateTask = () => {
       setEditMode(false);
       setModalOpen(true);

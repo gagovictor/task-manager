@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import TaskModal from '../components/TaskModal';
 import { FetchTasksParams } from '../models/api';
 import PullToRefresh from '../../shared/components/PullToRefresh';
+import { useAutoRefresh } from '../../shared/hooks/useAutoRefresh';
 
 export default function ArchivedTasksPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -39,6 +40,13 @@ export default function ArchivedTasksPage() {
     await dispatch(fetchTasksAsync(fetchParams));
   }
 
+  useAutoRefresh({
+    onRefresh: fetchTasks,
+    interval: 60000,
+    immediate: false,
+    onlyWhenFocused: true
+  });
+  
   const handleCreateTask = () => {
     setEditMode(false);
     setModalOpen(true);
