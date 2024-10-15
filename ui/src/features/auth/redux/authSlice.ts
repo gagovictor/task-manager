@@ -90,9 +90,9 @@ export const signupUser = createAsyncThunk<SignupResponse, SignupRequest>(
 
 export const recoverPassword = createAsyncThunk<RecoverPasswordResponse, RecoverPasswordRequest>(
   'auth/sendPasswordResetEmail',
-  async (recovrPasswordRequest, { rejectWithValue }) => {
+  async (recoverPasswordRequest, { rejectWithValue }) => {
     try {
-      await recoverPasswordAsync(recovrPasswordRequest);
+      return await recoverPasswordAsync(recoverPasswordRequest);
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
     }
@@ -104,7 +104,7 @@ export const resetPassword = createAsyncThunk<ResetPasswordResponse, ResetPasswo
   async ( resetPasswordRequest, { rejectWithValue }) => {
     try {
       const response = await resetPasswordAsync(resetPasswordRequest);
-      return response; // Ensure resetPasswordAsync returns ResetPasswordResponse
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
     }

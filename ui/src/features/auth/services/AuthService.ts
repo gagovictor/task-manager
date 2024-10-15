@@ -43,7 +43,9 @@ export interface RecoverPasswordRequest {
   email: string;
 }
 
-export interface RecoverPasswordResponse {} // TODO required?
+export interface RecoverPasswordResponse {
+  message: string;
+}
 
 export const recoverPassword = async (request: RecoverPasswordRequest): Promise<RecoverPasswordResponse> => {
   const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/recover-password`, request);
@@ -55,7 +57,9 @@ export interface ResetPasswordRequest {
   password: string;
 }
 
-export interface ResetPasswordResponse {} // TODO required?
+export interface ResetPasswordResponse {
+  message: string;
+}
 
 export const resetPassword = async (request: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
   const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/reset-password`, request);
