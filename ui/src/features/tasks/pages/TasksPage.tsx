@@ -5,7 +5,22 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { Alert, Fab, Container, Snackbar, Button, TextField, MenuItem, Select, FormControl, InputLabel, IconButton, InputAdornment, Collapse } from '@mui/material';
+import {
+  Alert,
+  Fab,
+  Container,
+  Snackbar,
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  IconButton,
+  InputAdornment,
+  Collapse,
+  Grow,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { Task, taskStatuses } from '../models/task';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -15,18 +30,24 @@ import CloseIcon from '@mui/icons-material/Close';
 import { FetchTasksParams } from '../models/api';
 import useInfiniteScroll from '../../shared/hooks/useInfiniteScroll';
 import PullToRefresh from '../../shared/components/PullToRefresh';
-import useAppFocus from '../../shared/hooks/useAppFocus';
+import { useAutoRefresh } from '../../shared/hooks/useAutoRefresh';
 
 const TasksPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { tasks, fetchStatus, fetchError, hasMore } = useSelector((state: RootState) => state.tasks);
+  const { tasks, fetchStatus, fetchError, hasMore } = useSelector(
+    (state: RootState) => state.tasks
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task>();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
-  const [snackbarUndoAction, setSnackbarUndoAction] = useState<(() => void) | undefined>(undefined);
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>(
+    'success'
+  );
+  const [snackbarUndoAction, setSnackbarUndoAction] = useState<
+    (() => void) | undefined
+  >(undefined);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterText, setFilterText] = useState<string>('');
   const [filtersVisible, setFiltersVisible] = useState(false);
@@ -34,8 +55,8 @@ const TasksPage = () => {
     page: 1,
     limit: 50,
     filters: {
-      archived: false
-    }
+      archived: false,
+    },
   });
 
   const loadMore = useCallback(() => {
@@ -55,18 +76,23 @@ const TasksPage = () => {
 
   const fetchTasks = async () => {
     await dispatch(fetchTasksAsync(fetchParams));
-  }
-  
-  useEffect(() => {
-    dispatch(fetchTasks);
-  }, [fetchParams]);
+  };
 
-  useAppFocus(fetchTasks, 30000);
+  useEffect(() => {
+    dispatch(fetchTasksAsync(fetchParams));
+  }, [fetchParams, dispatch]);
+
+  useAutoRefresh({
+    onRefresh: fetchTasks,
+    interval: 60000,
+    immediate: false,
+    onlyWhenFocused: true,
+  });
 
   const handleCreateTask = () => {
     setEditMode(false);
     setModalOpen(true);
-  }
+  };
 
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
@@ -77,11 +103,15 @@ const TasksPage = () => {
   const onCloseTaskModal = () => {
     setEditMode(false);
     setModalOpen(false);
-  }
+  };
 
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
-  const showSnackbar = (message: string, severity: 'success' | 'error', undoAction?: () => void) => {
+  const showSnackbar = (
+    message: string,
+    severity: 'success' | 'error',
+    undoAction?: () => void
+  ) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
@@ -98,12 +128,16 @@ const TasksPage = () => {
 
   const filteredTasks = tasks
     .filter((task: Task) => {
-      const matchesStatus = filterStatus ? task.status === filterStatus : task.status !== 'removed' && task.status !== 'completed';
-      const matchesText = filterText ? 
-        task.title.toLowerCase().includes(lowerCaseFilterText) || 
-        task.description.toLowerCase().includes(lowerCaseFilterText) 
+      const matchesStatus = filterStatus
+        ? task.status === filterStatus
+        : task.status !== 'removed' && task.status !== 'completed';
+      const matchesText = filterText
+        ? task.title.toLowerCase().includes(lowerCaseFilterText) ||
+          task.description.toLowerCase().includes(lowerCaseFilterText)
         : true;
-      return !task.archivedAt && !task.deletedAt && matchesStatus && matchesText;
+      return (
+        !task.archivedAt && !task.deletedAt && matchesStatus && matchesText
+      );
     })
     .sort((a, b) => {
       const dateA = new Date(a.createdAt);
@@ -123,7 +157,7 @@ const TasksPage = () => {
       <Container
         sx={{
           width: '100%',
-          minHeight: '100vh',
+          minHeight: 'calc(100vh - 64px)',
           marginTop: { xs: '56px', md: '64px' },
           position: 'relative',
           py: '32px',
@@ -141,7 +175,8 @@ const TasksPage = () => {
             {filtersVisible ? 'Hide Filters' : 'Show Filters'}
           </Button>
 
-          <Collapse in={filtersVisible || window.innerWidth >= 600}> {/* Show filters based on visibility */}
+          <Collapse in={filtersVisible || window.innerWidth >= 600}>
+            {/* Show filters based on visibility */}
             <Box
               sx={{
                 display: 'flex',
@@ -149,7 +184,7 @@ const TasksPage = () => {
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
                 gap: 2,
-                flexDirection: { sm: 'column', md: 'row' }
+                flexDirection: { sm: 'column', md: 'row' },
               }}
             >
               {/* Status Filter */}
@@ -160,23 +195,26 @@ const TasksPage = () => {
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value as string)}
                     label="Status"
-                    endAdornment={filterStatus && (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="clear status filter"
-                          edge="end"
-                          sx={{ marginRight: '8px' }}
-                          onClick={handleClearStatus}
-                        >
-                          <ClearIcon fontSize="small" />
-                        </IconButton>
-                      </InputAdornment>
-                    )}
+                    endAdornment={
+                      filterStatus && (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="clear status filter"
+                            edge="end"
+                            sx={{ marginRight: '8px' }}
+                            onClick={handleClearStatus}
+                          >
+                            <ClearIcon fontSize="small" />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }
                   >
                     <MenuItem value="">All</MenuItem>
                     {taskStatuses.map((statusOption) => (
                       <MenuItem key={statusOption} value={statusOption}>
-                        {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+                        {statusOption.charAt(0).toUpperCase() +
+                          statusOption.slice(1)}
                       </MenuItem>
                     ))}
                   </Select>
@@ -193,17 +231,18 @@ const TasksPage = () => {
                   value={filterText}
                   onChange={(e) => setFilterText(e.target.value)}
                   InputProps={{
-                    endAdornment: filterText && (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="clear search"
-                          edge="end"
-                          onClick={handleClearSearch}
-                        >
-                          <ClearIcon fontSize="small" />
-                        </IconButton>
-                      </InputAdornment>
-                    )
+                    endAdornment:
+                      filterText && (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="clear search"
+                            edge="end"
+                            onClick={handleClearSearch}
+                          >
+                            <ClearIcon fontSize="small" />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
                   }}
                 />
               </Box>
@@ -212,24 +251,15 @@ const TasksPage = () => {
         </Box>
 
         {fetchStatus === 'failed' && (
-          <Alert
-            severity="error"
-            data-testid="fetch-error-alert"
-            sx={{ mb: 4 }}
-            action={
-              <Button color="inherit" onClick={fetchTasks}>
-                Retry
-              </Button>
-            }
-          >
+          <Alert severity="error" data-testid="fetch-error-alert" sx={{ mb: 4 }}>
             {fetchError}
-            { filteredTasks.length > 0 && (
+            {filteredTasks.length > 0 && (
               <>Tasks shown may not represent their current state. </>
             )}
           </Alert>
         )}
 
-        {(fetchStatus === 'succeeded' && filteredTasks.length === 0) && (
+        {fetchStatus === 'succeeded' && filteredTasks.length === 0 && (
           <Alert severity="info" sx={{ mb: 4, flex: 1 }}>
             No tasks match the filter criteria.
           </Alert>
@@ -242,19 +272,22 @@ const TasksPage = () => {
             data-testid="masonry"
             sx={{ mb: 4 }}
           >
-            {filteredTasks.length > 0 && (
-              filteredTasks.map((task: Task) => (
-                <Box
-                  data-testid="task-card"
-                  key={task.id}>
-                  <TaskCard
-                    task={task}
-                    onEdit={() => handleEditTask(task)}
-                    showSnackbar={showSnackbar}
-                  />
-                </Box>
-              ))
-            )}
+            {filteredTasks.length > 0 &&
+              filteredTasks.map((task: Task, index: number) => (
+                <Grow
+                  key={task.id}
+                  in={true}
+                  timeout={(index + 1) * 300} // Staggered delay for animation
+                >
+                  <Box data-testid="task-card">
+                    <TaskCard
+                      task={task}
+                      onEdit={() => handleEditTask(task)}
+                      showSnackbar={showSnackbar}
+                    />
+                  </Box>
+                </Grow>
+              ))}
           </Masonry>
         )}
 
@@ -292,7 +325,8 @@ const TasksPage = () => {
                   Undo
                 </Button>
               )
-            }>
+            }
+          >
             {snackbarMessage}
           </Alert>
         </Snackbar>
