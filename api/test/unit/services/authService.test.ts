@@ -13,8 +13,10 @@ describe('AuthService', () => {
         mockUserRepository = {
             findByUsernameOrEmail: jest.fn<Promise<User | null>, [string, string]>(),
             findByUsername: jest.fn<Promise<User | null>, [string]>(),
-            createUser: jest.fn<Promise<User>, [Partial<User>]>(),
+            findByEmail: jest.fn<Promise<User>, [string]>(),
+            findByResetToken: jest.fn<Promise<User>, [string, number]>(),
             findById: jest.fn<Promise<User>, [string]>(),
+            createUser: jest.fn<Promise<User>, [Partial<User>]>(),
             updateUser: jest.fn<Promise<User>, [string, Partial<User>]>(),
         };
         
@@ -43,9 +45,16 @@ describe('AuthService', () => {
                 password: 'testpass',
                 email: 'test@test.com',
             };
-            const mockUser = { id: '1', username: 'testuser', email: 'test@test.com', password: 'hashedPassword' };
+            const mockUser = {
+                id: '1',
+                username: 'testuser',
+                email: 'test@test.com',
+                password: 'hashedPassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
+            };
             
-            mockUserRepository.findByUsernameOrEmail.mockResolvedValue(null); // No existing user
+            mockUserRepository.findByUsernameOrEmail.mockResolvedValue(null);
             mockUserRepository.createUser.mockResolvedValue(mockUser);
 
             const result = await authService.signup(signupRequest);
@@ -74,7 +83,14 @@ describe('AuthService', () => {
                 email: 'test@test.com',
             };
             
-            const existingUser = { id: '1', username: 'testuser', email: 'existing@test.com', password: 'hashedPassword' };
+            const existingUser = {
+                id: '1',
+                username: 'testuser',
+                email: 'existing@test.com',
+                password: 'hashedPassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
+            };
             mockUserRepository.findByUsernameOrEmail.mockResolvedValue(existingUser);
 
             await expect(authService.signup(signupRequest)).rejects.toThrow('Username already exists');
@@ -88,7 +104,14 @@ describe('AuthService', () => {
                 email: 'test@test.com',
             };
             
-            const existingUser = { id: '1', username: 'otheruser', email: 'test@test.com', password: 'hashedPassword' };
+            const existingUser = {
+                id: '1',
+                username: 'otheruser',
+                email: 'test@test.com',
+                password: 'hashedPassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
+            };
             mockUserRepository.findByUsernameOrEmail.mockResolvedValue(existingUser);
 
             await expect(authService.signup(signupRequest)).rejects.toThrow('Email already in use');
@@ -116,7 +139,14 @@ describe('AuthService', () => {
                 username: 'testuser',
                 password: 'testpass',
             };
-            const mockUser = { id: '1', username: 'testuser', email: 'test@test.com', password: 'hashedPassword' };
+            const mockUser = {
+                id: '1',
+                username: 'testuser',
+                email: 'test@test.com',
+                password: 'hashedPassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
+            };
             
             mockUserRepository.findByUsername.mockResolvedValue(mockUser);
             (bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -152,7 +182,14 @@ describe('AuthService', () => {
                 username: 'testuser',
                 password: 'wrongpass',
             };
-            const mockUser = { id: '1', username: 'testuser', email: 'test@test.com', password: 'hashedPassword' };
+            const mockUser = {
+                id: '1',
+                username: 'testuser',
+                email: 'test@test.com',
+                password: 'hashedPassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
+            };
             
             mockUserRepository.findByUsername.mockResolvedValue(mockUser);
             (bcrypt.compare as jest.Mock).mockResolvedValue(false);

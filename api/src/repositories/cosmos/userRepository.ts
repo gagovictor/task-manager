@@ -47,6 +47,28 @@ export default class CosmosUserRepository implements IUserRepository {
         }
     }
     
+    async findByEmail(email: string): Promise<User | null> {
+        try {
+            const query = `SELECT * FROM c WHERE c.email = @email`;
+            const parameters = [{ name: '@email', value: email }];
+            const { resources: users } = await this.container.items.query<User>({ query, parameters }).fetchAll();
+            return users.length > 0 ? users[0] : null;
+        } catch (error: any) {
+            console.error('Error finding user by email:', error);
+            throw new Error('Failed to find user by email');
+        }
+    }
+    
+    async findByResetToken(token: string, currentTime: number): Promise<User | null> {
+        const query = `SELECT * FROM c WHERE c.passwordResetToken = @token AND c.passwordResetExpires > @currentTime`;
+        const parameters = [
+            { name: '@token', value: token },
+            { name: '@currentTime', value: currentTime },
+        ];
+        const { resources: users } = await this.container.items.query<User>({ query, parameters }).fetchAll();
+        return users.length > 0 ? users[0] : null;
+    }
+    
     async findById(userId: string): Promise<User | null> {
         try {
             const { resource: user } = await this.container.item(userId).read<User>();

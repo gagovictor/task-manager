@@ -40,6 +40,8 @@ describe('CosmosUserRepository', () => {
                 username: 'testuser',
                 email: 'test@example.com',
                 password: 'hashedpassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
             };
             const queryResult = { resources: [mockUser] };
             const querySpec: SqlQuerySpec = {
@@ -100,6 +102,8 @@ describe('CosmosUserRepository', () => {
                 username: userData.username!,
                 email: userData.email!,
                 password: userData.password!,
+                passwordResetToken: userData.passwordResetToken!,
+                passwordResetExpires: userData.passwordResetExpires!,
             };
             (containerMock.items.create as jest.Mock).mockResolvedValue({ resource: createdUser });
             
@@ -147,6 +151,8 @@ describe('CosmosUserRepository', () => {
                 username: 'testuser',
                 email: 'test@example.com',
                 password: 'hashedpassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
             };
             const queryResult = { resources: [mockUser] };
             const querySpec: SqlQuerySpec = {
@@ -194,6 +200,63 @@ describe('CosmosUserRepository', () => {
         });
     });
     
+    describe('findByEmail', () => {
+        it('should return a user when found by username', async () => {
+            // Arrange
+            const mockUser: User = {
+                id: '1',
+                username: 'testuser',
+                email: 'test@example.com',
+                password: 'hashedpassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
+            };
+            const queryResult = { resources: [mockUser] };
+            const querySpec: SqlQuerySpec = {
+                query: expect.any(String),
+                parameters: expect.any(Array),
+            };
+            
+            (containerMock.items.query as jest.Mock).mockReturnValue({
+                fetchAll: jest.fn().mockResolvedValue(queryResult),
+            } as any);
+            
+            // Act
+            const result = await userRepository.findByEmail('test@example.com');
+            
+            // Assert
+            expect(containerMock.items.query).toHaveBeenCalledWith(querySpec);
+            expect(result).toEqual(mockUser);
+        });
+        
+        it('should return null when user is not found', async () => {
+            // Arrange
+            const queryResult = { resources: [] };
+            (containerMock.items.query as jest.Mock).mockReturnValue({
+                fetchAll: jest.fn().mockResolvedValue(queryResult),
+            } as any);
+            
+            // Act
+            const result = await userRepository.findByEmail('test@example.com');
+            
+            // Assert
+            expect(result).toBeNull();
+        });
+        
+        it('should throw an error when the query fails', async () => {
+            // Arrange
+            const error = new Error('Query failed');
+            (containerMock.items.query as jest.Mock).mockReturnValue({
+                fetchAll: jest.fn().mockRejectedValue(error),
+            } as any);
+            
+            // Act & Assert
+            await expect(userRepository.findByEmail('test@example.com')).rejects.toThrow(
+                'Failed to find user by email'
+            );
+        });
+    });
+    
     describe('findById', () => {
         it('should return a user when found by ID', async () => {
             // Arrange
@@ -202,6 +265,8 @@ describe('CosmosUserRepository', () => {
                 username: 'testuser',
                 email: 'test@example.com',
                 password: 'hashedpassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
             };
             containerMock.item.mockReturnValue({
                 read: jest.fn().mockResolvedValue({ resource: mockUser }),
@@ -249,6 +314,8 @@ describe('CosmosUserRepository', () => {
                 username: 'testuser',
                 email: 'test@example.com',
                 password: 'oldpassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
             };
             const updates: Partial<User> = {
                 password: 'newpassword',
@@ -294,6 +361,8 @@ describe('CosmosUserRepository', () => {
                 username: 'testuser',
                 email: 'test@example.com',
                 password: 'oldpassword',
+                passwordResetToken: null,
+                passwordResetExpires: null,
             };
             const updates: Partial<User> = {
                 password: 'newpassword',

@@ -21,6 +21,17 @@ export default class MongooseUserRepository implements IUserRepository {
         return await MongooseUser.findOne({ username }).exec() as User;
     }
     
+    async findByEmail(email: string): Promise<User | null> {
+        return await MongooseUser.findOne({ email }).exec() as User;
+    }
+    
+    async findByResetToken(token: string, currentTime: number): Promise<User | null> {
+        return await MongooseUser.findOne({
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: currentTime },
+        }).exec() as User;
+    }
+    
     async findById(userId: string): Promise<User | null> {
         return await MongooseUser.findById(userId).exec() as User;
     }

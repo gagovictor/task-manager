@@ -131,15 +131,64 @@ describe('MongooseUserRepository', () => {
         
         it('should handle exceptions during user retrieval', async () => {
             // Arrange
-            const username = 'testuser';
-            const error = new Error('Failed to fetch tasks');
+            const error = new Error('Failed to find user by username');
             
             (MongooseUser.findOne as jest.Mock).mockReturnValue({
                 exec: jest.fn().mockRejectedValue(error),
             });
             
             // Act & Assert
-            await expect(userRepository.findByUsername(username)).rejects.toThrow('Failed to fetch tasks');
+            await expect(userRepository.findByUsername('test@example.com')).rejects.toThrow(
+                'Failed to find user by username'
+            );
+        });
+    });
+    
+    describe('findByEmail', () => {
+        it('should find a user by email', async () => {
+            // Arrange
+            const email = 'test@example.com';
+            const user = { id: '1', email };
+            
+            (MongooseUser.findOne as jest.Mock).mockReturnValue({
+                exec: jest.fn().mockResolvedValue(user),
+            });
+            
+            // Act
+            const result = await userRepository.findByEmail(email);
+            
+            // Assert
+            expect(MongooseUser.findOne).toHaveBeenCalledWith({ email });
+            expect(result).toEqual(user);
+        });
+        
+        it('should return null when user is not found', async () => {
+            // Arrange
+            const email = 'test@example.com';
+            
+            (MongooseUser.findOne as jest.Mock).mockReturnValue({
+                exec: jest.fn().mockResolvedValue(null),
+            });
+            
+            // Act
+            const result = await userRepository.findByEmail(email);
+            
+            // Assert
+            expect(result).toBeNull();
+        });
+        
+        it('should handle exceptions during user retrieval', async () => {
+            // Arrange
+            const error = new Error('Failed to find user by email');
+            
+            (MongooseUser.findOne as jest.Mock).mockReturnValue({
+                exec: jest.fn().mockRejectedValue(error),
+            });
+            
+            // Act & Assert
+            await expect(userRepository.findByEmail('test@example.com')).rejects.toThrow(
+                'Failed to find user by email'
+            );
         });
     });
     
@@ -179,14 +228,14 @@ describe('MongooseUserRepository', () => {
         it('should handle exceptions during user retrieval by ID', async () => {
             // Arrange
             const userId = '1';
-            const error = new Error('Failed to fetch tasks');
+            const error = new Error('Failed to find user by ID');
             
             (MongooseUser.findById as jest.Mock).mockReturnValue({
                 exec: jest.fn().mockRejectedValue(error),
             });
             
             // Act & Assert
-            await expect(userRepository.findById(userId)).rejects.toThrow('Failed to fetch tasks');
+            await expect(userRepository.findById(userId)).rejects.toThrow('Failed to find user by ID');
         });
     });
     

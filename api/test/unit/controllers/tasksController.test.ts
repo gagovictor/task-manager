@@ -16,7 +16,9 @@ describe('TaskController', () => {
         id: 'testuser23',
         username: 'testuser',
         email: 'testuser@domain.com',
-        password: ''
+        password: '',
+        passwordResetToken: null,
+        passwordResetExpires: null,
     };
     
     beforeEach(() => {

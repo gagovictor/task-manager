@@ -19,6 +19,17 @@ export default class SequelizeUserRepository implements IUserRepository {
         return User.findOne({ where: { username } });
     }
     
+    async findByEmail(email: string): Promise<User | null> {
+        return User.findOne({ where: { email } });
+    }
+    
+    async findByResetToken(token: string, currentTime: number): Promise<User | null> {
+        return await User.findOne({ where: {
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: currentTime },
+        }});
+    }
+
     async findById(userId: string): Promise<User | null> {
         return User.findByPk(userId);
     }

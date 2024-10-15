@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import IUserRepository from '../repositories/userRepository';
 import { SignupRequest, AuthResponse, LoginRequest } from '../models/user';
+import { randomBytes, createHash } from 'crypto';
 
 class AuthService {
   private userRepository: IUserRepository;
@@ -82,6 +83,51 @@ class AuthService {
       console.error('Login error:', error);
       throw new Error('Login failed');
     }
+  }
+  
+  public async recoverPassword(email: string): Promise<void> {
+    try {
+        const user = await this.userRepository.findByEmail(email);
+
+        if (user) {
+            const resetToken = randomBytes(32).toString('hex');
+            const hashedToken = createHash('sha256').update(resetToken).digest('hex');
+            const tokenExpiration = Date.now() + 3600000; // Token valid for 1 hour
+
+            await this.userRepository.updateUser(user.id, {
+                passwordResetToken: hashedToken,
+                passwordResetExpires: tokenExpiration,
+            });
+
+            const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+            const emailSubject = 'Password Reset Request';
+            const emailBody = `You requested a password reset. Please use the following link to reset your password: ${resetUrl}`;
+            // await sendEmail(user.email, emailSubject, emailBody);
+        }
+
+        // Regardless of whether the user exists, return success
+    } catch (error) {
+        console.error('Forgot Password error:', error);
+        // Do not throw an error to prevent revealing information
+    }
+    return;
+}
+  
+  public async resetPassword(token: string, newPassword: string): Promise<void> {
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+    console.log(`token`, token, `hashedToken`, hashedToken);
+    const user = await this.userRepository.findByResetToken(hashedToken, Date.now());
+    if (!user) {
+      throw new Error('Invalid or expired password reset token');
+    }
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.updateUser(user.id, {
+      password: hashedPassword,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+    });
   }
 }
 

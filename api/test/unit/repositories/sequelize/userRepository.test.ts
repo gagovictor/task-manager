@@ -120,12 +120,56 @@ describe('SequelizeUserRepository', () => {
         it('should handle exceptions during user retrieval', async () => {
             // Arrange
             const username = 'testuser';
-            const error = new Error('Failed to fetch tasks');
+            const error = new Error('Failed to find user by username');
             
             (User.findOne as jest.Mock).mockRejectedValue(error);
             
             // Act & Assert
-            await expect(userRepository.findByUsername(username)).rejects.toThrow('Failed to fetch tasks');
+            await expect(userRepository.findByEmail('test@example.com')).rejects.toThrow(
+                'Failed to find user by username'
+            );
+        });
+    });
+    
+    describe('findByEmail', () => {
+        it('should find a user by email', async () => {
+            // Arrange
+            const email = 'test@example.com';
+            const user = { id: '1', email };
+            
+            (User.findOne as jest.Mock).mockResolvedValue(user);
+            
+            // Act
+            const result = await userRepository.findByEmail(email);
+            
+            // Assert
+            expect(User.findOne).toHaveBeenCalledWith({ where: { email } });
+            expect(result).toEqual(user);
+        });
+        
+        it('should return null when user is not found', async () => {
+            // Arrange
+            const email = 'test@example.com';
+            
+            (User.findOne as jest.Mock).mockResolvedValue(null);
+            
+            // Act
+            const result = await userRepository.findByEmail(email);
+            
+            // Assert
+            expect(result).toBeNull();
+        });
+        
+        it('should handle exceptions during user retrieval', async () => {
+            // Arrange
+            const error = new Error('Failed to find user by email');
+            
+            (User.findOne as jest.Mock).mockRejectedValue(error);
+            
+            // Act & Assert
+            await expect(userRepository.findByEmail('test@example.com')).rejects.toThrow(
+                'Failed to find user by email'
+            );
         });
     });
     
@@ -161,12 +205,12 @@ describe('SequelizeUserRepository', () => {
         it('should handle exceptions during user retrieval by ID', async () => {
             // Arrange
             const userId = '1';
-            const error = new Error('Failed to fetch tasks');
+            const error = new Error('Failed to find user by ID');
             
             (User.findByPk as jest.Mock).mockRejectedValue(error);
             
             // Act & Assert
-            await expect(userRepository.findById(userId)).rejects.toThrow('Failed to fetch tasks');
+            await expect(userRepository.findById(userId)).rejects.toThrow('Failed to find user by ID');
         });
     });
     
