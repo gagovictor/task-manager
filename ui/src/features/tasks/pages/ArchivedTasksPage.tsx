@@ -5,7 +5,7 @@ import { fetchTasksAsync } from '../redux/tasksSlice';
 import Box from '@mui/material/Box';
 import Masonry from '@mui/lab/Masonry';
 import TaskCard from '../components/TaskCard';
-import { Typography, Alert, Fab, Container, Snackbar, Button } from '@mui/material';
+import { Typography, Alert, Fab, Container, Snackbar, Button, Grow } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { Task } from '../models/task';
 import { useNavigate } from 'react-router-dom';
@@ -98,17 +98,20 @@ export default function ArchivedTasksPage() {
             spacing={2}
             data-testid="masonry"
           >
-            {filteredTasks.map((task: Task) => (
-              <Box
+            {filteredTasks.map((task: Task, index: number) => (
+              <Grow
                 key={task.id}
-                data-testid="task-card"
+                in={true}
+                timeout={(index + 1) * 300} // Staggered delay for animation
               >
-                <TaskCard
-                  task={task}
-                  onEdit={() => handleEditTask(task)}
-                  showSnackbar={showSnackbar}
-                />
-              </Box>
+                <Box data-testid="task-card">
+                  <TaskCard
+                    task={task}
+                    onEdit={() => handleEditTask(task)}
+                    showSnackbar={showSnackbar}
+                  />
+                </Box>
+              </Grow>
             ))}
           </Masonry>
         )}
