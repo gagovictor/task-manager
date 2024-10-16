@@ -10,8 +10,8 @@ import CosmosUserRepository from '@src/repositories/cosmos/userRepository';
 import MongooseUserRepository from '@src/repositories/mongoose/userRepository';
 import TaskService from '@src/services/TaskService';
 import AuthService from '@src/services/AuthService';
-import TaskController from '@src/controllers/taskController';
-import AuthController from '@src/controllers/authController';
+import TaskController from '@src/controllers/TaskController';
+import AuthController from '@src/controllers/AuthController';
 import { CosmosClient } from '@azure/cosmos'; // Import CosmosClient
 
 beforeAll(() => {

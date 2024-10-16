@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import httpMocks from 'node-mocks-http';
-import TaskController from '@src/controllers/taskController';
+import TaskController from '@src/controllers/TaskController';
 import { AuthenticatedRequest } from '@src/middlewares/auth';
 import TaskService from '@src/services/TaskService';
 import { Task } from '@src/models/task';
