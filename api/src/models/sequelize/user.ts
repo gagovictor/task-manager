@@ -5,6 +5,8 @@ export class SequelizeUser extends Model {
     public username!: string;
     public password!: string;
     public email!: string;
+    public passwordResetToken!: string | null;
+    public passwordResetExpires!: number | null;
 }
 
 export default SequelizeUser;

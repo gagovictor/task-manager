@@ -1,7 +1,14 @@
 import { Container } from '@mui/material';
-import SignupForm from '../components/SignupForm';
+import { useDispatch } from 'react-redux';
+import { logout } from '../redux/authSlice';
+import RecoverPasswordForm from '../components/RecoverPasswordForm';
 
-export default function SignupPage() {
+export default function RecoverPasswordPage() {
+    const dispatch = useDispatch();
+    
+    // Landing on the log in screen should clear user data from application.
+    dispatch(logout());
+
     return (
         <Container
             component="main"
@@ -16,7 +23,7 @@ export default function SignupPage() {
                 paddingBottom: 8,
             }}
         >
-            <SignupForm/>
+            <RecoverPasswordForm/>
         </Container>
     );
 }

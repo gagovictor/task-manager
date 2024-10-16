@@ -1,6 +1,6 @@
 
-import TaskService from '@src/services/taskService';
-import ITaskRepository from '@src/repositories/taskRepository';
+import TaskService from '@src/services/TaskService';
+import ITaskRepository from '@src/abstractions/repositories/ITaskRepository';
 import { CreateTaskDto, Task, TaskStatus, UpdateTaskDto } from '@src/models/task';
 import { PaginatedResponse, TaskFilter } from '@src/models/pagination';
 import { v4 as uuidv4 } from 'uuid';

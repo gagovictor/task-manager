@@ -1,7 +1,16 @@
 import { Container } from '@mui/material';
-import SignupForm from '../components/SignupForm';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { logout } from '../redux/authSlice';
+import ResetPasswordForm from '../components/ResetPasswordForm';
 
-export default function SignupPage() {
+export default function ResetPasswordPage() {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(logout());
+    }, [dispatch]);
+
     return (
         <Container
             component="main"
@@ -16,7 +25,7 @@ export default function SignupPage() {
                 paddingBottom: 8,
             }}
         >
-            <SignupForm/>
+            <ResetPasswordForm />
         </Container>
     );
 }

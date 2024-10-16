@@ -1,7 +1,7 @@
 import { MongooseTask } from "@src/models/mongoose/task";
 import { Task } from "@src/models/task";
 import MongooseTaskRepository from "@src/repositories/mongoose/taskRepository";
-import TaskEncryptionService from "@src/services/taskEncryptionService";
+import TaskEncryptionService from "@src/services/TaskEncryptionService";
 import { TaskFilter, PaginatedResponse } from '@src/models/pagination';
 
 jest.mock('@src/models/mongoose/task');

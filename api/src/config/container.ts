@@ -1,17 +1,21 @@
-import TaskController from "../controllers/taskController";
-import AuthController from "../controllers/authController";
-import SequelizeTaskRepository from "../repositories/sequelize/taskRepository";
-import SequelizeUserRepository from "../repositories/sequelize/userRepository";
-import CosmosTaskRepository from "../repositories/cosmos/taskRepository";
-import CosmosUserRepository from "../repositories/cosmos/userRepository";
-import TaskService from "../services/taskService";
-import AuthService from "../services/authService";
-import ITaskRepository from "../repositories/taskRepository";
-import IUserRepository from "../repositories/userRepository";
-import DatabaseConnection from "./db";
+import ITaskRepository from "@src/abstractions/repositories/ITaskRepository";
+import IUserRepository from "@src/abstractions/repositories/IUserRepository";
+import AuthController from "@src/controllers/AuthController";
+import TaskController from "@src/controllers/TaskController";
+import CosmosTaskRepository from "@src/repositories/cosmos/taskRepository";
+import CosmosUserRepository from "@src/repositories/cosmos/userRepository";
+import SequelizeTaskRepository from "@src/repositories/sequelize/taskRepository";
+import SequelizeUserRepository from "@src/repositories/sequelize/userRepository";
+import AuthService from "@src/services/AuthService";
+import TaskService from "@src/services/TaskService";
 import MongooseTaskRepository from "../repositories/mongoose/taskRepository";
 import MongooseUserRepository from "../repositories/mongoose/userRepository";
-import TaskEncryptionService from "../services/taskEncryptionService";
+import TaskEncryptionService from "../services/TaskEncryptionService";
+import DatabaseConnection from "./db";
+import { IMailService } from "@src/abstractions/services/IMailService";
+import { IEmailNotificationService } from "@src/abstractions/services/IEmailNotificationService";
+import EmailNotificationService from "@src/services/EmailNotificationService";
+import MailService from "@src/services/MailService";
 
 class Container {
     private static taskController: TaskController;
@@ -20,8 +24,10 @@ class Container {
     private static taskRepository: ITaskRepository;
     private static userRepository: IUserRepository;
     
-    private static taskService: TaskService;
-    private static authService: AuthService;
+    private static TaskService: TaskService;
+    private static AuthService: AuthService;
+    private static mailService: IMailService;
+    private static emailNotificationService: IEmailNotificationService;
     
     private static dbConnection: DatabaseConnection = DatabaseConnection.getInstance();
 
@@ -81,33 +87,47 @@ class Container {
     }
     
     static async getAuthService(): Promise<AuthService> {
-        if (!this.authService) {
+        if (!this.AuthService) {
             const userRepository = await this.getUserRepository();
-            this.authService = new AuthService(userRepository, process.env.JWT_SECRET!);
+            this.AuthService = new AuthService(userRepository, await this.getEmailNotificationService(), process.env.JWT_SECRET!);
         }
-        return this.authService;
+        return this.AuthService;
     }
     
     static async getTaskService(): Promise<TaskService> {
-        if (!this.taskService) {
+        if (!this.TaskService) {
             const taskRepository = await this.getTaskRepository();
-            this.taskService = new TaskService(taskRepository);
+            this.TaskService = new TaskService(taskRepository);
         }
-        return this.taskService;
+        return this.TaskService;
+    }
+    
+    static async getMailService(): Promise<IMailService> {
+        if (!this.mailService) {
+            this.mailService = new MailService();
+        }
+        return this.mailService;
+    }
+    
+    static async getEmailNotificationService(): Promise<IEmailNotificationService> {
+        if (!this.emailNotificationService) {
+            this.emailNotificationService = new EmailNotificationService(await this.getMailService());
+        }
+        return this.emailNotificationService;
     }
     
     static async getAuthController(): Promise<AuthController> {
         if (!this.authController) {
-            const authService = await this.getAuthService();
-            this.authController = new AuthController(authService);
+            const AuthService = await this.getAuthService();
+            this.authController = new AuthController(AuthService);
         }
         return this.authController;
     }
     
     static async getTaskController(): Promise<TaskController> {
         if (!this.taskController) {
-            const taskService = await this.getTaskService();
-            this.taskController = new TaskController(taskService);
+            const TaskService = await this.getTaskService();
+            this.taskController = new TaskController(TaskService);
         }
         return this.taskController;
     }

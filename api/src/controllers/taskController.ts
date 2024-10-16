@@ -1,14 +1,14 @@
 import { Response } from 'express';
-import TaskService from '../services/taskService';
-import { AuthenticatedRequest } from '../middlewares/auth';
-import { CreateTaskRequestBody, Task, UpdateTaskRequestBody, UpdateTaskStatusRequestBody } from '../models/task';
 import { TaskFilter } from '@src/models/pagination';
+import { AuthenticatedRequest } from '@src/middlewares/auth';
+import { CreateTaskRequestBody, UpdateTaskRequestBody, UpdateTaskStatusRequestBody } from '@src/models/task';
+import TaskService from '@src/services/TaskService';
 
 export default class TaskController {
-  private taskService: TaskService;
+  private TaskService: TaskService;
 
-  constructor(taskService: TaskService) {
-    this.taskService = taskService;
+  constructor(TaskService: TaskService) {
+    this.TaskService = TaskService;
   }
 
   public createTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -16,7 +16,7 @@ export default class TaskController {
     // TODO validate request payload
 
     try {
-      const task = await this.taskService.createTask({ title, description, checklist, dueDate, status, userId: req.user!.id });
+      const task = await this.TaskService.createTask({ title, description, checklist, dueDate, status, userId: req.user!.id });
       res.status(201).json(task);
     } catch (error) {
       console.error('Task creation error:', error);
@@ -49,7 +49,7 @@ export default class TaskController {
         filter.status = statusParam;
       }
   
-      const paginatedTasks = await this.taskService.getTasksByUser(req.user!.id, page, limit, filter);
+      const paginatedTasks = await this.TaskService.getTasksByUser(req.user!.id, page, limit, filter);
       res.status(200).json(paginatedTasks);
     } catch (error) {
       console.error('Fetching tasks error:', error);
@@ -63,7 +63,7 @@ export default class TaskController {
     // TODO validate request payload
 
     try {
-      const task = await this.taskService.updateTask(id, { title, description, checklist, dueDate, status, userId: req.user!.id });
+      const task = await this.TaskService.updateTask(id, { title, description, checklist, dueDate, status, userId: req.user!.id });
       res.status(200).json(task);
     } catch (error) {
       console.error('Task update error:', error);
@@ -75,7 +75,7 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      await this.taskService.deleteTask(id, req.user!.id);
+      await this.TaskService.deleteTask(id, req.user!.id);
       res.status(204).json();
     } catch (error) {
       console.error('Task deletion error:', error);
@@ -87,7 +87,7 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      await this.taskService.archiveTask(id, req.user!.id);
+      await this.TaskService.archiveTask(id, req.user!.id);
       res.status(204).json();
     } catch (error) {
       console.error('Task archive error:', error);
@@ -99,7 +99,7 @@ export default class TaskController {
     const { id } = req.params;
 
     try {
-      await this.taskService.unarchiveTask(id, req.user!.id);
+      await this.TaskService.unarchiveTask(id, req.user!.id);
       res.status(204).json();
     } catch (error) {
       console.error('Task unarchive error:', error);
@@ -112,7 +112,7 @@ export default class TaskController {
     const { status } = req.body as UpdateTaskStatusRequestBody;
 
     try {
-      const updatedTask = await this.taskService.updateTaskStatus(id, status, req.user!.id);
+      const updatedTask = await this.TaskService.updateTaskStatus(id, status, req.user!.id);
       if (!updatedTask) {
         res.status(404).json({ error: 'Task not found' });
         return;
@@ -133,7 +133,7 @@ export default class TaskController {
     }
 
     try {
-      const importedTasks = await this.taskService.bulkImportTasks(tasks, req.user!.id);
+      const importedTasks = await this.TaskService.bulkImportTasks(tasks, req.user!.id);
       res.status(201).json(importedTasks);
     } catch (error) {
       console.error('Bulk import error:', error);

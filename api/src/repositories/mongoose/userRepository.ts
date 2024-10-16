@@ -1,6 +1,6 @@
-import IUserRepository from '../userRepository';
-import { MongooseUser } from '../../models/mongoose/user';
-import { User } from '../../models/user';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
+import { MongooseUser } from '@src/models/mongoose/user';
+import { User } from '@src/models/user';
 import { v4 as uuidv4 } from 'uuid';
 
 export default class MongooseUserRepository implements IUserRepository {
@@ -19,6 +19,17 @@ export default class MongooseUserRepository implements IUserRepository {
     
     async findByUsername(username: string): Promise<User | null> {
         return await MongooseUser.findOne({ username }).exec() as User;
+    }
+    
+    async findByEmail(email: string): Promise<User | null> {
+        return await MongooseUser.findOne({ email }).exec() as User;
+    }
+    
+    async findByResetToken(token: string, currentTime: number): Promise<User | null> {
+        return await MongooseUser.findOne({
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: currentTime },
+        }).exec() as User;
     }
     
     async findById(userId: string): Promise<User | null> {

@@ -3,7 +3,7 @@ import { ICosmosTask } from '@src/models/cosmos/task';
 import { PaginatedResponse } from '@src/models/pagination';
 import { Task } from '@src/models/task';
 import CosmosTaskRepository from '@src/repositories/cosmos/taskRepository';
-import TaskEncryptionService from '@src/services/taskEncryptionService';
+import TaskEncryptionService from '@src/services/TaskEncryptionService';
 
 jest.mock('@azure/cosmos');
 

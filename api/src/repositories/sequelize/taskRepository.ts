@@ -1,9 +1,9 @@
-import ITaskRepository from '../taskRepository';
-import { SequelizeTask } from '../../models/sequelize/task';
-import TaskEncryptionService from '../../services/taskEncryptionService';
-import { Task } from '../../models/task';
+import { SequelizeTask } from '@src/models/sequelize/task';
+import TaskEncryptionService from '@src/services/TaskEncryptionService';
+import { Task } from '@src/models/task';
 import { PaginatedResponse, TaskFilter } from '@src/models/pagination';
 import { Op } from 'sequelize';
+import ITaskRepository from '@src/abstractions/repositories/ITaskRepository';
 
 export default class SequelizeTaskRepository implements ITaskRepository {
     private encryptionService: TaskEncryptionService;

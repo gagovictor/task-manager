@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Header from './features/shared/components/Header';
 import Footer from './features/shared/components/Footer';
@@ -17,6 +16,8 @@ import getTheme from './features/shared/config/theme';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
 import { enUS } from 'date-fns/locale/en-US';
+import RecoverPasswordPage from './features/auth/pages/RecoverPasswordPage';
+import ResetPasswordPage from './features/auth/pages/ResetPasswordPage';
 
 function App() {
   const mode = useSelector((state: RootState) => state.preferences.theme);
@@ -36,6 +37,8 @@ function App() {
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/logout" element={<LogoutPage />} />
+                  <Route path="/recover-password" element={<RecoverPasswordPage />} />
+                  <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
                   <Route element={<AuthGuard />}>
                     <Route path="/tasks" element={<TasksPage />} />

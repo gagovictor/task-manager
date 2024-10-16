@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import httpMocks from 'node-mocks-http';
-import TaskController from '@src/controllers/taskController';
+import TaskController from '@src/controllers/TaskController';
 import { AuthenticatedRequest } from '@src/middlewares/auth';
-import TaskService from '@src/services/taskService';
+import TaskService from '@src/services/TaskService';
 import { Task } from '@src/models/task';
 import { PaginatedResponse } from '@src/models/pagination';
 
@@ -16,7 +16,9 @@ describe('TaskController', () => {
         id: 'testuser23',
         username: 'testuser',
         email: 'testuser@domain.com',
-        password: ''
+        password: '',
+        passwordResetToken: null,
+        passwordResetExpires: null,
     };
     
     beforeEach(() => {
