@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { SignupRequest, AuthResponse, LoginRequest } from '@src/models/user';
-import { randomBytes, createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 import { IEmailNotificationService } from '@src/abstractions/services/IEmailNotificationService';
 import IUserRepository from '@src/abstractions/repositories/IUserRepository';
 
@@ -103,7 +103,6 @@ class AuthService {
         });
 
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-        console.log(`Password reset link: ${resetUrl}`);
 
         await this.emailNotificationService.sendPasswordResetEmail(user.email, resetUrl);
       }
