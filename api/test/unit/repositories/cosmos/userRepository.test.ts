@@ -1,5 +1,6 @@
 import { Container, CosmosClient, SqlQuerySpec } from '@azure/cosmos';
 import { User } from '@src/models/user';
+import CosmosUserRepository from '@src/repositories/cosmos/userRepository';
 import IUserRepository from '@src/abstractions/repositories/IUserRepository';
 
 jest.mock('@azure/cosmos');
@@ -7,7 +8,7 @@ jest.mock('@azure/cosmos');
 describe('CosmosUserRepository', () => {
     let cosmosClientMock: jest.Mocked<CosmosClient>;
     let containerMock: jest.Mocked<Container>;
-    let userRepository: CosmosUserRepository;
+    let userRepository: IUserRepository;
     
     const databaseId = 'testDatabase';
     const containerId = 'testContainer';

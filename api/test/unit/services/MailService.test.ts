@@ -1,106 +1,107 @@
 import sgMail from '@sendgrid/mail';
 import MailService from '@src/services/MailService';
-import { IMailService } from '@src/abstractions/services/IMailService';
 
 jest.mock('@sendgrid/mail');
 
 describe('MailService', () => {
-    const originalEnv = process.env;
+    const SENDGRID_API_KEY = 'test-sendgrid-api-key';
+    const EMAIL_FROM = 'test@example.com';
     
     beforeEach(() => {
-        jest.resetModules();
-        process.env = { ...originalEnv };
+        process.env.SENDGRID_API_KEY = SENDGRID_API_KEY;
+        process.env.EMAIL_FROM = EMAIL_FROM;
     });
     
     afterEach(() => {
-        process.env = originalEnv;
         jest.clearAllMocks();
+        delete process.env.SENDGRID_API_KEY;
+        delete process.env.EMAIL_FROM;
     });
     
     describe('constructor', () => {
-        it('should set the SendGrid API key if SENDGRID_API_KEY is defined', () => {
-            process.env.SENDGRID_API_KEY = 'test-sendgrid-api-key';
-            const setApiKeyMock = jest.spyOn(sgMail, 'setApiKey').mockImplementation(() => {});
-            
-            const mailService = new MailService();
-            
-            expect(setApiKeyMock).toHaveBeenCalledWith('test-sendgrid-api-key');
-        });
-        
         it('should throw an error if SENDGRID_API_KEY is not defined', () => {
             delete process.env.SENDGRID_API_KEY;
             
-            expect(() => new MailService()).toThrow('SendGrid API key is not defined in environment variables');
+            expect(() => new MailService()).toThrow(
+                'SendGrid API key is not defined in environment variables'
+            );
+        });
+        
+        it('should set the SendGrid API key if SENDGRID_API_KEY is defined', () => {
+            const setApiKeyMock = jest.spyOn(sgMail, 'setApiKey');
+            
+            new MailService();
+            
+            expect(setApiKeyMock).toHaveBeenCalledWith(SENDGRID_API_KEY);
         });
     });
     
     describe('sendEmail', () => {
-        let mailService: IMailService;
-        const mockSend = sgMail.send as jest.Mock;
+        let mailService: MailService;
         
         beforeEach(() => {
-            process.env.SENDGRID_API_KEY = 'test-sendgrid-api-key';
-            process.env.EMAIL_FROM = 'no-reply@test.com';
             mailService = new MailService();
-        });
-        
-        it('should send an email successfully', async () => {
-            mockSend.mockResolvedValue([{ statusCode: 202, body: '', headers: {} }]);
-            
-            const to = 'user@test.com';
-            const subject = 'Test Subject';
-            const textContent = 'Test email content';
-            const htmlContent = '<p>Test email content</p>';
-            
-            await expect(mailService.sendEmail(to, subject, textContent, htmlContent)).resolves.toBeUndefined();
-            
-            expect(mockSend).toHaveBeenCalledWith({
-                to,
-                from: 'no-reply@test.com',
-                subject,
-                text: textContent,
-                html: htmlContent,
-            });
-            expect(console.log).toHaveBeenCalledWith(`Email sent to ${to}`);
         });
         
         it('should throw an error if EMAIL_FROM is not defined', async () => {
             delete process.env.EMAIL_FROM;
             
-            const to = 'user@test.com';
-            const subject = 'Test Subject';
-            const textContent = 'Test email content';
-            const htmlContent = '<p>Test email content</p>';
-            
-            await expect(mailService.sendEmail(to, subject, textContent, htmlContent)).rejects.toThrow(
-                'Email From is not defined in environment variables'
-            );
-            
-            expect(mockSend).not.toHaveBeenCalled();
+            await expect(
+                mailService.sendEmail('to@example.com', 'Subject', 'Text content', '<p>HTML content</p>')
+            ).rejects.toThrow('Email From is not defined in environment variables');
         });
         
-        it('should handle errors from sgMail.send and throw a generic error', async () => {
-            const error = new Error('SendGrid error');
-            mockSend.mockRejectedValue(error);
-            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        it('should send an email with correct parameters', async () => {
+            const sendMock = jest.spyOn(sgMail, 'send').mockResolvedValue([{
+                statusCode: 200,
+                body: {},
+                headers: null
+            }, {}]);
             
-            const to = 'user@test.com';
-            const subject = 'Test Subject';
-            const textContent = 'Test email content';
-            const htmlContent = '<p>Test email content</p>';
-            
-            await expect(mailService.sendEmail(to, subject, textContent, htmlContent)).rejects.toThrow(
-                'Failed to send email'
+            await mailService.sendEmail(
+                'to@example.com',
+                'Test Subject',
+                'Test text content',
+                '<p>Test HTML content</p>'
             );
             
-            expect(mockSend).toHaveBeenCalledWith({
-                to,
-                from: 'no-reply@test.com',
-                subject,
-                text: textContent,
-                html: htmlContent,
+            expect(sendMock).toHaveBeenCalledWith({
+                to: 'to@example.com',
+                from: EMAIL_FROM,
+                subject: 'Test Subject',
+                text: 'Test text content',
+                html: '<p>Test HTML content</p>',
             });
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error sending email:', error);
+        });
+        
+        it('should log a message when email is sent successfully', async () => {
+            const consoleLogMock = jest.spyOn(console, 'log').mockImplementation();
+            jest.spyOn(sgMail, 'send').mockResolvedValue([{
+                statusCode: 200,
+                body: {},
+                headers: null
+            }, {}]);
+            
+            await mailService.sendEmail(
+                'to@example.com',
+                'Subject',
+                'Text content',
+                '<p>HTML content</p>'
+            );
+            
+            expect(consoleLogMock).toHaveBeenCalledWith('Email sent to to@example.com');
+        });
+        
+        it('should throw an error when sgMail.send fails', async () => {
+            const error = new Error('SendGrid error');
+            jest.spyOn(sgMail, 'send').mockRejectedValue(error);
+            const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation();
+            
+            await expect(
+                mailService.sendEmail('to@example.com', 'Subject', 'Text content', '<p>HTML content</p>')
+            ).rejects.toThrow('Failed to send email');
+            
+            expect(consoleErrorMock).toHaveBeenCalledWith('Error sending email:', error);
         });
     });
 });

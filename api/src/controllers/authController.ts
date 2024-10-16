@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import AuthService from '../services/AuthService';
 import { LoginRequestBody, SignupRequestBody } from '../models/user';
-
+import AuthService from '@src/services/AuthService';
 
 export default class AuthController {
   private AuthService: AuthService;

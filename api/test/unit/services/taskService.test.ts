@@ -9,7 +9,7 @@ jest.mock('uuid');
 
 describe('TaskService', () => {
     let mockTaskRepository: jest.Mocked<ITaskRepository>;
-    let TaskService: TaskService;
+    let taskService: TaskService;
     
     beforeEach(() => {
         // Mock the UUID to return a fixed value
@@ -30,7 +30,7 @@ describe('TaskService', () => {
             bulkCreateTasks: jest.fn<Promise<Task[]>, [Task[]]>(),
         };
         
-        TaskService = new TaskService(mockTaskRepository);
+        taskService = new TaskService(mockTaskRepository);
 
         jest.spyOn(console, 'error').mockImplementation(() => {});
     });
@@ -63,7 +63,7 @@ describe('TaskService', () => {
 
             mockTaskRepository.createTask.mockResolvedValue(mockTask);
             
-            const result = await TaskService.createTask(taskParams);
+            const result = await taskService.createTask(taskParams);
             
             // Expect the repository to be called with taskParams plus id and createdAt
             expect(mockTaskRepository.createTask).toHaveBeenCalledWith(mockTask);
@@ -110,7 +110,7 @@ describe('TaskService', () => {
             
             mockTaskRepository.getTasksByUser.mockResolvedValue(mockTasks);
             
-            const result = await TaskService.getTasksByUser(userId, 0, 10, { archived: false });
+            const result = await taskService.getTasksByUser(userId, 0, 10, { archived: false });
             
             expect(mockTaskRepository.getTasksByUser).toHaveBeenCalledWith(userId, 0, 10, { archived: false });
             expect(result).toEqual(mockTasks);
@@ -140,7 +140,7 @@ describe('TaskService', () => {
             
             mockTaskRepository.updateTask.mockResolvedValue(updatedTask);
             
-            const result = await TaskService.updateTask(taskId, updates);
+            const result = await taskService.updateTask(taskId, updates);
             
             // Expect the repository to be called with taskId and updates plus modifiedAt
             expect(mockTaskRepository.updateTask).toHaveBeenCalledWith(taskId, {
@@ -158,7 +158,7 @@ describe('TaskService', () => {
             
             mockTaskRepository.deleteTask.mockResolvedValue();
             
-            await TaskService.deleteTask(taskId, userId);
+            await taskService.deleteTask(taskId, userId);
             
             expect(mockTaskRepository.deleteTask).toHaveBeenCalledWith(taskId, userId);
         });
@@ -171,7 +171,7 @@ describe('TaskService', () => {
             
             mockTaskRepository.archiveTask.mockResolvedValue();
             
-            await TaskService.archiveTask(taskId, userId);
+            await taskService.archiveTask(taskId, userId);
             
             expect(mockTaskRepository.archiveTask).toHaveBeenCalledWith(taskId, userId);
         });
@@ -184,7 +184,7 @@ describe('TaskService', () => {
             
             mockTaskRepository.unarchiveTask.mockResolvedValue();
             
-            await TaskService.unarchiveTask(taskId, userId);
+            await taskService.unarchiveTask(taskId, userId);
             
             expect(mockTaskRepository.unarchiveTask).toHaveBeenCalledWith(taskId, userId);
         });
@@ -211,7 +211,7 @@ describe('TaskService', () => {
             
             mockTaskRepository.updateTaskStatus.mockResolvedValue(updatedTask);
             
-            const result = await TaskService.updateTaskStatus(taskId, status, userId);
+            const result = await taskService.updateTaskStatus(taskId, status, userId);
             
             expect(mockTaskRepository.updateTaskStatus).toHaveBeenCalledWith(taskId, status, userId);
             expect(result).toEqual(updatedTask);
@@ -224,7 +224,7 @@ describe('TaskService', () => {
             const invalidTasks: any = null; // Invalid input
 
             // Act & Assert
-            await expect(TaskService.bulkImportTasks(invalidTasks, 'userId'))
+            await expect(taskService.bulkImportTasks(invalidTasks, 'userId'))
                 .rejects.toThrow('Invalid tasks data provided.');
         });
 
@@ -252,7 +252,7 @@ describe('TaskService', () => {
             mockTaskRepository.bulkCreateTasks.mockResolvedValue(preparedTasks);
 
             // Act
-            const result = await TaskService.bulkImportTasks(tasks, 'userId');
+            const result = await taskService.bulkImportTasks(tasks, 'userId');
 
             // Assert
             expect(mockTaskRepository.bulkCreateTasks).toHaveBeenCalledWith(preparedTasks);

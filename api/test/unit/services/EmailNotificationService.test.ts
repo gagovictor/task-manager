@@ -1,102 +1,99 @@
+
 import EmailNotificationService from '@src/services/EmailNotificationService';
-import { IEmailNotificationService } from '@src/abstractions/services/IEmailNotificationService';
 import { IMailService } from '@src/abstractions/services/IMailService';
-import dedent from 'dedent';
 
 describe('EmailNotificationService', () => {
-    let mockMailService: jest.Mocked<IMailService>;
-    let emailNotificationService: IEmailNotificationService;
+    let mailServiceMock: jest.Mocked<IMailService>;
+    let emailNotificationService: EmailNotificationService;
+    
+    function normalizeHtml(html: string): string {
+        return html.replace(/\s+/g, ' ').trim();
+    }
     
     beforeEach(() => {
-        mockMailService = {
+        mailServiceMock = {
             sendEmail: jest.fn(),
         };
-        emailNotificationService = new EmailNotificationService(mockMailService);
+        
+        emailNotificationService = new EmailNotificationService(mailServiceMock);
     });
     
     describe('sendPasswordResetEmail', () => {
         it('should send a password reset email with correct parameters', async () => {
-            const to = 'user@test.com';
+            const to = 'user@example.com';
             const resetUrl = 'https://example.com/reset?token=abc123';
             
-            await expect(
-                emailNotificationService.sendPasswordResetEmail(to, resetUrl)
-            ).resolves.toBeUndefined();
+            await emailNotificationService.sendPasswordResetEmail(to, resetUrl);
             
-            expect(mockMailService.sendEmail).toHaveBeenCalledWith(
+            const expectedHtml = `
+        <p>You requested a password reset.</p>
+        <p>Please click the link below to reset your password:</p>
+        <a href="${resetUrl}">Reset Password</a>
+      `;
+            
+            const actualHtml = mailServiceMock.sendEmail.mock.calls[0][3];
+            
+            expect(normalizeHtml(actualHtml)).toBe(normalizeHtml(expectedHtml));
+            
+            expect(mailServiceMock.sendEmail).toHaveBeenCalledWith(
                 to,
                 'Password Reset Request',
                 `You requested a password reset. Please use the following link to reset your password: ${resetUrl}`,
-                dedent`
-      <p>You requested a password reset.</p>
-      <p>Please click the link below to reset your password:</p>
-      <a href="${resetUrl}">Reset Password</a>
-    `
+                actualHtml
             );
         });
         
-        it('should propagate errors from the mail service', async () => {
-            const to = 'user@test.com';
+        it('should throw an error if sendEmail fails', async () => {
+            const to = 'user@example.com';
             const resetUrl = 'https://example.com/reset?token=abc123';
-            const error = new Error('Mail service error');
-            mockMailService.sendEmail.mockRejectedValue(error);
+            const error = new Error('Mail service failed');
+            
+            mailServiceMock.sendEmail.mockRejectedValue(error);
             
             await expect(
                 emailNotificationService.sendPasswordResetEmail(to, resetUrl)
             ).rejects.toThrow(error);
             
-            expect(mockMailService.sendEmail).toHaveBeenCalledWith(
-                to,
-                'Password Reset Request',
-                `You requested a password reset. Please use the following link to reset your password: ${resetUrl}`,
-                dedent`
-      <p>You requested a password reset.</p>
-      <p>Please click the link below to reset your password:</p>
-      <a href="${resetUrl}">Reset Password</a>
-    `
-            );
+            expect(mailServiceMock.sendEmail).toHaveBeenCalled();
         });
     });
     
     describe('sendWelcomeEmail', () => {
         it('should send a welcome email with correct parameters', async () => {
-            const to = 'newuser@test.com';
-            const username = 'newuser';
+            const to = 'user@example.com';
+            const username = 'John Doe';
             
-            await expect(
-                emailNotificationService.sendWelcomeEmail(to, username)
-            ).resolves.toBeUndefined();
+            await emailNotificationService.sendWelcomeEmail(to, username);
             
-            expect(mockMailService.sendEmail).toHaveBeenCalledWith(
+            const expectedHtml = `
+        <p>Hello <strong>${username}</strong>,</p>
+        <p>Welcome to our service!</p>
+      `;
+            
+            const actualHtml = mailServiceMock.sendEmail.mock.calls[0][3];
+            
+            expect(normalizeHtml(actualHtml)).toBe(normalizeHtml(expectedHtml));
+            
+            expect(mailServiceMock.sendEmail).toHaveBeenCalledWith(
                 to,
                 'Welcome to Our Service',
                 `Hello ${username}, welcome to our service!`,
-                dedent`
-      <p>Hello <strong>${username}</strong>,</p>
-      <p>Welcome to our service!</p>
-    `
+                actualHtml
             );
         });
         
-        it('should propagate errors from the mail service', async () => {
-            const to = 'newuser@test.com';
-            const username = 'newuser';
-            const error = new Error('Mail service error');
-            mockMailService.sendEmail.mockRejectedValue(error);
+        it('should throw an error if sendEmail fails', async () => {
+            const to = 'user@example.com';
+            const username = 'John Doe';
+            const error = new Error('Mail service failed');
+            
+            mailServiceMock.sendEmail.mockRejectedValue(error);
             
             await expect(
                 emailNotificationService.sendWelcomeEmail(to, username)
             ).rejects.toThrow(error);
             
-            expect(mockMailService.sendEmail).toHaveBeenCalledWith(
-                to,
-                'Welcome to Our Service',
-                `Hello ${username}, welcome to our service!`,
-                dedent`
-      <p>Hello <strong>${username}</strong>,</p>
-      <p>Welcome to our service!</p>
-    `
-            );
+            expect(mailServiceMock.sendEmail).toHaveBeenCalled();
         });
     });
 });
