@@ -4,20 +4,20 @@ import { createTheme, Theme } from '@mui/material/styles';
 const palette = {
   light: {
     primary: {
-      main: '#39588A',
-      contrastText: '#EDF5FF',
+      main: '#45289a',
+      contrastText: '#dfe8f0',
     },
     secondary: {
-      main: '#E0672F',
-      contrastText: '#FFF1EB',
+      main: '#1C6575',
+      contrastText: '#C2FFC6',
     },
     background: {
       default: '#FFFFFF',
       paper: '#F7F6F6',
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575',
+      primary: '#111122',
+      secondary: '#435160',
     },
     info: {
       main: '#3269C2',
@@ -26,17 +26,17 @@ const palette = {
       background: '#444E5E',
     },
     textField: {
-      autofillBackground: '#EDF5FF',
+      autofillBackground: '#dfe8f0',
     },
   },
   dark: {
     primary: {
-      main: '#EDF5FF',
-      contrastText: '#39588A',
+      main: '#dfe8f0',
+      contrastText: '#45289a',
     },
     secondary: {
-      main: '#FFF1EB',
-      contrastText: '#55504E',
+      main: '#C2FFC6',
+      contrastText: '#1C6575',
     },
     background: {
       default: '#1e1e1e',
@@ -53,7 +53,7 @@ const palette = {
       background: '#333',
     },
     textField: {
-      autofillBackground: '#55504E',
+      autofillBackground: '#1C6575',
     },
   },
 };
@@ -73,9 +73,8 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
   };
 
   // Set PWA background color based on the theme mode
-  const pwaBackgroundColor = mode === 'light' ?
-    currentPalette.primary.main :
-    '#272727'; // Toolbar background color in dark mode
+  const pwaBackgroundColor =
+    mode === 'light' ? currentPalette.primary.main : '#272727'; // Toolbar background color in dark mode
 
   setMetaTag('theme-color', pwaBackgroundColor);
   setMetaTag('background-color', pwaBackgroundColor);
@@ -95,10 +94,21 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
       info: currentPalette.info,
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            // Global Box styling
+            '& .MuiBox-root': {
+              backgroundColor: 'transparent !important',
+            },
+          },
+        },
+      },
       MuiContainer: {
         styleOverrides: {
           root: {
             maxWidth: '98% !important',
+            backgroundColor: 'transparent !important', // Make container background transparent
           },
         },
       },

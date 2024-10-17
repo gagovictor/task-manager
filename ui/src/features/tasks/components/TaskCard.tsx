@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PendingActionsOutlined } from '@mui/icons-material';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import { useGlassmorphismStyles } from '../../shared/hooks/useGlassmorphismStyles';
 
 interface TaskCardProps {
   task: Task;
@@ -136,20 +137,19 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
     </Typography>
   );
 
+  const glassStyles = useGlassmorphismStyles();
+
   return (
     <Box sx={{ width: '100%', position: 'relative' }}>
       <Card
         variant="outlined"
         onClick={handleCardClick}
         sx={{
-          backgroundColor: theme.palette.background.paper,
+          ...glassStyles,
+          // backgroundColor: theme.palette.background.paper,
           cursor: 'pointer',
           userSelect: 'no-select',
           borderColor: theme.palette.divider,
-          transition: 'border-color .15s ease-in-out',
-          '&:hover': {
-            borderColor: theme.palette.primary.main,
-          },
         }}
       >
         <CardContent>

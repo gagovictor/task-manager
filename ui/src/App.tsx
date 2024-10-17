@@ -17,6 +17,7 @@ import getTheme from './features/shared/config/theme';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
 import { enUS } from 'date-fns/locale/en-US';
+import ThreeScene from './features/shared/components/ThreeScene';
 
 function App() {
   const mode = useSelector((state: RootState) => state.preferences.theme);
@@ -30,7 +31,8 @@ function App() {
           <div className="App">
             <Header />
             <main>
-              <Box sx={{ backgroundColor: theme.palette.background.default }}>
+              {/* <Box sx={{ backgroundColor: theme.palette.background.default }}> */}
+              <Box sx={{ backgroundColor: 'transparent' }}>
                 <Routes>
                   <Route path="/" element={<TasksPage />} />
                   <Route path="/signup" element={<SignupPage />} />
@@ -45,6 +47,7 @@ function App() {
 
                   <Route path="*" element={<Navigate to="/login" />} />
                 </Routes>
+                <ThreeScene></ThreeScene>
               </Box>
             </main>
 
