@@ -29,6 +29,8 @@ import Checklist from '../components/Checklist';
 import { v4 as uuidv4 } from 'uuid';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import ConfirmCloseDialog from './ConfirmCloseDialog';
+import ChecklistIcon from '@mui/icons-material/Checklist';
+import ShortTextIcon from '@mui/icons-material/ShortText';
 
 export type TaskModalMode = 'create' | 'edit';
 
@@ -218,13 +220,13 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
       <Modal open={open} onClose={handleClose}>
         <Paper
           sx={{
-            width: '85%',
+            width: '95%',
             maxWidth: '540px',
             margin: 'auto',
             borderRadius: 1,
             position: 'relative',
-            marginTop: '10vh',
-            maxHeight: '80vh',
+            marginTop: '64px',
+            maxHeight: 'calc(100vh - 128px)',
             overflowX: 'hidden',
             overflowY: 'auto',
             display: 'flex',
@@ -232,31 +234,40 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
             backgroundColor: theme.palette.background.default,
           }}
         >
-          <IconButton
-            onClick={handleClose}
+          <Box
             sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
+              flex: 1,
+              padding: 2,
+              pb: 0.5,
+              borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
             }}
-            aria-label="Close"
           >
-            <CloseIcon />
-          </IconButton>
+            <Typography variant="h6" gutterBottom>
+              {modalTitle}
+            </Typography>
+            
+            <IconButton
+              onClick={handleClose}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+              }}
+              aria-label="Close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
           {/* Scrollable content */}
           <Box
             sx={{
               flex: 1,
               overflowY: 'auto',
-              padding: 2,
+              px: 2,
               paddingBottom: 4,
             }}
           >
-            <Typography variant="h6" gutterBottom>
-              {modalTitle}
-            </Typography>
-
             <TextField
               fullWidth
               margin="normal"
@@ -285,7 +296,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
                 justifyContent: 'center',
               }}
             >
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={6} sm={8}>
                 <FormControl fullWidth margin="normal">
                   <InputLabel>Status</InputLabel>
                   <Select
@@ -302,7 +313,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={6} sm={4}>
                 <ToggleButtonGroup
                   color="primary"
                   value={alignment}
@@ -312,8 +323,12 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
                   fullWidth
                   sx={{ height: '56px', mt: '8px' }}
                 >
-                  <ToggleButton value="text">Text</ToggleButton>
-                  <ToggleButton value="checklist">Checklist</ToggleButton>
+                  <ToggleButton value="text">
+                    <ShortTextIcon/>
+                  </ToggleButton>
+                  <ToggleButton value="checklist">
+                    <ChecklistIcon/>
+                  </ToggleButton>
                 </ToggleButtonGroup>
               </Grid>
             </Grid>
@@ -342,13 +357,12 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
           </Box>
 
           {/* Fixed button at the bottom */}
-          <Paper
+          <Box
             sx={{
-              position: 'sticky',
               bottom: 0,
               padding: 2,
               zIndex: 2,
-              borderTop: '1px solid rgba(0, 0, 0, 0.23)',
+              borderTop: '1px solid rgba(0, 0, 0, 0.1)',
               backgroundColor: theme.palette.background.default,
             }}
           >
@@ -361,7 +375,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
             >
               {buttonLabel}
             </Button>
-          </Paper>
+          </Box>
         </Paper>
       </Modal>
 

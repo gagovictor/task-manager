@@ -266,6 +266,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
             <span>
               <Button
                 size="small"
+                color="primary"
                 onClick={(event) => handleButtonClick(event, () => { if(onEdit) onEdit(task); })}
                 data-testid="edit-task-btn">
                 <EditIcon />
@@ -277,6 +278,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
               <span>
                 <Button
                   size="small"
+                  color="primary"
                   onClick={(event) => handleButtonClick(event, handleUnarchive)}
                   disabled={archiveStatus === 'loading'}
                   data-testid="unarchive-task-btn">
@@ -289,6 +291,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
               <span>
                 <Button
                   size="small"
+                  color="primary"
                   onClick={(event) => handleButtonClick(event, handleArchive)}
                   disabled={archiveStatus === 'loading'}
                   data-testid="archive-task-btn">
@@ -301,6 +304,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
             <span>
               <Button
                 size="small"
+                color="primary"
                 onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}
                 disabled={deleteStatus === 'loading'}
                 data-testid="delete-task-btn">
