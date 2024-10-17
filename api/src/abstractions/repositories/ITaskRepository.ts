@@ -1,5 +1,5 @@
 import { PaginatedResponse, TaskFilter } from '@src/models/pagination';
-import { CreateTaskRequestBody, Task } from '../models/task';
+import { Task } from '@src/models/task';
 
 export default interface ITaskRepository {
     createTask(task: Task): Promise<Task>;

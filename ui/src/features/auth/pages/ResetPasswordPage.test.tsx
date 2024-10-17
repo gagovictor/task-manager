@@ -2,10 +2,10 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import LoginPage from './LoginPage';
+import ResetPasswordPage from './ResetPasswordPage';
 import store from '../../../redux/store';
 
-describe('LoginPage', () => {
+describe('ResetPasswordPage', () => {
     const renderWithProviders = (component: React.ReactElement) => {
         return render(
             <Provider store={store}>
@@ -16,15 +16,15 @@ describe('LoginPage', () => {
         );
     };
 
-    it('should render LoginPage component', () => {
-        const { getByRole } = renderWithProviders(<LoginPage />);
+    it('should render ResetPasswordPage component', () => {
+        const { getByRole } = renderWithProviders(<ResetPasswordPage />);
         
         const container = getByRole('main');
         expect(container).toBeInTheDocument();
     });
 
     it('should have correct styling for the container', () => {
-        const { getByRole } = renderWithProviders(<LoginPage />);
+        const { getByRole } = renderWithProviders(<ResetPasswordPage />);
         
         const container = getByRole('main');
         expect(container).toHaveStyle({
@@ -39,9 +39,9 @@ describe('LoginPage', () => {
     });
 
     it('should render the form component by text content', () => {
-        const { getAllByText } = renderWithProviders(<LoginPage />);
+        const { getAllByText } = renderWithProviders(<ResetPasswordPage />);
         
-        const loginFormText = getAllByText('Login'); 
-        expect(loginFormText.length).toBe(2);
+        const RecoverPasswordFormText = getAllByText(/Reset Password/i); 
+        expect(RecoverPasswordFormText.length).toBe(2);
     });
 });

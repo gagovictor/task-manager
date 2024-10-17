@@ -70,7 +70,75 @@ const createAuthRouter = (): Router => {
         }
     });
 
-    return router;  // Return the router synchronously
+
+    /**
+     * @swagger
+     * /forgot-password:
+     *   post:
+     *     summary: Initiate password recovery
+     *     tags: [Users]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - email
+     *             properties:
+     *               email:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Password reset email sent
+     *       404:
+     *         description: User not found
+     */
+    router.post('/recover-password', async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const authController = await Container.getAuthController();
+            await authController.recoverPassword(req, res);
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    /**
+     * @swagger
+     * /reset-password:
+     *   post:
+     *     summary: Reset user password
+     *     tags: [Users]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - token
+     *               - password
+     *             properties:
+     *               token:
+     *                 type: string
+     *               password:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Password reset successfully
+     *       400:
+     *         description: Invalid or expired token
+     */
+    router.post('/reset-password', async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const authController = await Container.getAuthController();
+            await authController.resetPassword(req, res);
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    return router;
 };
 
 export default createAuthRouter;

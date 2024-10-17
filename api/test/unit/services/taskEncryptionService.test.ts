@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import TaskEncryptionService from '@src/services/taskEncryptionService';
+import TaskEncryptionService from '@src/services/TaskEncryptionService';
 
 describe('TaskEncryptionService', () => {
     const secretKey = crypto.randomBytes(32).toString('base64'); // Generate a valid base64 secret key

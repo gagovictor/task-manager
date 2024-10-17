@@ -1,7 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { login, LoginRequest, LoginResponse, signup, SignupRequest, SignupResponse } from '../services/AuthService';
+import { login, LoginRequest, LoginResponse, RecoverPasswordRequest, RecoverPasswordResponse, ResetPasswordRequest, ResetPasswordResponse, signup, SignupRequest, SignupResponse } from '../services/AuthService';
 import { User } from '../models/user';
 import { saveTasksToLocalStorage } from '../../tasks/redux/persistTasks';
+import { recoverPassword as recoverPasswordAsync } from '../services/AuthService';
+import { resetPassword as resetPasswordAsync } from '../services/AuthService';
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -36,36 +38,36 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginUser.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
-        state.status = 'idle';
-        state.isAuthenticated = true;
-        state.token = action.payload.token;
-        state.user = action.payload.user;
-        localStorage.setItem('token', action.payload.token || "");
-        localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Login failed';
-      })
-      .addCase(signupUser.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(signupUser.fulfilled, (state, action: PayloadAction<SignupResponse>) => {
-        state.status = 'idle';
-        state.isAuthenticated = true;
-        state.token = action.payload.token;
-        state.user = action.payload.user;
-        localStorage.setItem('token', action.payload.token || "");
-        localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));
-      })
-      .addCase(signupUser.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Login failed';
-      });
+    .addCase(loginUser.pending, (state) => {
+      state.status = 'loading';
+    })
+    .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
+      state.status = 'idle';
+      state.isAuthenticated = true;
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+      localStorage.setItem('token', action.payload.token || "");
+      localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));
+    })
+    .addCase(loginUser.rejected, (state, action) => {
+      state.status = 'failed';
+      state.error = action.error.message || 'Login failed';
+    })
+    .addCase(signupUser.pending, (state) => {
+      state.status = 'loading';
+    })
+    .addCase(signupUser.fulfilled, (state, action: PayloadAction<SignupResponse>) => {
+      state.status = 'idle';
+      state.isAuthenticated = true;
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+      localStorage.setItem('token', action.payload.token || "");
+      localStorage.setItem('user', JSON.stringify(action.payload.user  || ""));
+    })
+    .addCase(signupUser.rejected, (state, action) => {
+      state.status = 'failed';
+      state.error = action.error.message || 'Login failed';
+    });
   },
 });
 
@@ -82,6 +84,30 @@ export const signupUser = createAsyncThunk<SignupResponse, SignupRequest>(
   async (signupRequest) => {
     const response = await signup(signupRequest);
     return response;
+  }
+);
+
+
+export const recoverPassword = createAsyncThunk<RecoverPasswordResponse, RecoverPasswordRequest>(
+  'auth/sendPasswordResetEmail',
+  async (recoverPasswordRequest, { rejectWithValue }) => {
+    try {
+      return await recoverPasswordAsync(recoverPasswordRequest);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk<ResetPasswordResponse, ResetPasswordRequest>(
+  'auth/resetPassword',
+  async ( resetPasswordRequest, { rejectWithValue }) => {
+    try {
+      const response = await resetPasswordAsync(resetPasswordRequest);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data);
+    }
   }
 );
 

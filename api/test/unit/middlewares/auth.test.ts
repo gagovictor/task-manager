@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import authMiddleware, { AuthenticatedRequest } from '../../../src/middlewares/auth';
-import IUserRepository from '../../../src/repositories/userRepository';
-import { User } from '../../../src/models/user';
+import authMiddleware, { AuthenticatedRequest } from '@src/middlewares/auth';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
+import { User } from '@src/models/user';
 
 describe('authMiddleware', () => {
     let mockUserRepository: jest.Mocked<IUserRepository>;
@@ -12,11 +12,13 @@ describe('authMiddleware', () => {
     
     beforeEach(() => {
         mockUserRepository = {
-            findById: jest.fn<Promise<User | null>, [string]>(),
-            findByUsername: jest.fn(),
-            createUser: jest.fn(),
-            updateUser: jest.fn(),
-            findByUsernameOrEmail: jest.fn(),
+            findByUsernameOrEmail: jest.fn<Promise<User | null>, [string, string]>(),
+            findByUsername: jest.fn<Promise<User | null>, [string]>(),
+            findByEmail: jest.fn<Promise<User>, [string]>(),
+            findByResetToken: jest.fn<Promise<User>, [string, number]>(),
+            findById: jest.fn<Promise<User>, [string]>(),
+            createUser: jest.fn<Promise<User>, [Partial<User>]>(),
+            updateUser: jest.fn<Promise<User>, [string, Partial<User>]>(),
         };
         
         req = {
@@ -93,6 +95,8 @@ describe('authMiddleware', () => {
             username: 'testuser',
             email: 'test@test.com',
             password: 'hashedPassword',
+            passwordResetToken: null,
+            passwordResetExpires: null,
         };
         
         req.headers = {

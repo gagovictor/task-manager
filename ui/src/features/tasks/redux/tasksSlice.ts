@@ -55,12 +55,22 @@ const tasksSlice = createSlice({
       .addCase(fetchTasksAsync.fulfilled, (state, action) => {
         state.fetchStatus = 'succeeded';
         // TODO store archived tasks in a separate property so that the tasks list is not reset between views.
+        let incomingTasks = action.payload.items || [];
         if (action.meta.arg.page === 1) {
           // If fetching from page, replace the tasks
-          state.tasks = action.payload.items || [];
+          state.tasks = incomingTasks;
         } else {
-          // Append new tasks
-          state.tasks = [...state.tasks, ...(action.payload.items || [])];
+          state.tasks.forEach((task, index) => {
+            const updatedTaskIndex = incomingTasks.findIndex(t => t.id == task.id);
+            if(updatedTaskIndex > -1) {
+              state.tasks[index] = incomingTasks[updatedTaskIndex];
+              incomingTasks.splice(updatedTaskIndex, 1);
+            }
+          });
+          state.tasks = [
+            ...state.tasks,
+            ...incomingTasks
+          ];
         }
         // Determine if more tasks are available
         state.hasMore = (action.payload.items?.length || 0) >= (action.meta.arg.limit || 20);
@@ -69,6 +79,7 @@ const tasksSlice = createSlice({
       .addCase(fetchTasksAsync.rejected, (state, action) => {
         state.fetchStatus = 'failed';
         state.fetchError = 'Failed to load tasks.';
+        state.hasMore = false;
       });
 
     // Create Task

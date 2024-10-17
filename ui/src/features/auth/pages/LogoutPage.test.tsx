@@ -32,7 +32,7 @@ describe('LogoutPage', () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: 'calc(100vh - 64px)',
+            minHeight: '100vh',
             paddingTop: '64px',
             paddingBottom: '64px',
         });

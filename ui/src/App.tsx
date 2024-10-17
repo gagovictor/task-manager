@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Header from './features/shared/components/Header';
 import Footer from './features/shared/components/Footer';
@@ -18,6 +17,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
 import { enUS } from 'date-fns/locale/en-US';
 import ThreeScene from './features/shared/components/ThreeScene';
+import RecoverPasswordPage from './features/auth/pages/RecoverPasswordPage';
+import ResetPasswordPage from './features/auth/pages/ResetPasswordPage';
 
 function App() {
   const mode = useSelector((state: RootState) => state.preferences.theme);
@@ -31,13 +32,14 @@ function App() {
           <div className="App">
             <Header />
             <main>
-              {/* <Box sx={{ backgroundColor: theme.palette.background.default }}> */}
               <Box sx={{ backgroundColor: 'transparent' }}>
                 <Routes>
                   <Route path="/" element={<TasksPage />} />
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/logout" element={<LogoutPage />} />
+                  <Route path="/recover-password" element={<RecoverPasswordPage />} />
+                  <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
                   <Route element={<AuthGuard />}>
                     <Route path="/tasks" element={<TasksPage />} />

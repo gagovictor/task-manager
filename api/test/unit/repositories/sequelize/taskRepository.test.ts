@@ -1,7 +1,7 @@
 import SequelizeTask from '@src/models/sequelize/task';
 import { Task } from '@src/models/task';
 import SequelizeTaskRepository from '@src/repositories/sequelize/taskRepository';
-import TaskEncryptionService from '@src/services/taskEncryptionService';
+import TaskEncryptionService from '@src/services/TaskEncryptionService';
 import { TaskFilter, PaginatedResponse } from '@src/models/pagination';
 import { Op } from 'sequelize';
 

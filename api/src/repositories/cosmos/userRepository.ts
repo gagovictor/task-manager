@@ -1,6 +1,6 @@
 import { Container, CosmosClient } from '@azure/cosmos';
-import IUserRepository from './userRepository';
-import { User } from '../../models/user';
+import IUserRepository from '@src/abstractions/repositories/IUserRepository';
+import { User } from '@src/models/user';
 
 export default class CosmosUserRepository implements IUserRepository {
     private container: Container;
@@ -45,6 +45,28 @@ export default class CosmosUserRepository implements IUserRepository {
             console.error('Error finding user by username:', error);
             throw new Error('Failed to find user by username');
         }
+    }
+    
+    async findByEmail(email: string): Promise<User | null> {
+        try {
+            const query = `SELECT * FROM c WHERE c.email = @email`;
+            const parameters = [{ name: '@email', value: email }];
+            const { resources: users } = await this.container.items.query<User>({ query, parameters }).fetchAll();
+            return users.length > 0 ? users[0] : null;
+        } catch (error: any) {
+            console.error('Error finding user by email:', error);
+            throw new Error('Failed to find user by email');
+        }
+    }
+    
+    async findByResetToken(token: string, currentTime: number): Promise<User | null> {
+        const query = `SELECT * FROM c WHERE c.passwordResetToken = @token AND c.passwordResetExpires > @currentTime`;
+        const parameters = [
+            { name: '@token', value: token },
+            { name: '@currentTime', value: currentTime },
+        ];
+        const { resources: users } = await this.container.items.query<User>({ query, parameters }).fetchAll();
+        return users.length > 0 ? users[0] : null;
     }
     
     async findById(userId: string): Promise<User | null> {
