@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Snackbar, IconButton } from '@mui/material';
+import { Button, Snackbar, IconButton, Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 const PwaInstallPrompt = () => {
@@ -46,22 +46,35 @@ const PwaInstallPrompt = () => {
     <div>
       <Snackbar
         open={open}
+        color="primary"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        message="Install this app on your device for a better experience!"
+        message="Install this app on your device for a better experience."
         action={
-          <>
-            <Button color="secondary" onClick={handleInstallClick} disabled={installing}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleInstallClick}
+              disabled={installing}
+            >
               {installing ? 'Installing...' : 'Install'}
             </Button>
-            <IconButton
-              size="small"
-              aria-label="close"
+            <Button
+              variant="text"
               color="secondary"
               onClick={handleClose}
+              disabled={installing}
             >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </>
+              Dismiss
+            </Button>
+          </Box>
         }
       />
     </div>

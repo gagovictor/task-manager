@@ -158,14 +158,14 @@ describe('TaskModal component', () => {
         
         act(() => {
             userEvent.type(descriptionInput, 'This should be cleared in checklist mode');
-            const checklistToggle = screen.getByRole('button', { name: /Checklist/i });
+            const checklistToggle = screen.getByTestId('toggle-checklist');
             userEvent.click(checklistToggle);
         });
         
         waitFor(() => expect(screen.queryByLabelText(/Description/i)).not.toBeInTheDocument());
         
         act(() => {
-            const textToggle = screen.getByRole('button', { name: /Text/i });
+            const textToggle = screen.getByTestId('toggle-text');
             userEvent.click(textToggle);
         });
         

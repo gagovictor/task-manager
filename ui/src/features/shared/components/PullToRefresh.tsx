@@ -50,7 +50,8 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
                 sx={{
                     marginTop: '56px',
                     position: 'absolute',
-                    top: isPulling ? 0 : -50, // Show indicator when pulling
+                    top: 0, // Show indicator when pulling
+                    opacity: isPulling ? 1 : 0,
                     left: '50%',
                     transform: 'translateX(-50%)',
                     display: 'flex',

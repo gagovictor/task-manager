@@ -4,39 +4,40 @@ import { createTheme, Theme } from '@mui/material/styles';
 const palette = {
   light: {
     primary: {
-      main: '#39588A',
-      contrastText: '#EDF5FF',
+      main: '#5584ac', // Inverted with secondary color
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: '#E0672F',
-      contrastText: '#FFF1EB',
+      main: '#6a4fbf', // Inverted with primary color
+      contrastText: '#ffffff',
     },
     background: {
-      default: '#FFFFFF',
-      paper: '#F7F6F6',
+      default: '#f4f6f8', // Softer background to reduce stark contrast
+      paper: '#ffffff',
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575',
+      primary: '#1a1a1a', // Darker text for better readability
+      secondary: '#5f6368',
     },
     info: {
-      main: '#3269C2',
+      main: '#0288d1',
     },
     snackbar: {
-      background: '#444E5E',
+      background: '#323f4b',
+      textColor: '#ffffff',
     },
     textField: {
-      autofillBackground: '#EDF5FF',
+      autofillBackground: '#e3f2fd', // Softer blue to match the theme
     },
   },
   dark: {
     primary: {
-      main: '#EDF5FF',
-      contrastText: '#39588A',
+      main: '#dfe8f0',
+      contrastText: '#45289a',
     },
     secondary: {
-      main: '#FFF1EB',
-      contrastText: '#55504E',
+      main: '#C2FFC6',
+      contrastText: '#1C6575',
     },
     background: {
       default: '#1e1e1e',
@@ -50,10 +51,11 @@ const palette = {
       main: '#3269C2',
     },
     snackbar: {
-      background: '#333',
+      background: '#444E5E',
+      textColor: '#fff',
     },
     textField: {
-      autofillBackground: '#55504E',
+      autofillBackground: '#444E5E', // Adjusted for better contrast
     },
   },
 };
@@ -73,9 +75,7 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
   };
 
   // Set PWA background color based on the theme mode
-  const pwaBackgroundColor = mode === 'light' ?
-    currentPalette.primary.main :
-    '#272727'; // Toolbar background color in dark mode
+  const pwaBackgroundColor = currentPalette.background.default;
 
   setMetaTag('theme-color', pwaBackgroundColor);
   setMetaTag('background-color', pwaBackgroundColor);
@@ -95,10 +95,21 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
       info: currentPalette.info,
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            // Global Box styling
+            '& .MuiBox-root': {
+              backgroundColor: 'transparent !important',
+            },
+          },
+        },
+      },
       MuiContainer: {
         styleOverrides: {
           root: {
             maxWidth: '98% !important',
+            backgroundColor: 'transparent', // Use palette instead of hardcoding
           },
         },
       },
@@ -106,6 +117,7 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
         styleOverrides: {
           root: {
             backgroundColor: currentPalette.snackbar.background,
+            color: currentPalette.snackbar.textColor,
           },
         },
       },
@@ -116,10 +128,16 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
               '& input:-webkit-autofill': {
                 '-webkit-box-shadow': `0 0 0 100px ${currentPalette.textField.autofillBackground} inset !important`,
               },
-              ':has(> input:-webkit-autofill)': {
-                backgroundColor: currentPalette.textField.autofillBackground,
-              },
             },
+          },
+        },
+      },
+      MuiBackdrop: {
+        styleOverrides: {
+          root: {
+            backgroundColor: `${currentPalette.background.default}80`,
+            backdropFilter: 'blur(10px)',
+            transition: 'all .5s ease-in-out',
           },
         },
       },
@@ -131,6 +149,18 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
       },
       h6: {
         fontWeight: 500,
+      },
+      h1: {
+        fontWeight: 600,
+      },
+      h2: {
+        fontWeight: 600,
+      },
+      body1: {
+        fontWeight: 400,
+      },
+      body2: {
+        fontWeight: 400,
       },
     },
     shape: {
