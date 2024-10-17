@@ -137,7 +137,9 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
     </Typography>
   );
 
-  const glassStyles = useGlassmorphismStyles();
+  const glassStyles = useGlassmorphismStyles({
+    opacity: theme.palette.mode === 'dark' ? 0.1 : 0.4
+  });
 
   return (
     <Box sx={{ width: '100%', position: 'relative' }}>

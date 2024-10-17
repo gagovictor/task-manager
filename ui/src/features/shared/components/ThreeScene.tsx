@@ -32,6 +32,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const nodes = useRef<THREE.Mesh[]>([]);
     const lines = useRef<THREE.Line[]>([]);
     const lineGeometries = useRef<THREE.BufferGeometry[]>([]);
+    const originalPositions = useRef<Float32Array[]>([]);
     
     const theme = useTheme();
     
@@ -65,6 +66,9 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
             node.position.x = Math.random() * 50 - 25;
             node.position.y = Math.random() * 50 - 25;
             node.position.z = Math.random() * 50 - 25;
+            node.scale.x *= 3;
+            node.scale.y *= 3;
+            node.scale.z *= 3;
             nodes.current.push(node);
             scene.add(node);
         }
@@ -73,7 +77,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         const pulseMaterial = new THREE.LineBasicMaterial({
             transparent: true,
             linewidth: 2,
-            //   blending: THREE.AdditiveBlending,
             vertexColors: true,
             depthWrite: false,
         });
@@ -89,7 +92,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
                     const y = THREE.MathUtils.lerp(nodes.current[i].position.y, nodes.current[j].position.y, t);
                     const z = THREE.MathUtils.lerp(nodes.current[i].position.z, nodes.current[j].position.z, t);
                     points.push(new THREE.Vector3(x, y, z));
-                    
+
                     // Add initial color (using primary color)
                     const primaryColor = new THREE.Color(theme.palette.primary.main);
                     colors.push(primaryColor.r, primaryColor.g, primaryColor.b);
@@ -97,6 +100,9 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
                 
                 const geometry = new THREE.BufferGeometry().setFromPoints(points);
                 geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(colors), 3));
+                
+                // Store the original positions for animation
+                originalPositions.current.push(new Float32Array(geometry.attributes.position.array));
                 
                 const line = new THREE.Line(geometry, pulseMaterial);
                 lines.current.push(line);
@@ -161,6 +167,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
             lines.current.forEach((line, index) => {
                 const geometry = lineGeometries.current[index];
                 const positions = geometry.attributes.position.array as Float32Array;
+                const original = originalPositions.current[index]; // Get the original positions
                 const colors = geometry.attributes.color.array as Float32Array;
 
                 const primaryColor = new THREE.Color(theme.palette.primary.main);
@@ -171,13 +178,16 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
                 for (let k = 0; k <= waveSegments; k++) {
                     const t = k / waveSegments;
-                    const amplitude = 0.01;
-                    const frequency = 0.2; // Lower frequency to make the oscillation slower
-                    const speed = 0.0005; // Slower speed
+                    const amplitude = 0.5;
+                    const frequency = 2; // Lower frequency to make the oscillation slower
+                    const speed = 0.0002; // Slower speed
                     const offsetY = amplitude * Math.sin(frequency * t * Math.PI * 2 + Date.now() * speed + phaseOffset);
                     const i = k * 3; // x, y, z components
 
-                    positions[i + 1] += offsetY; // modify y component to oscillate
+                    // Set the y component relative to the original position
+                    positions[i] = original[i];       // x
+                    positions[i + 1] = original[i + 1] + offsetY; // y with oscillation
+                    positions[i + 2] = original[i + 2]; // z
 
                     // Update color to oscillate between primary and secondary
                     const colorFactor = 0.5 + 0.5 * Math.sin(Date.now() * 0.001 + t * Math.PI + phaseOffset);
@@ -192,7 +202,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
                 geometry.attributes.color.needsUpdate = true;
 
                 // Update line opacity to oscillate with time, with different values for each line
-                const opacityFactor = 0 + 0.5 * Math.sin(Date.now() * 0.002 + phaseOffset); // Slower opacity change
+                const opacityFactor = 0.2 + 0.2 * Math.sin(Date.now() * 0.002 + phaseOffset); // Slower opacity change
                 line.material.opacity = opacityFactor;
             });
 

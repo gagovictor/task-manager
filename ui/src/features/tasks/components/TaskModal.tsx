@@ -31,6 +31,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import ConfirmCloseDialog from './ConfirmCloseDialog';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import ShortTextIcon from '@mui/icons-material/ShortText';
+import { useGlassmorphismStyles } from '../../shared/hooks/useGlassmorphismStyles';
 
 export type TaskModalMode = 'create' | 'edit';
 
@@ -215,6 +216,10 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
     setSnackbarOpen(true);
   };
   
+  const glassStyles = useGlassmorphismStyles({
+    opacity: theme.palette.mode === 'dark' ? 0.1 : 0.7
+  });
+  
   return (
     <>
       <Modal open={open} onClose={handleClose}>
@@ -231,7 +236,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
             overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: theme.palette.background.default,
+            outline: 'none',
+            ...glassStyles
           }}
         >
           <Box
@@ -323,10 +329,10 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
                   fullWidth
                   sx={{ height: '56px', mt: '8px' }}
                 >
-                  <ToggleButton value="text">
+                  <ToggleButton value="text" data-testid="toggle-text">
                     <ShortTextIcon/>
                   </ToggleButton>
-                  <ToggleButton value="checklist">
+                  <ToggleButton value="checklist" data-testid="toggle-checklist">
                     <ChecklistIcon/>
                   </ToggleButton>
                 </ToggleButtonGroup>
@@ -363,7 +369,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
               padding: 2,
               zIndex: 2,
               borderTop: '1px solid rgba(0, 0, 0, 0.1)',
-              backgroundColor: theme.palette.background.default,
             }}
           >
             <Button

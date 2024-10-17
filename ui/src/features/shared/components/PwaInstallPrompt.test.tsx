@@ -34,7 +34,7 @@ describe('PwaInstallPrompt Component', () => {
 
     waitFor(() => {
       expect(
-        screen.queryByText('Install this app on your device for a better experience!')
+        screen.queryByText('Install this app on your device for a better experience.')
       ).not.toBeInTheDocument();
     });
   });
@@ -45,7 +45,7 @@ describe('PwaInstallPrompt Component', () => {
 
     waitFor(() => {
       expect(
-        screen.getByText('Install this app on your device for a better experience!')
+        screen.getByText('Install this app on your device for a better experience.')
       ).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Install/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('PwaInstallPrompt Component', () => {
 
   //   await waitFor(() => {
   //     expect(
-  //       screen.queryByText('Install this app on your device for a better experience!')
+  //       screen.queryByText('Install this app on your device for a better experience.')
   //     ).not.toBeInTheDocument();
       
   //     expect(console.log).toHaveBeenCalledWith('User accepted the A2HS prompt');
@@ -86,7 +86,7 @@ describe('PwaInstallPrompt Component', () => {
 
   //   await waitFor(() => {
   //     expect(
-  //       screen.queryByText('Install this app on your device for a better experience!')
+  //       screen.queryByText('Install this app on your device for a better experience.')
   //     ).not.toBeInTheDocument();
   //   });
 
@@ -97,7 +97,7 @@ describe('PwaInstallPrompt Component', () => {
   //   render(<PwaInstallPrompt />);
   //   mockBeforeInstallPromptEvent();
 
-  //   const alertText = screen.findByText('Install this app on your device for a better experience!');
+  //   const alertText = screen.findByText('Install this app on your device for a better experience.');
 
   //   waitFor(() => {
   //     expect(alertText).toBeInTheDocument();
