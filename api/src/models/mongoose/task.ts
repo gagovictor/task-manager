@@ -1,5 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
-import { ChecklistItem } from '../checklist';
+import { ChecklistItem } from '@src/models/checklist';
 import { checklistItemSchema } from './checklist';
 
 export interface IMongooseTask extends Document {

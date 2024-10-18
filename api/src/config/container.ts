@@ -8,9 +8,9 @@ import SequelizeTaskRepository from "@src/repositories/sequelize/taskRepository"
 import SequelizeUserRepository from "@src/repositories/sequelize/userRepository";
 import AuthService from "@src/services/AuthService";
 import TaskService from "@src/services/TaskService";
-import MongooseTaskRepository from "../repositories/mongoose/taskRepository";
-import MongooseUserRepository from "../repositories/mongoose/userRepository";
-import TaskEncryptionService from "../services/TaskEncryptionService";
+import MongooseTaskRepository from "@src/repositories/mongoose/taskRepository";
+import MongooseUserRepository from "@src/repositories/mongoose/userRepository";
+import TaskEncryptionService from "@src/services/TaskEncryptionService";
 import DatabaseConnection from "./db";
 import { IMailService } from "@src/abstractions/services/IMailService";
 import { IEmailNotificationService } from "@src/abstractions/services/IEmailNotificationService";
