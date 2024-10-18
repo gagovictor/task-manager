@@ -2,37 +2,9 @@ import { createTheme, Theme } from '@mui/material/styles';
 
 // Define a color palette for both light and dark modes
 const palette = {
-  light: {
-    primary: {
-      main: '#5584ac', // Inverted with secondary color
-      contrastText: '#ffffff',
-    },
-    secondary: {
-      main: '#6a4fbf', // Inverted with primary color
-      contrastText: '#ffffff',
-    },
-    background: {
-      default: '#f4f6f8', // Softer background to reduce stark contrast
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#1a1a1a', // Darker text for better readability
-      secondary: '#5f6368',
-    },
-    info: {
-      main: '#0288d1',
-    },
-    snackbar: {
-      background: '#323f4b',
-      textColor: '#ffffff',
-    },
-    textField: {
-      autofillBackground: '#e3f2fd', // Softer blue to match the theme
-    },
-  },
   dark: {
     primary: {
-      main: '#dfe8f0',
+      main: '#dae9f7', // Adjusted halfway in saturation
       contrastText: '#45289a',
     },
     secondary: {
@@ -48,14 +20,64 @@ const palette = {
       secondary: '#e0e0e0',
     },
     info: {
-      main: '#3269C2',
+      main: '#dae9f7',
+    },
+    success: {
+      main: '#C2FFC6',
+    },
+    warning: {
+      main: '#ffb74d',
+      contrastText: '#1e1e1e',
+    },
+    error: {
+      main: '#e57373',
+      contrastText: '#1e1e1e',
     },
     snackbar: {
       background: '#444E5E',
-      textColor: '#fff',
+      textColor: '#ffffff',
     },
     textField: {
-      autofillBackground: '#444E5E', // Adjusted for better contrast
+      autofillBackground: '#444E5E',
+    },
+  },
+  light: {
+    primary: {
+      main: '#3a5683', // Derived from dark primary, adjusted for light mode
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#77a6f7', // Derived from dark secondary, adjusted for light mode
+      contrastText: '#ffffff',
+    },
+    background: {
+      default: '#f4f6f8',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#1a1a1a',
+      secondary: '#5f6368',
+    },
+    info: {
+      main: '#3a5683', // Same as primary.main
+    },
+    success: {
+      main: '#77a6f7', // Same as secondary.main
+    },
+    warning: {
+      main: '#ff9800',
+      contrastText: '#ffffff',
+    },
+    error: {
+      main: '#f44336',
+      contrastText: '#ffffff',
+    },
+    snackbar: {
+      background: '#323f4b',
+      textColor: '#ffffff',
+    },
+    textField: {
+      autofillBackground: '#e3f2fd',
     },
   },
 };
@@ -93,6 +115,9 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
       },
       text: currentPalette.text,
       info: currentPalette.info,
+      success: currentPalette.success,
+      warning: currentPalette.warning,
+      error: currentPalette.error,
     },
     components: {
       MuiCssBaseline: {

@@ -41,16 +41,14 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
             sx={{
                 position: 'relative',
                 overflow: 'auto',
-                height: '100vh',
             }}
             data-testid="pull-to-refresh-container"
         >
             {/* Pull to Refresh Indicator */}
             <Box
                 sx={{
-                    marginTop: '56px',
                     position: 'absolute',
-                    top: 0, // Show indicator when pulling
+                    top: '56px',
                     opacity: isPulling ? 1 : 0,
                     left: '50%',
                     transform: 'translateX(-50%)',
@@ -63,17 +61,22 @@ const PullToRefresh: React.FC<PullToRefreshProps> = ({
                     color: theme.palette.info.contrastText,
                     zIndex: 1000,
                     transition: 'all 0.3s ease-in-out',
+                    pointerEvents: 'none'
                 }}
                 role="status"
                 aria-live="polite"
             >
                 {releaseToRefresh ? (
                     <>
-                        <Typography variant="body2">Release to refresh</Typography>
+                        <Typography variant="body2" fontWeight={500}>
+                            Release to refresh
+                        </Typography>
                     </>
                 ) : (
                     <>
-                        <Typography variant="body2">{getMessage()}</Typography>
+                        <Typography variant="body2" fontWeight={500}>
+                            {getMessage()}
+                        </Typography>
                     </>
                 )}
             </Box>

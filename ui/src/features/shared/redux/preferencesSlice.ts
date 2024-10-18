@@ -7,7 +7,7 @@ export interface PreferencesState {
 }
 
 export const initialState: PreferencesState = {
-  theme: (localStorage.getItem('theme') as 'light' | 'dark') || 'light',
+  theme: (localStorage.getItem('theme') as 'light' | 'dark') || 'dark',
   language: 'en',
 };
 

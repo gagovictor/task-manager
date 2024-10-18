@@ -17,7 +17,7 @@ interface ThreeSceneProps {
 }
 
 const ThreeScene: React.FC<ThreeSceneProps> = ({
-    seed = 'gago.works',
+    seed = 'zooit',
     nodesCount = 20,
     waveSegments = 50,
     initialFov = 75,
@@ -40,7 +40,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const themeMode = useSelector((state: RootState) => state.preferences.theme);
 
     useEffect(() => {
-        console.log('useEffect', themeMode);
         renderScene();
         return () => {
             disposeScene();
@@ -69,7 +68,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     };
 
     const renderScene = () => {
-        console.log('renderScene');
         disposeScene();
 
         const textureLoader = new THREE.TextureLoader();
@@ -102,9 +100,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
             node.position.x = Math.random() * 50 - 25;
             node.position.y = Math.random() * 50 - 25;
             node.position.z = Math.random() * 50 - 25;
-            node.scale.x *= 3;
-            node.scale.y *= 3;
-            node.scale.z *= 3;
             nodes.current.push(node);
             scene.add(node);
         }
@@ -236,7 +231,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
                 geometry.attributes.position.needsUpdate = true;
                 geometry.attributes.color.needsUpdate = true;
-                
+
                 // Update line opacity to oscillate with time, with different values for each line
                 const opacityFactor = 0.2 + 0.2 * Math.sin(Date.now() * 0.002 + phaseOffset); // Slower opacity change
                 line.material.opacity = opacityFactor;

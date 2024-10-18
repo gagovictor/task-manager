@@ -12,7 +12,7 @@ export const useGlassmorphismStyles = ({ blur = 10, opacity = 0.1 } = {}) => {
     border: `1px solid ${theme.palette.divider}`,
     '&:hover': {
       borderColor: theme.palette.secondary.main,
-      boxShadow: `0 0 4px ${theme.palette.secondary.main}`,
+      boxShadow: `0 0 2px 0px ${theme.palette.secondary.main}`,
     },
     transition: 'all .15s ease-in-out',
   };

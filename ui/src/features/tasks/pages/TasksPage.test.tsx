@@ -290,7 +290,7 @@ describe('TasksPage component', () => {
     it('toggles the visibility of filters', async () => {
         renderWithProviders(store);
     
-        const toggleButton = screen.getByRole('button', { name: /Show Filters/i });
+        const toggleButton = screen.getByRole('button', { name: /Filter/i });
         act(() => userEvent.click(toggleButton));
     
         waitFor(() => expect(screen.getByLabelText('Search')).toBeInTheDocument());

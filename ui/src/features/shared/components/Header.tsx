@@ -23,6 +23,7 @@ import { RootState } from '../../../redux/store';
 import { logout } from '../../../features/auth/redux/authSlice';
 import Logout from '@mui/icons-material/Logout';
 import ThemeToggle from './ThemeToggle';
+import Logo from './Logo';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -49,102 +50,121 @@ export default function Header() {
     handleMenuClose();
   };
 
-  // Optional: Future menu items handler
-  // const handleProfile = () => {
-  //   navigate('/profile');
-  //   handleMenuClose();
-  // };
-
   const handleLoginClick = () => {
     navigate('/login');
   };
 
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
   return (
     <Box sx={{ flexGrow: 1, zIndex: 999 }}>
-      <AppBar position="fixed">
-        <Toolbar>
-          <Sidebar />
+      <AppBar
+        position="fixed"
+        sx={{
+          background: theme.palette.mode === 'dark' ?
+            `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0))` :
+            `linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0))`,
+          boxShadow: 'none',
+          color: theme.palette.text.primary,
+          // backdropFilter: 'blur(4px)',
+        }}
+      >
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
+          {/* Left Side Placeholder */}
+          <Box sx={{ width: 100, display: 'flex', alignItems: 'center' }}>
+            <Sidebar />
+          </Box>
 
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Tasks
-          </Typography>
+          {/* Centered Logo */}
+          <Logo isLoading={isLoading} onClick={handleLogoClick} />
 
-          {isLoading && (
-            <CircularProgress color="inherit" size={24} sx={{ marginRight: 2 }} />
-          )}
+          {/* Right Side Placeholder */}
+          <Box
+            sx={{
+              width: 100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+            }}
+          >
+            {isLoading && (
+              <CircularProgress color="inherit" size={24} sx={{ marginRight: 2 }} />
+            )}
 
-          {!isMobile && (
-            isAuthenticated ? (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Tooltip title="Account settings">
-                  <IconButton
-                    onClick={handleAvatarClick}
-                    size="small"
-                    sx={{ ml: 2 }}
-                    aria-controls={open ? 'account-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
+            {!isMobile &&
+              (isAuthenticated ? (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Tooltip title="Account settings">
+                    <IconButton
+                      onClick={handleAvatarClick}
+                      size="small"
+                      sx={{ ml: 2 }}
+                      aria-controls={open ? 'account-menu' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={open ? 'true' : undefined}
+                    >
+                      <Avatar sx={{ width: 32, height: 32 }}>
+                        {username ? username.charAt(0).toUpperCase() : ''}
+                      </Avatar>
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    anchorEl={anchorEl}
+                    id="account-menu"
+                    open={open}
+                    onClose={handleMenuClose}
+                    onClick={handleMenuClose}
+                    PaperProps={{
+                      elevation: 0,
+                      sx: {
+                        overflow: 'visible',
+                        mt: 1.5,
+                        '& .MuiAvatar-root': {
+                          width: 32,
+                          height: 32,
+                          ml: -0.5,
+                          mr: 1,
+                        },
+                        '&:before': {
+                          content: '""',
+                          display: 'block',
+                          position: 'absolute',
+                          top: 0,
+                          right: 14,
+                          width: 10,
+                          height: 10,
+                          bgcolor: 'background.paper',
+                          transform: 'translateY(-50%) rotate(45deg)',
+                          zIndex: 0,
+                        },
+                      },
+                    }}
+                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                   >
-                    <Avatar sx={{ width: 32, height: 32 }}>
-                      {username ? username.charAt(0).toUpperCase() : ''}
-                    </Avatar>
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  anchorEl={anchorEl}
-                  id="account-menu"
-                  open={open}
-                  onClose={handleMenuClose}
-                  onClick={handleMenuClose}
-                  PaperProps={{
-                    elevation: 0,
-                    sx: {
-                      overflow: 'visible',
-                      mt: 1.5,
-                      '& .MuiAvatar-root': {
-                        width: 32,
-                        height: 32,
-                        ml: -0.5,
-                        mr: 1,
-                      },
-                      '&:before': {
-                        content: '""',
-                        display: 'block',
-                        position: 'absolute',
-                        top: 0,
-                        right: 14,
-                        width: 10,
-                        height: 10,
-                        bgcolor: 'background.paper',
-                        transform: 'translateY(-50%) rotate(45deg)',
-                        zIndex: 0,
-                      },
-                    },
-                  }}
-                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                    <MenuItem onClick={handleLogout}>
+                      <ListItemIcon>
+                        <Logout fontSize="small" />
+                      </ListItemIcon>
+                      Logout
+                    </MenuItem>
+                    <MenuItem>
+                      <ThemeToggle />
+                    </MenuItem>
+                  </Menu>
+                </Box>
+              ) : (
+                <Button
+                  color="inherit"
+                  sx={{ fontWeight: '400' }}
+                  onClick={handleLoginClick}
                 >
-                  <MenuItem onClick={handleLogout}>
-                    <ListItemIcon>
-                      <Logout fontSize="small" />
-                    </ListItemIcon>
-                    Logout
-                  </MenuItem>
-                  <MenuItem>
-                    <ThemeToggle />
-                  </MenuItem>
-                </Menu>
-              </Box>
-            ) : (
-              <Button
-                color="inherit"
-                sx={{ fontWeight: '400' }}
-                onClick={handleLoginClick}
-              >
-                Login
-              </Button>
-            )
-          )}
+                  Login
+                </Button>
+              ))}
+          </Box>
         </Toolbar>
       </AppBar>
     </Box>

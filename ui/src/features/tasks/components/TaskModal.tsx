@@ -217,7 +217,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ open, onClose, mode, task }) => {
   };
   
   const glassStyles = useGlassmorphismStyles({
-    opacity: theme.palette.mode === 'dark' ? 0.1 : 0.7
+    opacity: theme.palette.mode === 'dark' ? 0.1 : 0.7,
+    blur: 20
   });
   
   return (
