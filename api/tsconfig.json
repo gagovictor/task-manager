@@ -13,11 +13,10 @@
     "typeRoots": ["./node_modules/@types", "./types"],
     "baseUrl": ".",
     "paths": {
-      "@src/*": ["src/*"]
+      "@src/*": ["./src/*"]
     },
     "sourceMap": true,
     "types": ["jest"]
   },
-  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
