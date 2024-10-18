@@ -2,41 +2,14 @@ import { createTheme, Theme } from '@mui/material/styles';
 
 // Define a color palette for both light and dark modes
 const palette = {
-  light: {
-    primary: {
-      main: '#39588A',
-      contrastText: '#EDF5FF',
-    },
-    secondary: {
-      main: '#E0672F',
-      contrastText: '#FFF1EB',
-    },
-    background: {
-      default: '#FFFFFF',
-      paper: '#F7F6F6',
-    },
-    text: {
-      primary: '#212121',
-      secondary: '#757575',
-    },
-    info: {
-      main: '#3269C2',
-    },
-    snackbar: {
-      background: '#444E5E',
-    },
-    textField: {
-      autofillBackground: '#EDF5FF',
-    },
-  },
   dark: {
     primary: {
-      main: '#EDF5FF',
-      contrastText: '#39588A',
+      main: '#dae9f7', // Adjusted halfway in saturation
+      contrastText: '#45289a',
     },
     secondary: {
-      main: '#FFF1EB',
-      contrastText: '#55504E',
+      main: '#C2FFC6',
+      contrastText: '#1C6575',
     },
     background: {
       default: '#1e1e1e',
@@ -47,13 +20,64 @@ const palette = {
       secondary: '#e0e0e0',
     },
     info: {
-      main: '#3269C2',
+      main: '#dae9f7',
+    },
+    success: {
+      main: '#C2FFC6',
+    },
+    warning: {
+      main: '#ffb74d',
+      contrastText: '#1e1e1e',
+    },
+    error: {
+      main: '#e57373',
+      contrastText: '#1e1e1e',
     },
     snackbar: {
-      background: '#333',
+      background: '#444E5E',
+      textColor: '#ffffff',
     },
     textField: {
-      autofillBackground: '#55504E',
+      autofillBackground: '#444E5E',
+    },
+  },
+  light: {
+    primary: {
+      main: '#3a5683', // Derived from dark primary, adjusted for light mode
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#77a6f7', // Derived from dark secondary, adjusted for light mode
+      contrastText: '#ffffff',
+    },
+    background: {
+      default: '#f4f6f8',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#1a1a1a',
+      secondary: '#5f6368',
+    },
+    info: {
+      main: '#3a5683', // Same as primary.main
+    },
+    success: {
+      main: '#77a6f7', // Same as secondary.main
+    },
+    warning: {
+      main: '#ff9800',
+      contrastText: '#ffffff',
+    },
+    error: {
+      main: '#f44336',
+      contrastText: '#ffffff',
+    },
+    snackbar: {
+      background: '#323f4b',
+      textColor: '#ffffff',
+    },
+    textField: {
+      autofillBackground: '#e3f2fd',
     },
   },
 };
@@ -73,9 +97,7 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
   };
 
   // Set PWA background color based on the theme mode
-  const pwaBackgroundColor = mode === 'light' ?
-    currentPalette.primary.main :
-    '#272727'; // Toolbar background color in dark mode
+  const pwaBackgroundColor = currentPalette.background.default;
 
   setMetaTag('theme-color', pwaBackgroundColor);
   setMetaTag('background-color', pwaBackgroundColor);
@@ -93,12 +115,26 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
       },
       text: currentPalette.text,
       info: currentPalette.info,
+      success: currentPalette.success,
+      warning: currentPalette.warning,
+      error: currentPalette.error,
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            // Global Box styling
+            '& .MuiBox-root': {
+              backgroundColor: 'transparent !important',
+            },
+          },
+        },
+      },
       MuiContainer: {
         styleOverrides: {
           root: {
             maxWidth: '98% !important',
+            backgroundColor: 'transparent', // Use palette instead of hardcoding
           },
         },
       },
@@ -106,6 +142,7 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
         styleOverrides: {
           root: {
             backgroundColor: currentPalette.snackbar.background,
+            color: currentPalette.snackbar.textColor,
           },
         },
       },
@@ -116,10 +153,16 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
               '& input:-webkit-autofill': {
                 '-webkit-box-shadow': `0 0 0 100px ${currentPalette.textField.autofillBackground} inset !important`,
               },
-              ':has(> input:-webkit-autofill)': {
-                backgroundColor: currentPalette.textField.autofillBackground,
-              },
             },
+          },
+        },
+      },
+      MuiBackdrop: {
+        styleOverrides: {
+          root: {
+            backgroundColor: `${currentPalette.background.default}80`,
+            backdropFilter: 'blur(10px)',
+            transition: 'all .5s ease-in-out',
           },
         },
       },
@@ -131,6 +174,18 @@ export const getTheme = (mode: 'light' | 'dark'): Theme => {
       },
       h6: {
         fontWeight: 500,
+      },
+      h1: {
+        fontWeight: 600,
+      },
+      h2: {
+        fontWeight: 600,
+      },
+      body1: {
+        fontWeight: 400,
+      },
+      body2: {
+        fontWeight: 400,
       },
     },
     shape: {

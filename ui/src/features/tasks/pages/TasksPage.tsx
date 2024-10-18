@@ -153,185 +153,186 @@ const TasksPage = () => {
   };
 
   return (
-    <PullToRefresh onRefresh={fetchTasks}>
-      <Container
-        sx={{
-          width: '100%',
-          minHeight: 'calc(100vh - 64px)',
-          marginTop: { xs: '56px', md: '64px' },
-          position: 'relative',
-          py: '32px',
-        }}
-      >
-        <Box sx={{ mb: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={filtersVisible ? <CloseIcon /> : <FilterListIcon />}
-            onClick={toggleFilters}
-            fullWidth
-            sx={{ display: { xs: 'flex', md: 'none' } }} // Only show the button on mobile
-            aria-label={filtersVisible ? 'Hide Filters' : 'Show Filters'}
-          >
-            {filtersVisible ? 'Hide Filters' : 'Show Filters'}
-          </Button>
-
-          <Collapse in={filtersVisible || window.innerWidth >= 600}>
-            {/* Show filters based on visibility */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: { sm: 'stretch', md: 'center' },
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: 2,
-                flexDirection: { sm: 'column', md: 'row' },
-              }}
+    <>
+      <PullToRefresh onRefresh={fetchTasks}>
+        <Container
+          sx={{
+            width: '100%',
+            minHeight: 'calc(100vh - 64px)',
+            marginTop: { xs: '56px', md: '64px' },
+            position: 'relative',
+            py: '32px',
+          }}
+        >
+          <Box sx={{ mb: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={filtersVisible ? <CloseIcon /> : <FilterListIcon />}
+              onClick={toggleFilters}
+              fullWidth
+              sx={{ display: { xs: 'flex', md: 'none' } }} // Only show the button on mobile
+              aria-label={filtersVisible ? 'Hide Filters' : 'Filter'}
             >
-              {/* Status Filter */}
-              <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value as string)}
-                    label="Status"
-                    endAdornment={
-                      filterStatus && (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="clear status filter"
-                            edge="end"
-                            sx={{ marginRight: '8px' }}
-                            onClick={handleClearStatus}
-                          >
-                            <ClearIcon fontSize="small" />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }
+              {filtersVisible ? 'Hide Filters' : 'Filter'}
+            </Button>
+
+            <Collapse in={filtersVisible || window.innerWidth >= 600}>
+              {/* Show filters based on visibility */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: { sm: 'stretch', md: 'center' },
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: window.innerWidth >= 600 ? 2 : 0,
+                  flexDirection: { sm: 'column', md: 'row' },
+                }}
+              >
+                {/* Status Filter */}
+                <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value as string)}
+                      label="Status"
+                      endAdornment={
+                        filterStatus && (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="clear status filter"
+                              edge="end"
+                              sx={{ marginRight: '8px' }}
+                              onClick={handleClearStatus}
+                            >
+                              <ClearIcon fontSize="small" />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }
+                    >
+                      <MenuItem value="">All</MenuItem>
+                      {taskStatuses.map((statusOption) => (
+                        <MenuItem key={statusOption} value={statusOption}>
+                          {statusOption.charAt(0).toUpperCase() +
+                            statusOption.slice(1)}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                {/* Search Filter */}
+                <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Search"
+                    variant="outlined"
+                    value={filterText}
+                    onChange={(e) => setFilterText(e.target.value)}
+                    InputProps={{
+                      endAdornment:
+                        filterText && (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="clear search"
+                              edge="end"
+                              onClick={handleClearSearch}
+                            >
+                              <ClearIcon fontSize="small" />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Collapse>
+          </Box>
+
+          {fetchStatus === 'failed' && (
+            <Alert severity="error" data-testid="fetch-error-alert" sx={{ mb: 4 }}>
+              {fetchError}
+              {filteredTasks.length > 0 && (
+                <>Tasks shown may not represent their current state. </>
+              )}
+            </Alert>
+          )}
+
+          {fetchStatus === 'succeeded' && filteredTasks.length === 0 && (
+            <Alert severity="info" sx={{ mb: 4, flex: 1 }}>
+              No tasks match the filter criteria.
+            </Alert>
+          )}
+
+          {(fetchStatus === 'succeeded' || filteredTasks.length > 0) && (
+            <Masonry
+              columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
+              spacing={1}
+              data-testid="masonry"
+              sx={{ mb: 4 }}
+            >
+              {filteredTasks.length > 0 &&
+                filteredTasks.map((task: Task, index: number) => (
+                  <Grow
+                    key={task.id}
+                    in={true}
+                    timeout={(index + 1) * 300} // Staggered delay for animation
                   >
-                    <MenuItem value="">All</MenuItem>
-                    {taskStatuses.map((statusOption) => (
-                      <MenuItem key={statusOption} value={statusOption}>
-                        {statusOption.charAt(0).toUpperCase() +
-                          statusOption.slice(1)}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
+                    <Box data-testid="task-card">
+                      <TaskCard
+                        task={task}
+                        onEdit={() => handleEditTask(task)}
+                        showSnackbar={showSnackbar}
+                      />
+                    </Box>
+                  </Grow>
+                ))}
+            </Masonry>
+          )}
 
-              {/* Search Filter */}
-              <Box sx={{ flex: 1, minWidth: 200, position: 'relative' }}>
-                <TextField
-                  fullWidth
-                  margin="normal"
-                  label="Search"
-                  variant="outlined"
-                  value={filterText}
-                  onChange={(e) => setFilterText(e.target.value)}
-                  InputProps={{
-                    endAdornment:
-                      filterText && (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="clear search"
-                            edge="end"
-                            onClick={handleClearSearch}
-                          >
-                            <ClearIcon fontSize="small" />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                  }}
-                />
-              </Box>
-            </Box>
-          </Collapse>
-        </Box>
+          {/* Sentinel Element for Infinite Scroll */}
+          <div ref={sentinelRef} />
+        </Container>
+      </PullToRefresh>
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{ position: 'fixed', bottom: 16, right: 16 }}
+        onClick={handleCreateTask}
+      >
+        <AddIcon />
+      </Fab>
 
-        {fetchStatus === 'failed' && (
-          <Alert severity="error" data-testid="fetch-error-alert" sx={{ mb: 4 }}>
-            {fetchError}
-            {filteredTasks.length > 0 && (
-              <>Tasks shown may not represent their current state. </>
-            )}
-          </Alert>
-        )}
+      <TaskModal
+        open={modalOpen}
+        onClose={onCloseTaskModal}
+        task={selectedTask}
+        mode={editMode ? 'edit' : 'create'}
+      />
 
-        {fetchStatus === 'succeeded' && filteredTasks.length === 0 && (
-          <Alert severity="info" sx={{ mb: 4, flex: 1 }}>
-            No tasks match the filter criteria.
-          </Alert>
-        )}
-
-        {(fetchStatus === 'succeeded' || filteredTasks.length > 0) && (
-          <Masonry
-            columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
-            spacing={1}
-            data-testid="masonry"
-            sx={{ mb: 4 }}
-          >
-            {filteredTasks.length > 0 &&
-              filteredTasks.map((task: Task, index: number) => (
-                <Grow
-                  key={task.id}
-                  in={true}
-                  timeout={(index + 1) * 300} // Staggered delay for animation
-                >
-                  <Box data-testid="task-card">
-                    <TaskCard
-                      task={task}
-                      onEdit={() => handleEditTask(task)}
-                      showSnackbar={showSnackbar}
-                    />
-                  </Box>
-                </Grow>
-              ))}
-          </Masonry>
-        )}
-
-        {/* Sentinel Element for Infinite Scroll */}
-        <div ref={sentinelRef} />
-
-        <Fab
-          color="primary"
-          aria-label="add"
-          sx={{ position: 'fixed', bottom: 16, right: 16 }}
-          onClick={handleCreateTask}
-        >
-          <AddIcon />
-        </Fab>
-
-        <TaskModal
-          open={modalOpen}
-          onClose={onCloseTaskModal}
-          task={selectedTask}
-          mode={editMode ? 'edit' : 'create'}
-        />
-
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={6000}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
           onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          severity={snackbarSeverity}
+          action={
+            snackbarUndoAction && (
+              <Button color="inherit" onClick={handleSnackbarAction}>
+                Undo
+              </Button>
+            )
+          }
         >
-          <Alert
-            onClose={handleSnackbarClose}
-            severity={snackbarSeverity}
-            action={
-              snackbarUndoAction && (
-                <Button color="inherit" onClick={handleSnackbarAction}>
-                  Undo
-                </Button>
-              )
-            }
-          >
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
-      </Container>
-    </PullToRefresh>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

@@ -74,92 +74,94 @@ export default function ArchivedTasksPage() {
   const filteredTasks = tasks.filter((task: Task) => task.archivedAt && !task.deletedAt);
 
   return (
-    <PullToRefresh onRefresh={fetchTasks}>
-      <Container
-        sx={{
-          width: '100%',
-          minHeight: '100vh', // full screen height minus footer
-          paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
-          position: 'relative',
-          paddingBottom: '32px',
-        }}
+    <>
+      <PullToRefresh onRefresh={fetchTasks}>
+        <Container
+          sx={{
+            width: '100%',
+            minHeight: 'calc(100vh - 64px)', // full screen height minus footer
+            paddingTop: { xs: 'calc(32px + 56px)', md: 'calc(32px + 64px)' }, // Offset fixed app bar/header
+            position: 'relative',
+            paddingBottom: '32px',
+          }}
+        >
+          {fetchStatus === 'failed' &&
+            <Alert
+              severity="error"
+              data-testid="fetch-error-alert"
+            >
+              {fetchError}
+            </Alert>
+          }
+          {(fetchStatus === 'succeeded' || filteredTasks.length > 0) && (
+            <Masonry
+              columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
+              spacing={2}
+              data-testid="masonry"
+            >
+              {filteredTasks.map((task: Task, index: number) => (
+                <Grow
+                  key={task.id}
+                  in={true}
+                  timeout={(index + 1) * 300} // Staggered delay for animation
+                >
+                  <Box data-testid="task-card">
+                    <TaskCard
+                      task={task}
+                      onEdit={() => handleEditTask(task)}
+                      showSnackbar={showSnackbar}
+                    />
+                  </Box>
+                </Grow>
+              ))}
+            </Masonry>
+          )}
+          {fetchStatus === 'succeeded' && filteredTasks.length === 0 && (
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <Typography variant="h6" gutterBottom>No tasks archived</Typography>
+              <Button variant="contained" color="primary" onClick={() => navigate('/tasks')}>
+                Back to tasks
+              </Button>
+            </Box>
+          )}
+        </Container>
+      </PullToRefresh>
+      
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{ position: 'fixed', bottom: 16, right: 16 }}
+        onClick={handleCreateTask}
       >
-        {fetchStatus === 'failed' &&
-          <Alert
-            severity="error"
-            data-testid="fetch-error-alert"
-          >
-            {fetchError}
-          </Alert>
-        }
-        {(fetchStatus === 'succeeded' || filteredTasks.length > 0) && (
-          <Masonry
-          columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
-            spacing={2}
-            data-testid="masonry"
-          >
-            {filteredTasks.map((task: Task, index: number) => (
-              <Grow
-                key={task.id}
-                in={true}
-                timeout={(index + 1) * 300} // Staggered delay for animation
-              >
-                <Box data-testid="task-card">
-                  <TaskCard
-                    task={task}
-                    onEdit={() => handleEditTask(task)}
-                    showSnackbar={showSnackbar}
-                  />
-                </Box>
-              </Grow>
-            ))}
-          </Masonry>
-        )}
-        {fetchStatus === 'succeeded' && filteredTasks.length === 0 && (
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-            }}
-          >
-            <Typography variant="h6" gutterBottom>No tasks archived</Typography>
-            <Button variant="contained" color="primary" onClick={() => navigate('/tasks')}>
-              Back to tasks
-            </Button>
-          </Box>
-        )}
+        <AddIcon />
+      </Fab>
 
-        <Fab
-          color="primary"
-          aria-label="add"
-          sx={{ position: 'fixed', bottom: 16, right: 16 }}
-          onClick={handleCreateTask}
-        >
-          <AddIcon />
-        </Fab>
+      <TaskModal
+        open={modalOpen}
+        onClose={onCloseTaskModal}
+        task={selectedTask}
+        mode={editMode ? 'edit' : 'create'}
+      />
 
-        <TaskModal
-          open={modalOpen}
-          onClose={onCloseTaskModal}
-          task={selectedTask}
-          mode={editMode ? 'edit' : 'create'}
-        />
-
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={6000}
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
-      </Container>
-    </PullToRefresh>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

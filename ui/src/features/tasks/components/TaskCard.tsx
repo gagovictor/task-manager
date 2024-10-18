@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PendingActionsOutlined } from '@mui/icons-material';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import { useGlassmorphismStyles } from '../../shared/hooks/useGlassmorphismStyles';
 
 interface TaskCardProps {
   task: Task;
@@ -136,20 +137,21 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
     </Typography>
   );
 
+  const glassStyles = useGlassmorphismStyles({
+    opacity: theme.palette.mode === 'dark' ? 0.1 : 0.4
+  });
+
   return (
     <Box sx={{ width: '100%', position: 'relative' }}>
       <Card
         variant="outlined"
         onClick={handleCardClick}
         sx={{
-          backgroundColor: theme.palette.background.paper,
+          ...glassStyles,
+          // backgroundColor: theme.palette.background.paper,
           cursor: 'pointer',
           userSelect: 'no-select',
           borderColor: theme.palette.divider,
-          transition: 'border-color .15s ease-in-out',
-          '&:hover': {
-            borderColor: theme.palette.primary.main,
-          },
         }}
       >
         <CardContent>
@@ -266,6 +268,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
             <span>
               <Button
                 size="small"
+                color="primary"
                 onClick={(event) => handleButtonClick(event, () => { if(onEdit) onEdit(task); })}
                 data-testid="edit-task-btn">
                 <EditIcon />
@@ -277,6 +280,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
               <span>
                 <Button
                   size="small"
+                  color="primary"
                   onClick={(event) => handleButtonClick(event, handleUnarchive)}
                   disabled={archiveStatus === 'loading'}
                   data-testid="unarchive-task-btn">
@@ -289,6 +293,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
               <span>
                 <Button
                   size="small"
+                  color="primary"
                   onClick={(event) => handleButtonClick(event, handleArchive)}
                   disabled={archiveStatus === 'loading'}
                   data-testid="archive-task-btn">
@@ -301,6 +306,7 @@ export default function TaskCard({ task, onEdit, showSnackbar }: TaskCardProps) 
             <span>
               <Button
                 size="small"
+                color="primary"
                 onClick={(event) => handleButtonClick(event, () => setOpenConfirm(true))}
                 disabled={deleteStatus === 'loading'}
                 data-testid="delete-task-btn">
