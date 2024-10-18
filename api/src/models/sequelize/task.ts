@@ -1,5 +1,5 @@
 import { Model } from 'sequelize';
-import { ChecklistItem } from '../checklist';
+import { ChecklistItem } from '@src/models/checklist';
 
 export class SequelizeTask extends Model {
     public id!: string;

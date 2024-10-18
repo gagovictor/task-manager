@@ -1,7 +1,7 @@
 import { DataTypes, Sequelize } from 'sequelize';
 import { CosmosClient } from '@azure/cosmos';
-import User from '../models/sequelize/user';
-import { SequelizeTask } from '../models/sequelize/task';
+import User from '@src/models/sequelize/user';
+import { SequelizeTask } from '@src/models/sequelize/task';
 import mongoose from 'mongoose';
 
 class DatabaseConnection {

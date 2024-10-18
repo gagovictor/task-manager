@@ -1,5 +1,5 @@
 import { Container, CosmosClient, SqlQuerySpec } from '@azure/cosmos';
-import { Task } from '../../models/task';
+import { Task } from '@src/models/task';
 import { PaginatedResponse, TaskFilter } from '@src/models/pagination';
 import ITaskRepository from '@src/abstractions/repositories/ITaskRepository';
 import { ICosmosTask } from '@src/models/cosmos/task';
